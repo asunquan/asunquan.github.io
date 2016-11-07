@@ -4,16 +4,15 @@
 
 # Site
 title: asunquan
-subtitle:行道难 难于上青天
-description:HLJU小本一枚,iOS开发Rookie,现就职于CYOU-INC.COM PTC.平日和一只小柯基生活在一起.
-author:Charles Sun
-email:asunquan@gmail.com
-language:zh-hans/en
-timezone:GMT+8
+subtitle: Good Good Study Day Day Up
+description: HLJU小本一枚,iOS开发Rookie,现就职于CYOU-INC.COM PTC.平日和一只小柯基生活在一起.
+author: Charles Sun
+email: asunquan@gmail.com
+language: zh-CN
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://www.sunquan.com
+url: http://www.sunquan.club
 root: /
 permalink: :year/:month/:day/:title/
 tag_dir: tags
@@ -40,7 +39,7 @@ highlight:
   enable: true
   line_number: true
   auto_detect: true
-  tab_replace: ``
+  tab_replace: 
 
 # Category & Tag
 default_category: uncategorized
@@ -87,7 +86,7 @@ disqus_shortname:
 #  - hexo-generator-baidu-sitemap
 #  - hexo-generator-sitemap
 
-theme: yilia
+theme: landscape
 exclude_generator:
 
 # Deployment
