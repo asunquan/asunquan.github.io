@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>WWDC 2012 Session笔记——219 Advanced Collection Views and Building Custom Layouts</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="WWDC 2012 Session笔记——219 Advanced Collection Views and Building Custom Layouts">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="WWDC 2012 Session笔记——219 Advanced Collection Views and Building Custom Layouts">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2012/08/advanced-collection-view/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2012-08-28 22:55:59 +0800" itemprop="datePublished" class="post-meta__date date">2012-08-28</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">WWDC 2012 Session笔记——219 Advanced Collection Views and Building Custom Layouts</h1>
+  </header>
+
+  <section class="post">
+    <p><a href="http://www.onevcat.com/wp-content/uploads/2012/08/QQ20120828-3.png"><img src="http://www.onevcat.com/wp-content/uploads/2012/08/QQ20120828-3.png" alt="" title="uicollectionview-struct"></a></p>
+
+<p>这是博主的WWDC2012笔记系列中的一篇，完整的笔记列表可以参看<a href="http://onevcat.com/2012/06/%E5%BC%80%E5%8F%91%E8%80%85%E6%89%80%E9%9C%80%E8%A6%81%E7%9F%A5%E9%81%93%E7%9A%84ios6-sdk%E6%96%B0%E7%89%B9%E6%80%A7/">这里</a>。如果您是首次来到本站，也许您会有兴趣通过<a href="http://onevcat.com/atom.xml">RSS</a>，或者通过页面左侧的邮件订阅的方式订阅本站。</p>
+
+<p>在上一篇<a href="http://www.onevcat.com/2012/06/introducing-collection-views/">UICollectionView的入门介绍</a>中，大概地对iOS6新加入的强大的UICollectionView进行了一些说明。在这篇博文中，将结合WWDC2012 Session219：Advanced Collection View的内容，对Collection View进行一个深入的使用探讨，并给出一个自定义的Demo。</p>
+
+<h2>UICollectionView的结构回顾</h2>
+
+<p>首先回顾一下Collection View的构成，我们能看到的有三个部分：</p>
+
+<ul>
+<li>Cells</li>
+<li>Supplementary Views 追加视图 （类似Header或者Footer）</li>
+<li>Decoration Views 装饰视图 （用作背景展示）</li>
+</ul>
+
+<p>而在表面下，由两个方面对UICollectionView进行支持。其中之一和tableView一样，即提供数据的UICollectionViewDataSource以及处理用户交互的UICollectionViewDelegate。另一方面，对于cell的样式和组织方式，由于collectionView比tableView要复杂得多，因此没有按照类似于tableView的style的方式来定义，而是专门使用了一个类来对collectionView的布局和行为进行描述，这就是UICollectionViewLayout。</p>
+
+<p>这次的笔记将把重点放在UICollectionViewLayout上，因为这不仅是collectionView和tableView的最重要求的区别，也是整个UICollectionView的精髓所在。</p>
+
+<p>如果对UICollectionView的基本构成要素和使用方法还不清楚的话，可以移步到我之前的一篇笔记：<a href="http://www.onevcat.com/2012/06/introducing-collection-views/">Session笔记——205 Introducing Collection Views</a>中进行一些了解。</p>
+
+<hr>
+
+<h2>UICollectionViewLayoutAttributes</h2>
+
+<p>UICollectionViewLayoutAttributes是一个非常重要的类，先来看看property列表：</p>
+
+<ul>
+<li>@property (nonatomic) CGRect frame</li>
+<li>@property (nonatomic) CGPoint center</li>
+<li>@property (nonatomic) CGSize size</li>
+<li>@property (nonatomic) CATransform3D transform3D</li>
+<li>@property (nonatomic) CGFloat alpha</li>
+<li>@property (nonatomic) NSInteger zIndex</li>
+<li>@property (nonatomic, getter=isHidden) BOOL hidden</li>
+</ul>
+
+<p>可以看到，UICollectionViewLayoutAttributes的实例中包含了诸如边框，中心点，大小，形状，透明度，层次关系和是否隐藏等信息。和DataSource的行为十分类似，当UICollectionView在获取布局时将针对每一个indexPath的部件（包括cell，追加视图和装饰视图），向其上的UICollectionViewLayout实例询问该部件的布局信息（在这个层面上说的话，实现一个UICollectionViewLayout的时候，其实很像是zap一个delegate，之后的例子中会很明显地看出），这个布局信息，就以UICollectionViewLayoutAttributes的实例的方式给出。</p>
+
+<hr>
+
+<h2>自定义的UICollectionViewLayout</h2>
+
+<p>UICollectionViewLayout的功能为向UICollectionView提供布局信息，不仅包括cell的布局信息，也包括追加视图和装饰视图的布局信息。实现一个自定义layout的常规做法是继承UICollectionViewLayout类，然后重载下列方法：</p>
+
+<ul>
+<li><p>-(CGSize)collectionViewContentSize</p>
+
+<ul>
+<li>返回collectionView的内容的尺寸</li>
+</ul></li>
+<li><p>-(NSArray *)layoutAttributesForElementsInRect:(CGRect)rect</p>
+
+<ul>
+<li>返回rect中的所有的元素的布局属性</li>
+<li>返回的是包含UICollectionViewLayoutAttributes的NSArray</li>
+<li><p>UICollectionViewLayoutAttributes可以是cell，追加视图或装饰视图的信息，通过不同的UICollectionViewLayoutAttributes初始化方法可以得到不同类型的UICollectionViewLayoutAttributes：</p>
+
+<ul>
+<li>layoutAttributesForCellWithIndexPath:</li>
+<li>layoutAttributesForSupplementaryViewOfKind:withIndexPath:</li>
+<li>layoutAttributesForDecorationViewOfKind:withIndexPath:</li>
+</ul></li>
+</ul></li>
+<li><p>-(UICollectionViewLayoutAttributes _)layoutAttributesForItemAtIndexPath:(NSIndexPath _)indexPath</p>
+
+<ul>
+<li>返回对应于indexPath的位置的cell的布局属性</li>
+</ul></li>
+<li><p>-(UICollectionViewLayoutAttributes _)layoutAttributesForSupplementaryViewOfKind:(NSString _)kind atIndexPath:(NSIndexPath *)indexPath</p>
+
+<ul>
+<li>返回对应于indexPath的位置的追加视图的布局属性，如果没有追加视图可不重载</li>
+</ul></li>
+<li><p>-(UICollectionViewLayoutAttributes * )layoutAttributesForDecorationViewOfKind:(NSString_)decorationViewKind atIndexPath:(NSIndexPath _)indexPath</p>
+
+<ul>
+<li>返回对应于indexPath的位置的装饰视图的布局属性，如果没有装饰视图可不重载</li>
+</ul></li>
+<li><p>-(BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds</p>
+
+<ul>
+<li>当边界发生改变时，是否应该刷新布局。如果YES则在边界变化（一般是scroll到其他地方）时，将重新计算需要的布局信息。</li>
+</ul></li>
+</ul>
+
+<p>另外需要了解的是，在初始化一个UICollectionViewLayout实例后，会有一系列准备方法被自动调用，以保证layout实例的正确。</p>
+
+<p>首先，-(void)prepareLayout将被调用，默认下该方法什么没做，但是在自己的子类实现中，一般在该方法中设定一些必要的layout的结构和初始需要的参数等。</p>
+
+<p>之后，-(CGSize) collectionViewContentSize将被调用，以确定collection应该占据的尺寸。注意这里的尺寸不是指可视部分的尺寸，而应该是所有内容所占的尺寸。collectionView的本质是一个scrollView，因此需要这个尺寸来配置滚动行为。</p>
+
+<p>接下来-(NSArray *)layoutAttributesForElementsInRect:(CGRect)rect被调用，这个没什么值得多说的。初始的layout的外观将由该方法返回的UICollectionViewLayoutAttributes来决定。</p>
+
+<p>另外，在需要更新layout时，需要给当前layout发送 -invalidateLayout，该消息会立即返回，并且预约在下一个loop的时候刷新当前layout，这一点和UIView的setNeedsLayout方法十分类似。在-invalidateLayout后的下一个collectionView的刷新loop中，又会从prepareLayout开始，依次再调用-collectionViewContentSize和-layoutAttributesForElementsInRect来生成更新后的布局。</p>
+
+<hr>
+
+<h2>Demo</h2>
+
+<p>说了那么多，其实还是Demo最能解决问题。Apple官方给了一个flow layout和一个circle layout的例子，都很经典，需要的同学可以从<a href="http://www.onevcat.com/wp-content/uploads/2012/08/advanced-collection-view-demo.zip">这里下载</a>。</p>
+
+<h3>LineLayout——对于个别UICollectionViewLayoutAttributes的调整</h3>
+
+<p>先看LineLayout，它继承了UICollectionViewFlowLayout这个Apple提供的基本的布局。它主要实现了单行布局，自动对齐到网格以及当前网格cell放大三个特性。如图：</p>
+
+<p><a href="http://www.onevcat.com/wp-content/uploads/2012/08/QQ20120828-1-e1346145550225.png"><img src="http://www.onevcat.com/wp-content/uploads/2012/08/QQ20120828-1-e1346145550225.png" alt="" title="collection-view-line-layout"></a></p>
+
+<p>先看LineLayout的init方法：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">-(id)init
+{
+    self = [super init];
+    if (self) {
+        self.itemSize = CGSizeMake(ITEM_SIZE, ITEM_SIZE);
+        self.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        self.sectionInset = UIEdgeInsetsMake(200, 0.0, 200, 0.0);
+        self.minimumLineSpacing = 50.0;
+    }
+    return self;
+}
+</code></pre></figure>
+<p>self.sectionInset = UIEdgeInsetsMake(200, 0.0, 200, 0.0); 确定了缩进，此处为上方和下方各缩进200个point。由于cell的size已经定义了为200x200，因此屏幕上在缩进后就只有一排item的空间了。</p>
+
+<p>self.minimumLineSpacing = 50.0; 这个定义了每个item在水平方向上的最小间距。</p>
+
+<p>UICollectionViewFlowLayout是Apple为我们准备的开袋即食的现成布局，因此之前提到的几个必须重载的方法中需要我们操心的很少，即使完全不重载它们，现在也可以得到一个不错的线状一行的gridview了。而我们的LineLayout通过重载父类方法后，可以实现一些新特性，比如这里的动对齐到网格以及当前网格cell放大。</p>
+
+<p>自动对齐到网格</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">- (CGPoint)targetContentOffsetForProposedContentOffset: (CGPoint)proposedContentOffset withScrollingVelocity:(CGPoint)velocity
+{
+    //proposedContentOffset是没有对齐到网格时本来应该停下的位置
+    CGFloat offsetAdjustment = MAXFLOAT;
+    CGFloat horizontalCenter = proposedContentOffset.x + (CGRectGetWidth(self.collectionView.bounds) / 2.0);
+    CGRect targetRect = CGRectMake(proposedContentOffset.x, 0.0, self.collectionView.bounds.size.width, self.collectionView.bounds.size.height);
+    NSArray* array = [super layoutAttributesForElementsInRect:targetRect];
+
+    //对当前屏幕中的UICollectionViewLayoutAttributes逐个与屏幕中心进行比较，找出最接近中心的一个
+    for (UICollectionViewLayoutAttributes* layoutAttributes in array) {
+        CGFloat itemHorizontalCenter = layoutAttributes.center.x;
+        if (ABS(itemHorizontalCenter - horizontalCenter) &amp;lt; ABS(offsetAdjustment)) {
+            offsetAdjustment = itemHorizontalCenter - horizontalCenter;
+        }
+    }
+    return CGPointMake(proposedContentOffset.x + offsetAdjustment, proposedContentOffset.y);
+}
+</code></pre></figure>
+<p>当前item放大</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">-(NSArray *)layoutAttributesForElementsInRect:(CGRect)rect
+{
+    NSArray *array = [super layoutAttributesForElementsInRect:rect];
+    CGRect visibleRect;
+    visibleRect.origin = self.collectionView.contentOffset;
+    visibleRect.size = self.collectionView.bounds.size;
+
+    for (UICollectionViewLayoutAttributes* attributes in array) {
+        if (CGRectIntersectsRect(attributes.frame, rect)) {
+            CGFloat distance = CGRectGetMidX(visibleRect) - attributes.center.x;
+            CGFloat normalizedDistance = distance / ACTIVE_DISTANCE;
+            if (ABS(distance) &amp;lt; ACTIVE_DISTANCE) {
+                CGFloat zoom = 1 + ZOOM_FACTOR*(1 - ABS(normalizedDistance));
+                attributes.transform3D = CATransform3DMakeScale(zoom, zoom, 1.0);
+                attributes.zIndex = 1;
+            }
+        }
+    }
+    return array;
+}
+</code></pre></figure>
+<p>对于个别UICollectionViewLayoutAttributes进行调整，以达到满足设计需求是UICollectionView使用中的一种思路。在根据位置提供不同layout属性的时候，需要记得让-shouldInvalidateLayoutForBoundsChange:返回YES，这样当边界改变的时候，-invalidateLayout会自动被发送，才能让layout得到刷新。</p>
+
+<h3>CircleLayout——完全自定义的Layout，添加删除item，以及手势识别</h3>
+
+<p>CircleLayout的例子稍微复杂一些，cell分布在圆周上，点击cell的话会将其从collectionView中移出，点击空白处会加入一个cell，加入和移出都有动画效果。</p>
+
+<p>这放在以前的话估计够写一阵子了，而得益于UICollectionView，基本只需要100来行代码就可以搞定这一切，非常cheap。通过CircleLayout的实现，可以完整地看到自定义的layout的编写流程，非常具有学习和借鉴的意义。</p>
+
+<p><img src="http://www.onevcat.com/wp-content/uploads/2012/06/QQ20120630-5.png" alt="CircleLayout"></p>
+
+<p>首先，布局准备中定义了一些之后计算所需要用到的参数。</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">-(void)prepareLayout
+{   //和init相似，必须call super的prepareLayout以保证初始化正确
+    [super prepareLayout];
+
+    CGSize size = self.collectionView.frame.size;
+    _cellCount = [[self collectionView] numberOfItemsInSection:0];
+    _center = CGPointMake(size.width / 2.0, size.height / 2.0);
+    _radius = MIN(size.width, size.height) / 2.5;
+}
+</code></pre></figure>
+<p>其实对于一个size不变的collectionView来说，除了_cellCount之外的中心和半径的定义也可以扔到init里去做，但是显然在prepareLayout里做的话具有更大的灵活性。因为每次重新给出layout时都会调用prepareLayout，这样在以后如果有collectionView大小变化的需求时也可以自动适应变化。</p>
+
+<p>然后，按照UICollectionViewLayout子类的要求，重载了所需要的方法：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//整个collectionView的内容大小就是collectionView的大小（没有滚动）
+-(CGSize)collectionViewContentSize
+{
+    return [self collectionView].frame.size;
+}
+
+//通过所在的indexPath确定位置。
+- (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)path
+{
+    UICollectionViewLayoutAttributes* attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:path]; //生成空白的attributes对象，其中只记录了类型是cell以及对应的位置是indexPath
+    //配置attributes到圆周上
+    attributes.size = CGSizeMake(ITEM_SIZE, ITEM_SIZE);
+    attributes.center = CGPointMake(_center.x + _radius * cosf(2 * path.item * M_PI / _cellCount), _center.y + _radius * sinf(2 * path.item * M_PI / _cellCount));
+    return attributes;
+}
+
+//用来在一开始给出一套UICollectionViewLayoutAttributes
+-(NSArray*)layoutAttributesForElementsInRect:(CGRect)rect
+{
+    NSMutableArray* attributes = [NSMutableArray array];
+    for (NSInteger i=0 ; i &amp;lt; self.cellCount; i++) {
+        //这里利用了-layoutAttributesForItemAtIndexPath:来获取attributes
+        NSIndexPath* indexPath = [NSIndexPath indexPathForItem:i inSection:0];
+        [attributes addObject:[self layoutAttributesForItemAtIndexPath:indexPath]];
+    }    
+    return attributes;
+}
+</code></pre></figure>
+<p>现在已经得到了一个circle layout。为了实现cell的添加和删除，需要为collectionView加上手势识别，这个很简单，在ViewController中：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
+[self.collectionView addGestureRecognizer:tapRecognizer];
+</code></pre></figure>
+<p>对应的处理方法handleTapGesture:为</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">- (void)handleTapGesture:(UITapGestureRecognizer *)sender {
+    if (sender.state == UIGestureRecognizerStateEnded) {
+        CGPoint initialPinchPoint = [sender locationInView:self.collectionView];
+        NSIndexPath* tappedCellPath = [self.collectionView indexPathForItemAtPoint:initialPinchPoint]; //获取点击处的cell的indexPath
+        if (tappedCellPath!=nil) { //点击处没有cell
+            self.cellCount = self.cellCount - 1;
+            [self.collectionView performBatchUpdates:^{
+                [self.collectionView deleteItemsAtIndexPaths:[NSArray arrayWithObject:tappedCellPath]];
+            } completion:nil];
+        } else {
+            self.cellCount = self.cellCount + 1;
+            [self.collectionView performBatchUpdates:^{
+                [self.collectionView insertItemsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:0 inSection:0]]];
+            } completion:nil];
+        }
+    }
+}
+</code></pre></figure>
+<p>performBatchUpdates:completion: 再次展示了block的强大的一面..这个方法可以用来对collectionView中的元素进行批量的插入，删除，移动等操作，同时将触发collectionView所对应的layout的对应的动画。相应的动画由layout中的下列四个方法来定义：</p>
+
+<ul>
+<li>initialLayoutAttributesForAppearingItemAtIndexPath:</li>
+<li>initialLayoutAttributesForAppearingDecorationElementOfKind:atIndexPath:</li>
+<li>finalLayoutAttributesForDisappearingItemAtIndexPath:</li>
+<li>finalLayoutAttributesForDisappearingDecorationElementOfKind:atIndexPath:</li>
+</ul>
+
+<blockquote>
+<p>更正：正式版中API发生了变化（而且不止一次变化
+initialLayoutAttributesForInsertedItemAtIndexPath:在正式版中已经被废除。现在在insert或者delete之前，prepareForCollectionViewUpdates:会被调用，可以使用这个方法来完成添加/删除的布局。关于更多这方面的内容以及新的示例demo，可以参看<a href="http://markpospesel.wordpress.com/2012/10/25/fixing-circlelayout/">这篇博文</a>（需要翻墙）。新的示例demo在Github上也有，<a href="https://github.com/mpospese/CircleLayout">链接</a></p>
+</blockquote>
+
+<p>在CircleLayout中，实现了cell的动画。</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//插入前，cell在圆心位置，全透明
+- (UICollectionViewLayoutAttributes *)initialLayoutAttributesForInsertedItemAtIndexPath:(NSIndexPath *)itemIndexPath
+{
+    UICollectionViewLayoutAttributes* attributes = [self layoutAttributesForItemAtIndexPath:itemIndexPath];
+    attributes.alpha = 0.0;
+    attributes.center = CGPointMake(_center.x, _center.y);
+    return attributes;
+}
+
+//删除时，cell在圆心位置，全透明，且只有原来的1/10大
+- (UICollectionViewLayoutAttributes *)finalLayoutAttributesForDeletedItemAtIndexPath:(NSIndexPath *)itemIndexPath
+{
+    UICollectionViewLayoutAttributes* attributes = [self layoutAttributesForItemAtIndexPath:itemIndexPath];
+    attributes.alpha = 0.0;
+    attributes.center = CGPointMake(_center.x, _center.y);
+    attributes.transform3D = CATransform3DMakeScale(0.1, 0.1, 1.0);
+    return attributes;
+}
+</code></pre></figure>
+<p>在插入或删除时，将分别以插入前和删除后的attributes和普通状态下的attributes为基准，进行UIView的动画过渡。而这一切并没有很多代码要写，几乎是free的，感谢苹果…</p>
+
+<hr>
+
+<h2>布局之间的切换</h2>
+
+<p>有时候可能需要不同的布局，Apple也提供了方便的布局间切换的方法。直接更改collectionView的collectionViewLayout属性可以立即切换布局。而如果通过setCollectionViewLayout:animated:，则可以在切换布局的同时，使用动画来过渡。对于每一个cell，都将有对应的UIView动画进行对应，又是一个接近free的特性。</p>
+
+<p>对于我自己来说，UICollectionView可能是我转向iOS 6 SDK的最具有吸引力的特性之一，因为UIKit团队的努力和CoreAnimation的成熟，使得创建一个漂亮优雅的UI变的越来越简单了。可以断言说UICollectionView在今后的iOS开发中，一定会成为和UITableView一样的强大和最常用的类之一。在iOS 6还未正式上市前，先对其特性进行一些学习，以期尽快能使用新特性来简化开发流程，可以说是非常值得的。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/09/autoayout/" title="link to WWDC 2012 Session笔记——202, 228, 232 AutoLayout（自动布局）入门">WWDC 2012 Session笔记——202, 228, 232 AutoLayout（自动布局）入门</a></h2>
+       <p class="excerpt">这是博主的WWDC2012笔记系列中的一篇，完整的笔记列表可以参看这里。如果您是首次来到本站，也许您会有兴趣通过RSS，或者通过页面左侧的邮件订阅的方式订阅本站。AutoLayout在去年的WWDC上被引入Cocoa，而在今年的WWDC上，Apple不惜花费了三个Session的前所未见的篇幅来详细地向开发者讲解AutoLayout在iOS上的应用，是由起原因的：iPhone5的屏幕将变为4寸，开发者即将面临为不同尺寸屏幕进行应用适配的工作。Android平台开发中最令人诟病的适配工作的厄...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-09-19 23:01:31 +0800" class="post-list__meta--date date">2012-09-19</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2012/09/autoayout/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/08/not-a-studen/" title="link to 学生时代的终焉">学生时代的终焉</a></h2>
+       <p class="excerpt">距离研究生毕业，已经过去一个月了。在毕业季的离愁和从学生身份的转变的怅惘渐渐淡去时，大概是时候对我的整个的大学生涯做一个小结了。很多事情的记忆已经在时间的冲蚀中变得模糊了，但是也有一些事情比其他的琐事更深地印刻在了记忆之中，也许简单的梳理和回忆，无法把这七年刻画的细致入微，但是作为轮廓的勾勒和回顾，却已然绰绰有余了。（写完之后终于发现又被写成标准流水账了，这个从小学开始的写作文的毛病在不写博客两个月之后再次复发了哎…）悲剧的开始大学本科加上研究生，七年时间，说长不长，说短却也不短。在经历了...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-08-10 22:53:51 +0800" class="post-list__meta--date date">2012-08-10</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2012/08/not-a-studen/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2012/08/advanced-collection-view/";
+        this.page.identifier = "/2012/08/advanced-collection-view/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

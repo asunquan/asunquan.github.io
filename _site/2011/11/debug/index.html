@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>Xcode4.2的debug小技巧</title>
+  <meta name="description" content="GNU Debugger(gdb)">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Xcode4.2的debug小技巧">
+  <meta name="twitter:description" content="GNU Debugger(gdb)">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Xcode4.2的debug小技巧">
+  <meta property="og:description" content="GNU Debugger(gdb)">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2011/11/debug/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2011-11-26 22:58:57 +0800" itemprop="datePublished" class="post-meta__date date">2011-11-26</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">Xcode4.2的debug小技巧</h1>
+  </header>
+
+  <section class="post">
+    <p><a href="http://en.wikipedia.org/wiki/Gdb">GNU Debugger(gdb)</a></p>
+
+<p>一直是UNIX下最为流行的调试器，而在Cocoa框架中也一直被作为默认的调试工具。在gcc都被LLVM取代了的如今，gdb还是作为默认调试器，更可见其优秀特性。</p>
+
+<p>最近在调试过程中发现了一些小窍门或者说是小技巧，不敢独飨。也许调试在大多数人看来不过是切断点，run程序，断住，然后开始分析。很多时候我们需要在gdb中一行行敲命令去控制gdb的运行，而如果我们右击代码段左侧的断点标记，可以发现一个很有趣的菜单，那就是Edit Breakponit。</p>
+
+<p>然后你会发现，原来断点和调试器如此强大。不同的action可以解放你的双手完成无脑傻瓜调试，比如自动在断点处输入调试命令，按照需求输出log，为断点次数计数，执行shell命令，捕捉断点时的屏幕状态等，更甚至于可以运行AppleScript。熟悉AppleScript的朋友便知道这意味着什么，你甚至可以在gdb上外挂上自己的另外的程序，这是无数的可能。这种方式让我联想到用lua和python这样的脚本语言制作的各类插件，而AppleScript一向是被低估的语言（很大程度上是由于平台局限）。但是显然现在AppleScript可以用来作为一个gdb的插件语言，保不准明天它就会成为iOS设备上的标准插件语言，如果Apple有这样的气魄、决心和能力让AppleScript可以运行在iOS设备的话，对于所有的Cocoa开发者来说，都将是一场激动人心的革命（好吧因为系统的封闭性被打破，这也许对用户会是灾难..）～</p>
+
+<p>总之，断点设置不错，配合AppleScript的话很好很强大，花上5分钟研究研究断点设置能实现的功能，一定能提高gdb的使用效率～</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/11/nsurl/" title="link to 关于 NSURL 的解析和编码">关于 NSURL 的解析和编码</a></h2>
+       <p class="excerpt">NSURL毫无疑问是常用类，有时候我们需要对一个url进行分析整理，当然是可以按照RFC 1808的定义去自己分析，但是万能的Apple大大已经在SDK里扔了不少方法来帮助解析一个url了…方便又快捷呐～比如下面的输入：NSURL *url = [NSURL URLWithString: @&quot;http://www.onevcat.com/2011/11/debug/;param?p=307#more-307&quot;];NSLog(@“Scheme: %@”, [url sch...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-11-29 23:06:37 +0800" class="post-list__meta--date date">2011-11-29</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2011/11/nsurl/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/11/kayac/" title="link to 尘埃落定，下一站Kayac">尘埃落定，下一站Kayac</a></h2>
+       <p class="excerpt">AHRP2012秋季项目已经结束，春季项目博主可以以内定者的身份进行内推，具体可以参看这篇帖子。从10月初开始到现在，一个多月的求职尘埃落定，没有意外的话我明年将在日本镰仓(Kamakura)的Kayac公司开始自己的职业生涯。回顾这一个多月来的心情沉浮，颇有收获：从一开始的国内公司连连被拒，到之后几近看到出路，到最后寻找到Kayac，一路过来似乎有些宿命的感觉，而在一次又一次的笔试面试谈话中，确实渐渐看清了今后的道路和心中的诉求。这一个多月里，思考了很多人生的问题，整个人成熟了不少。Ka...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-11-25 23:02:48 +0800" class="post-list__meta--date date">2011-11-25</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2011/11/kayac/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2011/11/debug/";
+        this.page.identifier = "/2011/11/debug/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

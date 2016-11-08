@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>谈谈Objective-C的警告</title>
+  <meta name="description" content="一个有节操的程序员会在乎自己的代码的警告，就像在乎饭碗边上有只死蟑螂那样。——@onevcat">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="谈谈Objective-C的警告">
+  <meta name="twitter:description" content="一个有节操的程序员会在乎自己的代码的警告，就像在乎饭碗边上有只死蟑螂那样。——@onevcat">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="谈谈Objective-C的警告">
+  <meta property="og:description" content="一个有节操的程序员会在乎自己的代码的警告，就像在乎饭碗边上有只死蟑螂那样。——@onevcat">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2013/05/talk-about-warning/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2013-05-23 23:43:19 +0800" itemprop="datePublished" class="post-meta__date date">2013-05-23</time> &#8226; <span class="post-meta__tags tags">胡言乱语集</span>
+    </div>
+    <h1 class="post-title">谈谈Objective-C的警告</h1>
+  </header>
+
+  <section class="post">
+    <blockquote>
+<p>一个有节操的程序员会在乎自己的代码的警告，就像在乎饭碗边上有只死蟑螂那样。
+——<a href="http://weibo.com/onevcat">@onevcat</a></p>
+</blockquote>
+
+<h3>重视编译警告</h3>
+
+<p>现在编译器有时候会很吵，而编译器给出的警告对开发者来说是很有用的信息。警告不会阻止继续编译和链接，也不会导致程序不能运行，但是很多时候编译器会先你一步发现问题所在，对于Objective-C来说特别如此。<a href="http://clang.llvm.org/">Clang</a>不仅对于明显的错误能够提出警告（比如某方法或者接口未实现），也能对很多潜在可能的问题做出提示（比如方法已经废弃或者有问题的转换），而这些问题在很多时候都可能成为潜在的致命错误，必须加以重视。</p>
+
+<p>像Ruby或者PHP这样的动态语言没有所谓的编译警告，而C#或者Java这类语言的警告很多都是不得不照顾的废弃方法什么的，很多开发者已经习惯于忽略警告进行开发。OC由于现在由苹果负责维护，Clang的LLVM也同时是苹果在做，可以说从语言到编译器到SDK全局都在掌握之中，因此做OC开发时的警告往往比其他语言的警告更有参考价值。打开尽可能多的警告提示，并且在程序开发中尽量避免生成警告，对于构建一个健壮高效的程序来说，是必须的。</p>
+
+<h3>在Xcode中开启额外警告提示</h3>
+
+<p>Xcode的工程模板已经为我们设置开启了一些默认和常用的警告提示，这些默认设置为了兼容一些上年头的项目，并没有打开很多，仅是指对最危险和最常见的部分进行了警告。这对于一个新项目来说这是不够用的（至少对我来说是不够用的），在无数前辈大牛的教导下，首先要做的事情就是打开尽可能多的警告提示。</p>
+
+<p>最简单的方法是通过UI来打开警告。在Xcode中，Build Setting选项里为我们预留了一些打开警告的开关，找到并直接勾选相应的选项就可以打开警告。大部分时间里选项本身已经足够能描述警告的作用和产生警告的时机，如果不是很明白的话，在右侧的Quick Help面板里有更详细的说明。对于OC开发来说特有的警告都在<code>Apple LLVM compiler 4.2 - Warnings - Objective C</code>一栏中，不管您是不是决定打开它们，都是值得花时间看一看加以了解的，因为它们都是写OC程序时最应该避免的情况。另外几个<code>Apple LLVM compiler 4.2 - Warnings - …</code>(All languages和C++)也包含了大量的选项，以方便控制警告产生。</p>
+
+<p><img src="/assets/images/2013/xcode-warning.png" alt="Xcode设置中的警告选项"></p>
+
+<p>当然在UI里一个一个点击激活警告虽然简单，但每次都这样来一回是一种一点也不有趣的做法，特别是在你已经了解它们的内容并决定打开它们的时候。在编译选项中加入合适的flag能够打开或者关闭警告：在Build Setting中的Other C Flags里添加形似<code>-W...</code>的编译标识。你可以在其中填写任意多的<code>-W...</code>以开关某些警告，比如，填写为<code>-Wall -Wno-unused-variable</code>即可打开“全部”警告（其实并不是全部，只是一大部分严重警告而已），但是不启用“未使用变量”的警告。使用<code>-W...</code>的形式，而不是在UI上勾选的一大好处是，在编译器版本更新时，新加入的警告如果包含在<code>-Wall</code>中的话，不需要对工程做任何修改，新的警告即可以生效。这样立即可以察觉到同一个工程由于编译器版本更新时可能带来的隐患。另外一个更重要的原因是..Xcode的UI并没有提供所有的警告 =_=||..</p>
+
+<p>刚才提到的，需要注意的是，<code>-Wall</code>的名字虽然是all，但是这真的只是一个迷惑人的词语，实际上<code>-Wall</code>涵盖的仅只是所有警告中的一个子集。在<a href="http://programmers.stackexchange.com/questions/122608/clang-warning-flags-for-objective-c-development/124574#124574">StackExchange</a>上有一个在Google工作的Clang开发者进行的回答，其中解释了有一些重要的警告组：</p>
+
+<ul>
+<li>-Wall 并<strong>不是</strong>所有警告。这一个警告组开启的是编译器开发者对于“你所写的代码中有问题”这一命题有着很高的自信的那些警告。要是在这一组设定下你的代码出现了警告，那基本上就是你的代码真的存在严重问题了。但是同时，并不是说打开Wall就万事大吉了，因为Wall所针对的仅仅只是经典代码库中的为数不多的问题，因此有一些致命的警告并不能被其捕捉到。但是不论如何，因为Wall的警告提供的都是可信度和优先级很高的警告，所以为所有项目（至少是所有新项目）打开这组警告，应该成为一种良好的习惯。</li>
+<li>-Wextra 如其所名，<code>-Wextra</code>组提供“额外的”警告。这个组和<code>-Wall</code>组几乎一样有用，但是有些情况下对于代码相对过于严苛。一个很常见的例子是，<code>-Wextra</code>中包含了<code>-Wsign-compare</code>，这个警告标识会开启比较时候对signed和unsigned的类型检查，当比较符两边一边是signed一边是unsigned时，产生警告。其实很多代码并没有特别在意这样的比较，而且绝大多数时候，比较signed和unsigned也是没有太大问题的（当然不排除会有致命错误出现的情况）。需要注意，<code>-Wextra</code>和<code>-Wall</code>是相互独立的两个警告组，虽然里面打开的警告标识有个别是重复的，但是两组并没有包含的关系。想要同时使用的话必须在Other C Flags中都加上</li>
+<li>-Weverything 这个是真正的所有警告。但是一般开发者不会选择使用这个标识，因为它包含了那些还正在开发中的可能尚存bug的警告提示。这个标识一般是编译器开发者用来调试时使用的，如果你想在自己的项目里开启的话，警告一定会爆棚导致你想开始撞墙..</li>
+</ul>
+
+<p><img src="/assets/images/2013/weverything.png" alt="-Wall和-Wextra下0警告的工程，在-Weverything下的表现，可以用惨不忍睹来形容"></p>
+
+<p>关于某个组开启了哪些警告的说明，在GCC的手册中有<a href="http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html">一个参考</a>。虽然苹果现在用的都是LLVM了，但是这部分内容应该是继承了GCC的设定。</p>
+
+<h3>控制警告，局部加入或关闭</h3>
+
+<p>Clang提供了我们自己加入警告或者暂时关闭警告的办法。</p>
+
+<p>强制加入一个警告：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//Generate a warning
+#pragma message &quot;Warning 1&quot;
+
+//Another way to generate a warning
+#warning &quot;Warning 2&quot;
+</code></pre></figure>
+<p>两种强制警告的方法在视觉效果上结果是一样的，但是警告类型略有不同，一个是<code>-W#pragma-messages</code>，另一个是<code>-W#warnings</code>。对于第二种写法，把warning换成error，可以强制使编译失败。比如在发布一些需要API Key之类的类库时，可以使用这个方法来提示别的开发者别忘了输入必要的信息。</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//Generate an error to fail the build.
+#error &quot;Something wrong&quot;
+</code></pre></figure>
+<p>对于关闭某个警告，如果需要全局关闭的话，直接在Other C Flags里写<code>-Wno-...</code>就行了，比如<code>-Wextra -Wno-sign-compare</code>就是一个常见的组合。如果相对某几个文件开启或禁用警告，在Build Phases的Compile Source相应的文件中加入对应的编译标识即可。如果只是想在某几行关闭某个警告的话，可以通过临时改变诊断编译标记来抑制指定类型的警告，具体如下：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">#pragma clang diagnostic push
+#pragma clang diagnostic ignored &quot;-Wunused-variable&quot;
+
+int a;
+
+#pragma clang diagnostic pop
+</code></pre></figure>
+<p>如果a之后没有被使用，也不会出未使用变量的警告了。对于想要抑制的警告类型的标识名，可以在build产生该警告后的build log中看到。Xcode中的话，快捷键Cmd+7然后点击最近的build log中，进入详细信息中就能看到了。</p>
+
+<p><img src="/assets/images/2013/warning-detail.png" alt="警告的详细信息，可以找到标识符"></p>
+
+<h3>我应该开启哪些警告提示</h3>
+
+<p>个人喜好（代码洁癖）不同，会有不同的需求。我的建议是对于所有项目，特别是新开的项目，首先开启<code>-Wall</code>和<code>-Wextra</code>，然后在此基础上构建项目并且避免一切警告。如果在开发过程中遇到了某些确实无法解决或者确信自己的做法是正确的话（其实这种情况，你的做法一般即使不是错误的，也会是不那么正确的），可以有选择性地关闭某些警告。一般来说，关闭的警告项目不应该超过一只手能数出来的数字，否则一定哪儿出问题了..</p>
+
+<h3>是否要让警告等于错误</h3>
+
+<p>一种很常见的做法和代码洁癖是将警告标识为错误，从而中断编译过程。这让开发者不得不去修复这些警告，从而保持代码干净整洁。在Xcode中，可以通过勾选相应的Treat Warnings as Errors来开启，或者加入<code>-Werror</code>标识。我个人来说不喜欢使用这个设定，因为它总是打断开发流程。很多时候并不可能把代码全写完再编译调试，相反地，我更喜欢写一点就编译运行一下看看结果，这样在中间debug编译的时候会出现警告也不足为奇。另外，如果做TDD开发时，也可能会有大量正常的警告出现，如果有警告就不让编译的话，开发效率可能会打折扣。一个比较好的做法是只在Release Build时将警告视为错误，因为Xcode中是可以为Debug和Release分别指定标识的，所以这很容易做到。</p>
+
+<p>另外也可以只把某些警告当作错误，<code>-Werror=...</code>即可，同样地，也可以在<code>-Werror</code>被激活时使用<code>-Wno-error=...</code>来使某些警告不成为错误。结合使用这些编译标识可以达到很好的控制。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/06/developer-should-know-about-ios7/" title="link to 开发者所需要知道的iOS7 SDK新特性">开发者所需要知道的iOS7 SDK新特性</a></h2>
+       <p class="excerpt">春风又绿加州岸，物是人非又一年。WWDC 2013 keynote落下帷幕，新的iOS开发旅程也由此开启。在iOS7界面重大变革的背后，开发者们需要知道的又有哪些呢。同去年一样，我会先简单纵览地介绍iOS7中我个人认为开发者需要着重关注和学习的内容，之后再陆续对自己感兴趣章节进行探索。计划继承类似WWDC2012的笔记的形式，希望对国内开发者有所帮助。相关笔记整理如下：总览 开发者所需要知道的iOS7 SDK新特性工具 WWDC2013笔记 Xcode5和ObjC新特性 UIKit动力学 ...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-06-10 23:45:02 +0800" class="post-list__meta--date date">2013-06-10</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/06/developer-should-know-about-ios7/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/04/using-blending-in-ios/" title="link to iOS中使用blend改变图片颜色">iOS中使用blend改变图片颜色</a></h2>
+       <p class="excerpt">最近对Core Animation和Core Graphics的内容东西比较感兴趣，自己之前也在这块相对薄弱，趁此机会也想补习一下这块的内容，所以之后几篇可能都会是对CA和CG学习的记录的文章。在应用里一个很常见的需求是主题变换：同样的图标，同样的素材，但是需要按照用户喜爱变为不同的颜色。在iOS5和6的SDK里部分标准控件引入了tintColor，来满足个性化界面的需求，但是Apple在这方面还远远做的不够。一是现在用默认控件根本难以做出界面优秀的应用，二是tintColor所覆盖的并不...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-04-28 23:41:33 +0800" class="post-list__meta--date date">2013-04-28</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/04/using-blending-in-ios/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2013/05/talk-about-warning/";
+        this.page.identifier = "/2013/05/talk-about-warning/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

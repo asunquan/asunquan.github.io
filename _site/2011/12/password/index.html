@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>凑热闹，谈密码，Challenge-Response密码验证</title>
+  <meta name="description" content="CSDN的密码事件闹得沸沸扬扬，600万用户数据的泄露应该是中国互联网历史上最严重的帐号信息泄露事件。让人不可思议的是，2009年4月之前的用户密码居然是以明文存储。使用明文存储密码本身就是一件相当扯淡的事情，而当这种事情发生在以程序员为主要客户的大型网站上，真是让人哭笑不得。">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="凑热闹，谈密码，Challenge-Response密码验证">
+  <meta name="twitter:description" content="CSDN的密码事件闹得沸沸扬扬，600万用户数据的泄露应该是中国互联网历史上最严重的帐号信息泄露事件。让人不可思议的是，2009年4月之前的用户密码居然是以明文存储。使用明文存储密码本身就是一件相当扯淡的事情，而当这种事情发生在以程序员为主要客户的大型网站上，真是让人哭笑不得。">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="凑热闹，谈密码，Challenge-Response密码验证">
+  <meta property="og:description" content="CSDN的密码事件闹得沸沸扬扬，600万用户数据的泄露应该是中国互联网历史上最严重的帐号信息泄露事件。让人不可思议的是，2009年4月之前的用户密码居然是以明文存储。使用明文存储密码本身就是一件相当扯淡的事情，而当这种事情发生在以程序员为主要客户的大型网站上，真是让人哭笑不得。">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2011/12/password/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2011-12-21 23:49:48 +0800" itemprop="datePublished" class="post-meta__date date">2011-12-21</time> &#8226; <span class="post-meta__tags tags">南箕北斗集</span>
+    </div>
+    <h1 class="post-title">凑热闹，谈密码，Challenge-Response密码验证</h1>
+  </header>
+
+  <section class="post">
+    <p><a href="http://news.csdn.net/a/20111221/309505.html">CSDN的密码事件</a>闹得沸沸扬扬，600万用户数据的泄露应该是中国互联网历史上最严重的帐号信息泄露事件。让人不可思议的是，2009年4月之前的用户密码居然是以明文存储。使用明文存储密码本身就是一件相当扯淡的事情，而当这种事情发生在以程序员为主要客户的大型网站上，真是让人哭笑不得。</p>
+
+<p>之后又陆续爆出人人、多玩以及各种知名网站的账户信息泄露的消息，虽然还未确知真伪，但也很是让人揪心。而“不能明文保存密码”这一个初级中的初级的错误之所以会在中国这篇神奇的土地上一次又一次的出现，我认为是与中国的网络审查制度和相关法制不全造成的（其实就算法令全了我估计在特权之下也只是一纸空文）。负责网络审查的大大们往往一个电话过来指明要XXX的密码，而在天朝这样的地方如果你拿不出这个密码的话，基本就被扣上了政治不合作和给领导难看的大帽子，很多时候程序员被逼无奈只能明文存储。而像这次CSDN这样的由于系统升级而遗留下的历史问题，可以相信溯其根源也或多或少会与这样的特权有关吧...</p>
+
+<p>扯远了扯远了...作为有良知的程序员，绝不能用明文存储密码，而作为简单的密码存放验证解决方案，MD5的Challenge-Response验证方法可以满足绝大部分非机密级别的应用了。使用MD5存储密码在验证中是很常见的做法，虽然<a href="http://baike.baidu.com/view/350813.htm#2">王小云</a>教授提出了有效的MD5强无碰撞算法，但是作为民用级别的网站认证，简单的散列MD5的方便快速简单易用的特性还是相当吸引人。为了防止截取MD5伪造身份完成认证，再加入一个Challenge-Response机制，客户端请求验证时，由服务器随机一个串给客户端进行挑战，客户端使用密码的散列值与从服务器取得的串组合得到新的散列值，将此散列值提交给服务器生成的散列值进行应答验证，若两个散列一致则通过，否则失效。如果希望能够得到更加安全的散列算法，可以选择SHA-256，SHA-384或者SHA-512等还未被攻破的散列（仅限民用..我猜政府军事部门不太可能用散列这种悲剧又简单的摘要算法）。对于iPhone SDK来说，常用的散列算法都在<CommonCrypto/CommonDigest.h>头文件中均有说明。而libcommonCrypto.dylib和Security.framework中也都提供了相当多的安全方法，涉及网络应用的app开发的话，不论是作为自身修养的提升还是对自己的代码负责，都应当对安全问题有基本的认识和思索...</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/12/vvbordertimer/" title="link to VVBorderTimer">VVBorderTimer</a></h2>
+       <p class="excerpt">GitHub 链接: https://github.com/onevcat/VVBorderTimerView是什么VVBorderTimer是UIView的子类它为UIView提供使用边界进行倒计时的效果边框角落的半径和线宽在运行时可调倒计时是有颜色渐变效果What’s thisVVBorderTimer is a subclass of UIView.It provides an counting down effect using the view’s border.The radi...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-12-24 21:04:43 +0800" class="post-list__meta--date date">2011-12-24</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2011/12/vvbordertimer/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/12/uiimage/" title="link to 带边框的UIImage缩放">带边框的UIImage缩放</a></h2>
+       <p class="excerpt">一个带边框的UIImage如果使用常规的缩放，边框部分将被按照缩放比例拉伸或压缩，有些时候这并不是我们所期望的..比如这个边框是根据图片大小变化的外框。比如下面的类似按钮的不明物体图片：主体为渐变蓝色，边框为外圈白色，灰色底板为背景。常见的按钮添加和背景设置如下：UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(80, 130, 160, 44)];[button setTitle:@”Test Button” fo...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-12-20 23:46:41 +0800" class="post-list__meta--date date">2011-12-20</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2011/12/uiimage/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2011/12/password/";
+        this.page.identifier = "/2011/12/password/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

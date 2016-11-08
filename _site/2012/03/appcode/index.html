@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>AppCode，Objective-C IDE的另一选择</title>
+  <meta name="description" content="Xcode or AppCode">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AppCode，Objective-C IDE的另一选择">
+  <meta name="twitter:description" content="Xcode or AppCode">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="AppCode，Objective-C IDE的另一选择">
+  <meta property="og:description" content="Xcode or AppCode">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2012/03/appcode/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2012-03-24 22:10:06 +0800" itemprop="datePublished" class="post-meta__date date">2012-03-24</time> &#8226; <span class="post-meta__tags tags">南箕北斗集</span>
+    </div>
+    <h1 class="post-title">AppCode，Objective-C IDE的另一选择</h1>
+  </header>
+
+  <section class="post">
+    <h3>Xcode or AppCode</h3>
+
+<p>近年来随着iOS设备和Mac发展，Objective-C（以下简写为OC）进步神速，但是这个世界上并没有多少OC的IDE。要说集成了Mac和iOS SDK的OC开发套件，最为常用和普及的一定是Apple自家的Xcode了。真心说来Xcode是一个很棒的IDE，它具备了作为一个优秀IDE所应该拥有的一切要素。其他的OC IDE环境从来不是主流，但是其中却也不乏优秀者，<a href="http://www.jetbrains.com/objc/">JetBrains的AppCode</a>便是佼佼者之一。</p>
+
+<p>说到JetBrains可能最为人熟知的是它旗下的另一款Java IDE——<a href="http://www.jetbrains.com/idea/">IntelliJ IDEA</a>。而JetBrains也还同时有PHP，Python，Ruby等语言的专用IDE，可以说JetBrains就是以IDE为主要产品的公司。作为一家专业的IDE解决方案提供商，它的产品自然也能符合绝大多数用户的需求。而AppCode是JetBrains为Mac和iOS下app开发所推出的IDE产品。如果你想要更effective和elegant的coding，那确实应该尝试AppCode；或者只是单单看腻了Xcode，也可以尝尝鲜～</p>
+
+<h3>列举AppCode的几个好用特性</h3>
+
+<h4>代码补全</h4>
+
+<p>这是最最基本的特性，我想也是一个合格的IDE及编辑器应该完成的最基本的功能。AppCode的代码补全不仅限于类、方法或者变量名字这样的基本自动完成，它还具备了根据上下文推测的能力，并且推测算法十分可靠。</p>
+
+<p>甚至如果你写了一个从未出现过的变量或者方法，AppCode都会询问你是否想要添加这个方法。开发者将有机会避免一切可能的无意义的来回跳转，而专注于有效代码的编写。</p>
+
+<h4>快速跳转</h4>
+
+<p>Xcode的最大确定之一就是难以定位文件和类。想找一个文件的话，基本上不可能完全用键盘实现。而如果遵循效率至上的原则的话，手指离开键盘就意味着效率下降。Sublime Text提供了一种很优秀的寻找和跳转的方法，而AppCode中也有类似的导航方式（我不确定是谁先提出的）。配合类似微博的特定符号，可以完成从文件到类乃至到方法和符号的快速跳转，避免了所有可能的鼠标操作。</p>
+
+<h4>代码分析和修改意见</h4>
+
+<p>虽然Xcode也有代码分析的功能(Shift+Cmd+B in Xcode 4)，但是大部分情况下是会望了用的，而且Xcode的分析基本只能找到内存上的潜在问题，随着ARC的逐渐普及，相信内存上的issue会在开发过程中越来越少。AppCode的代码分析是实时进行的，在代码完成之前，你就可以看到存在的问题。分析和监测的问题包括且不限于代码内存管理、从未调用的方法、不可到达的代码段等。</p>
+
+<p>关于警告或错误代码的修改可以说是AppCode的强项，自动帮助添加release/autorelease，优化头文件引用（去掉多余头文件以及自动添加需要的头文件），自动帮助完成强制转换等。</p>
+
+<p>代码分析和修正共有超过60种监视的错误，遵循AppCode的建议可以保证代码的整洁。</p>
+
+<h4>代码格式修正</h4>
+
+<p>每个人都有自己喜欢和习惯的代码格式，比如{}的位置，缩进和隔行的形式等等。阅读符合自己风格的代码时，往往效率能有大幅提升。AppCode提供了高度可自定制的代码风格模版，并可以很简单地将其套用到任何代码上。这样，不论写代码时多么没有注意格式，最后产生的代码都是完全符合风格的漂亮优雅的代码。这不仅可以为自己之后的维护和修改打下基础，也能在团队合作中快速将自己的代码的风格改为和团队统一。这也是我个人最喜欢的AppCode的一个功能。</p>
+
+<h4>iOS环境</h4>
+
+<p>既然是for OC的IDE，那基本上绝大部分时间都是在为iOS或者Mac开发而工作了。AppCode虽然不是Apple的亲儿子，但是不管是设备调试还是模拟器运行也都是没有问题的。而且AppCode也集成了GDB和LLDB，其Debug工具的界面总体上说比Xcode更灵活。另外，单元测试和文档功能也深度集成到了AppCode中，可以随时方便地运行和调用。</p>
+
+<h4>插件</h4>
+
+<p>插件这种东西，为一个应用提供了无限的可能（关于插件这种东西的登峰造极的应用，可以参考VIM或者魔兽世界）。可以说使用插件或者自己编写插件来使用，完全可以将AppCode二次开发为一个完全符合自己需求和习惯的IDE。Xcode虽然也提供插件功能，但是Xcode的插件开发相当繁琐，而且成功的Xcode插件也基本不存在与这个世界之上。而AppCode现在已经有50+的插件存在于插件仓库中，已经可以满足大部分开发者的需求了（比如存在把编辑器VIM化的强力插件）。</p>
+
+<h3>AppCode的不足</h3>
+
+<p>金无足赤，AppCode也有一些不足之处。比如需要依赖Xcode，没有集成nib编辑器，在打开nib文件时会自动去开Xcode，Instrument工具也要调用Xcode等。但是这并不妨碍AppCode成为一款伟大的IDE，在通过一段时间的对AppCode的使用后，我已经成为了AppCode的忠实拥趸～这款IDE对于开发效率的提高和开发心情的调节可谓是相当成功。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/04/objective-c-runtime/" title="link to 深入Objective-C的动态特性">深入Objective-C的动态特性</a></h2>
+       <p class="excerpt">Objective-C具有相当多的动态特性，基本的，也是经常被提到和用到的有动态类型（Dynamic typing），动态绑定（Dynamic binding）和动态加载（Dynamic loading）。这些动态特性都是在Cocoa程序开发时非常常用的语言特性，而在这之后，OC在底层也提供了相当丰富的运行时的特性，比如枚举类属性方法、获取方法实现等等。虽然在平常的Cocoa开发中这些较底层的运行特性基本用不着，但是在某些情况下如果你知道这些特性并合理加以运用的话，往往能事半功倍～动态特性...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-04-22 22:18:44 +0800" class="post-list__meta--date date">2012-04-22</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2012/04/objective-c-runtime/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/03/opencv-build-and-config/" title="link to OpenCV 在 iOS 开发环境下的编译和配置">OpenCV 在 iOS 开发环境下的编译和配置</a></h2>
+       <p class="excerpt">转载本文请保留以下原作者信息:原作：OneV&#39;s Den http://www.onevcat.com/2012/03/opencv-build-and-config/2014.5.3 更新现在一般都直接使用方便的 CocoaPods 来进行依赖管理了，特别是对于像 OpenCV 这样关系复杂的类库来说尤为如此。可以访问 CocoaPods 的页面并搜索 OpenCV 找到相关的 pod 信息就可以进行简单的导入了。如果您还不会或者没有开始使用 CocoaPods 的话，现在正是时...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-03-03 22:06:23 +0800" class="post-list__meta--date date">2012-03-03</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2012/03/opencv-build-and-config/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2012/03/appcode/";
+        this.page.identifier = "/2012/03/appcode/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

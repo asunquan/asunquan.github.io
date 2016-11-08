@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>WWDC 2013 Session笔记 - iOS7中弹簧式列表的制作</title>
+  <meta name="description" content="这是我的WWDC2013系列笔记中的一篇，完整的笔记列表请参看这篇总览。本文仅作为个人记录使用，也欢迎在许可协议范围内转载或使用，但是还烦请保留原文链接，谢谢您的理解合作。如果您觉得本站对您能有帮助，您可以使用RSS或邮件方式订阅本站，这样您将能在第一时间获取本站信息。">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="WWDC 2013 Session笔记 - iOS7中弹簧式列表的制作">
+  <meta name="twitter:description" content="这是我的WWDC2013系列笔记中的一篇，完整的笔记列表请参看这篇总览。本文仅作为个人记录使用，也欢迎在许可协议范围内转载或使用，但是还烦请保留原文链接，谢谢您的理解合作。如果您觉得本站对您能有帮助，您可以使用RSS或邮件方式订阅本站，这样您将能在第一时间获取本站信息。">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="WWDC 2013 Session笔记 - iOS7中弹簧式列表的制作">
+  <meta property="og:description" content="这是我的WWDC2013系列笔记中的一篇，完整的笔记列表请参看这篇总览。本文仅作为个人记录使用，也欢迎在许可协议范围内转载或使用，但是还烦请保留原文链接，谢谢您的理解合作。如果您觉得本站对您能有帮助，您可以使用RSS或邮件方式订阅本站，这样您将能在第一时间获取本站信息。">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2013/08/spring-list-like-ios7-message/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2013-08-31 23:58:48 +0800" itemprop="datePublished" class="post-meta__date date">2013-08-31</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">WWDC 2013 Session笔记 - iOS7中弹簧式列表的制作</h1>
+  </header>
+
+  <section class="post">
+    <p>这是我的WWDC2013系列笔记中的一篇，完整的笔记列表请参看<a href="http://onevcat.com/2013/06/developer-should-know-about-ios7/">这篇总览</a>。本文仅作为个人记录使用，也欢迎在<a href="http://creativecommons.org/licenses/by-nc/3.0/deed.zh">许可协议</a>范围内转载或使用，但是还烦请保留原文链接，谢谢您的理解合作。如果您觉得本站对您能有帮助，您可以使用<a href="http://onevcat.com/atom.xml">RSS</a>或<a href="http://eepurl.com/wNSkj">邮件</a>方式订阅本站，这样您将能在第一时间获取本站信息。</p>
+
+<p>本文涉及到的WWDC2013 Session有</p>
+
+<ul>
+<li>Session 206 Getting Started with UIKit Dynamics</li>
+<li>Session 217 Exploring Scroll Views in iOS7</li>
+</ul>
+
+<p>UIScrollView可以说是UIKit中最重要的类之一了，包括UITableView和UICollectionView等重要的数据容器类都是UIScrollView的子类。在历年的WWDC上，UIScrollView和相关的API都有专门的主题进行介绍，也可以看出这个类的使用和变化之快。今年也不例外，因为iOS7完全重新定义了UI，这使得UIScrollView里原来不太会使用的一些用法和实现的效果在新的系统中得到了很好的表现。另外，由于引入了UIKit Dynamics，我们还可以结合ScrollView做出一些以前不太可能或者需要花费很大力气来实现的效果，包括带有重力的swipe或者是类似新的信息app中的带有弹簧效果聊天泡泡等。如果您还不太了解iOS7中信息app的效果，这里有一张gif图可以帮您大概了解一下：</p>
+
+<p><img src="/assets/images/2013/ios7-message-app-spring.gif" alt="iOS7中信息app的弹簧效果"></p>
+
+<p>这次笔记的内容主要就是实现一个这样的效果。为了避免重复造轮子，我对这个效果进行了一些简单的封装，并连同这篇笔记的demo一起扔在了Github上，有需要的童鞋可以<a href="https://github.com/onevcat/VVSpringCollectionViewFlowLayout">到这里</a>自取。</p>
+
+<p>iOS7的SDK中Apple最大的野心其实是想用SpriteKit来结束iOS平台游戏开发（至少是2D游戏开发）的乱战，统一游戏开发的方式并建立良性社区。而UIKit Dynamics，个人猜测Apple在花费力气为SpriteKit开发了物理引擎的同时，发现在UIKit中也可以使用，并能得到不错的效果，于是顺便革新了一下设计理念，在UI设计中引入了不少物理的概念。在iOS系统中，最为典型的应用是锁屏界面打开相机时中途放弃后的重力下坠+反弹的效果，另一个就是信息应用中的加入弹性的消息列表了。弹性列表在我自己上手试过以后觉得表现形式确实很生动，可以消除原来列表那种冷冰冰的感觉，是有可能在今后的设计中被大量使用的，因此决定学上一学。</p>
+
+<p>首先我们需要知道要如何实现这样一种效果，我们会用到哪些东西。毋庸置疑，如果不使用UIKit Dynamics的话，自己从头开始来完成会是一件非常费力的事情，你可能需要实现一套位置计算和物理模拟来使效果看起来真实滑润。而UIKit Dynamics中已经给我们提供了现成的弹簧效果，可以用<code>UIAttachmentBehavior</code>进行实现。另外，在说到弹性效果的时候，我们其实是在描述一个列表中的各个cell之间的关系，对于传统的UITableView来说，描述UITableViewCell之间的关系是比较复杂的（因为Apple已经把绝大多数工作做了，包括计算cell位置和位移等。使用越简单，定制就会越麻烦在绝大多数情况下都是真理）。而UICollectionView则通过layout来完成cell之间位置关系的描述，给了开发者较大的空间来实现布局。另外，UIKit Dynamics为UICollectionView做了很多方便的Catagory，可以很容易地“指导”UICollectionView利用加入物理特性计算后的结果，在实现弹性效果的时候，UICollectionView是我们不二的选择。</p>
+
+<p>如果您在阅读这篇笔记的时候遇到困难的话，建议您可以看看我之前的一些笔记，包括今年的<a href="http://onevcat.com/2013/06/uikit-dynamics-started/">UIKit Dynamics的介绍</a>和去年的<a href="http://onevcat.com/2012/06/introducing-collection-views/">UICollectionView介绍</a>。</p>
+
+<p>话不多说，我们开工。首先准备一个UICollectionViewFlowLayout的子类（在这里叫做<code>VVSpringCollectionViewFlowLayout</code>），然后在ViewController中用这个layout实现一个简单的collectionView：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//ViewController.m
+
+@interface ViewController ()&lt;UICollectionViewDataSource, UICollectionViewDelegate&gt;
+@property (nonatomic, strong) VVSpringCollectionViewFlowLayout *layout;
+@end
+
+static NSString *reuseId = @&quot;collectionViewCellReuseId&quot;;
+
+@implementation ViewController
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+
+    self.layout = [[VVSpringCollectionViewFlowLayout alloc] init];
+    self.layout.itemSize = CGSizeMake(self.view.frame.size.width, 44);
+    UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:self.view.frame collectionViewLayout:self.layout];
+
+    collectionView.backgroundColor = [UIColor clearColor];
+
+    [collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:reuseId];
+
+    collectionView.dataSource = self;
+    [self.view insertSubview:collectionView atIndex:0];
+}
+
+#pragma mark - UICollectionViewDataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return 50;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseId forIndexPath:indexPath];
+
+    //Just give a random color to the cell. See https://gist.github.com/kylefox/1689973
+    cell.contentView.backgroundColor = [UIColor randomColor];
+    return cell;
+}
+@end
+</code></pre></figure>
+<p>这部分没什么可以多说的，现在我们有一个标准的FlowLayout的UICollectionView了。通过使用UICollectionViewFlowLayout的子类来作为开始的layout，我们可以节省下所有的初始cell位置计算的代码，在上面代码的情况下，这个collectionView的表现和一个普通的tableView并没有太大不同。接下来我们着重来看看要如何实现弹性的layout。对于弹性效果，我们需要的是连接一个item和一个锚点间弹性连接的<code>UIAttachmentBehavior</code>，并能在滚动时设置新的锚点位置。我们在scroll的时候，只要使用UIKit Dynamics的计算结果，替代掉原来的位置更新计算（其实就是简单的scrollView的contentOffset的改变），就可以模拟出弹性的效果了。</p>
+
+<p>首先在<code>-prepareLayout</code>中为cell添加<code>UIAttachmentBehavior</code>。</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//VVSpringCollectionViewFlowLayout.m
+@interface VVSpringCollectionViewFlowLayout()
+@property (nonatomic, strong) UIDynamicAnimator *animator;
+@end
+
+@implementation VVSpringCollectionViewFlowLayout
+//...
+
+-(void)prepareLayout {
+    [super prepareLayout];
+
+    if (!_animator) {
+        _animator = [[UIDynamicAnimator alloc] initWithCollectionViewLayout:self];
+        CGSize contentSize = [self collectionViewContentSize];
+        NSArray *items = [super layoutAttributesForElementsInRect:CGRectMake(0, 0, contentSize.width, contentSize.height)];
+
+        for (UICollectionViewLayoutAttributes *item in items) {
+            UIAttachmentBehavior *spring = [[UIAttachmentBehavior alloc] initWithItem:item attachedToAnchor:item.center];
+
+            spring.length = 0;
+            spring.damping = 0.5;
+            spring.frequency = 0.8;
+
+            [_animator addBehavior:spring];
+        }
+    }
+}
+@end
+</code></pre></figure>
+<p>prepareLayout将在CollectionView进行排版的时候被调用。首先当然是call一下super的prepareLayout，你肯定不会想要全都要自己进行设置的。接下来，如果是第一次调用这个方法的话，先初始化一个UIDynamicAnimator实例，来负责之后的动画效果。iOS7 SDK中，UIDynamicAnimator类专门有一个针对UICollectionView的Category，以使UICollectionView能够轻易地利用UIKit Dynamics的结果。在<code>UIDynamicAnimator.h</code>中能够找到这个Category：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">@interface UIDynamicAnimator (UICollectionViewAdditions)
+
+// When you initialize a dynamic animator with this method, you should only associate collection view layout attributes with your behaviors.
+// The animator will employ thecollection view layout’s content size coordinate system.
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout*)layout;
+
+// The three convenience methods returning layout attributes (if associated to behaviors in the animator) if the animator was configured with collection view layout
+- (UICollectionViewLayoutAttributes*)layoutAttributesForCellAtIndexPath:(NSIndexPath*)indexPath;
+- (UICollectionViewLayoutAttributes*)layoutAttributesForSupplementaryViewOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+- (UICollectionViewLayoutAttributes*)layoutAttributesForDecorationViewOfKind:(NSString*)decorationViewKind atIndexPath:(NSIndexPath *)indexPath;
+
+@end
+</code></pre></figure>
+<p>于是通过<code>-initWithCollectionViewLayout:</code>进行初始化后，这个UIDynamicAnimator实例便和我们的layout进行了绑定，之后这个layout对应的attributes都应该由绑定的UIDynamicAnimator的实例给出。就像下面这样：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//VVSpringCollectionViewFlowLayout.m
+@implementation VVSpringCollectionViewFlowLayout
+
+//...
+
+-(NSArray *)layoutAttributesForElementsInRect:(CGRect)rect {
+    return [_animator itemsInRect:rect];
+}
+
+-(UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath {
+    return [_animator layoutAttributesForCellAtIndexPath:indexPath];
+}
+@end
+</code></pre></figure>
+<p>让我们回到<code>-prepareLayout</code>方法中，在创建了UIDynamicAnimator实例后，我们对于这个layout中的每个attributes对应的点，都创建并添加一个添加一个<code>UIAttachmentBehavior</code>（在iOS7 SDK中，UICollectionViewLayoutAttributes已经实现了UIDynamicItem接口，可以直接参与UIKit Dynamic的计算中去）。创建时我们希望collectionView的每个cell就保持在原位，因此我们设定了锚点为当前attribute本身的center。</p>
+
+<p>接下来我们考虑滑动时的弹性效果的实现。在系统的信息app中，我们可以看到弹性效果有两个特点：</p>
+
+<ul>
+<li>随着滑动的速度增大，初始的拉伸和压缩的幅度将变大</li>
+<li>随着cell距离屏幕触摸位置越远，拉伸和压缩的幅度</li>
+</ul>
+
+<p>对于考虑到这两方面的特点，我们所期望的滑动时的各cell锚点的变化应该是类似这样的：</p>
+
+<p><img src="/assets/images/2013/spring-list-ios7.png" alt="向上拖动时的锚点变化示意"></p>
+
+<p>现在我们来实现这个锚点的变化。既然都是滑动，我们是不是可以考虑在UIScrollView的<code>–scrollViewDidScroll:</code>委托方法中来设定新的Behavior锚点值呢？理论上来说当然是可以的，但是如果这样的话我们大概就不得不面临着将刚才的layout实例设置为collectionView的delegate这样一个事实。但是我们都知道layout应该做的事情是给collectionView提供必要的布局信息，而不应该负责去处理它的委托事件。处理collectionView的回调更恰当地应该由处于collectionView的controller层级的类来完成，而不应该由一个给collectionView提供数据和信息的类来响应。在<code>UICollectionViewLayout</code>中，我们有一个叫做<code>-shouldInvalidateLayoutForBoundsChange:</code>的方法，每次layout的bounds发生变化的时候，collectionView都会询问这个方法是否需要为这个新的边界和更新layout。一般情况下只要layout没有根据边界不同而发生变化的话，这个方法直接不做处理地返回NO，表示保持现在的layout即可，而每次bounds改变时这个方法都会被调用的特点正好可以满足我们更新锚点的需求，因此我们可以在这里面完成锚点的更新。</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">//VVSpringCollectionViewFlowLayout.m
+@implementation VVSpringCollectionViewFlowLayout
+
+//...
+
+-(BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds {
+    UIScrollView *scrollView = self.collectionView;
+    CGFloat scrollDelta = newBounds.origin.y - scrollView.bounds.origin.y;
+
+    //Get the touch point
+    CGPoint touchLocation = [scrollView.panGestureRecognizer locationInView:scrollView];
+
+    for (UIAttachmentBehavior *spring in _animator.behaviors) {
+        CGPoint anchorPoint = spring.anchorPoint;
+
+        CGFloat distanceFromTouch = fabsf(touchLocation.y - anchorPoint.y);
+        CGFloat scrollResistance = distanceFromTouch / 500;
+
+        UICollectionViewLayoutAttributes *item = [spring.items firstObject];
+        CGPoint center = item.center;
+
+        //In case the added value bigger than the scrollDelta, which leads an unreasonable effect
+        center.y += (scrollDelta &gt; 0) ? MIN(scrollDelta, scrollDelta * scrollResistance)
+                                      : MAX(scrollDelta, scrollDelta * scrollResistance);
+        item.center = center;
+
+        [_animator updateItemUsingCurrentState:item];
+    }
+    return NO;
+}
+
+@end
+</code></pre></figure>
+<p>首先我们计算了这次scroll的距离<code>scrollDelta</code>，为了得到每个item与触摸点的之间的距离，我们当然还需要知道触摸点的坐标<code>touchLocation</code>。接下来，可以根据距离对每个锚点进行设置了：简单地计算了原来锚点与触摸点之间的距离<code>distanceFromTouch</code>，并由此计算一个系数。接下来，对于当前的item，我们获取其当前锚点位置，然后将其根据<code>scrollDelta</code>的数值和刚才计算的系数，重新设定锚点的位置。最后我们需要告诉UIDynamicAnimator我们已经完成了对冒点的更新，现在可以开始更新物理计算，并随时准备collectionView来取LayoutAttributes的数据了。</p>
+
+<p>也许你还没有缓过神来？但是我们确实已经做完了，让我们来看看实际的效果吧：</p>
+
+<p><img src="/assets/images/2013/spring-collection-view-over-ios7.gif" alt="带有弹性效果的collecitonView"></p>
+
+<p>当然，通过调节<code>damping</code>，<code>frequency</code>和<code>scrollResistance</code>的系数等参数，可以得到弹性不同的效果，比如更多的震荡或者更大的幅度等等。</p>
+
+<p>这个layout实现起来非常简单，我顺便封装了一下放到了Github上，大家有需要的话可以<a href="https://github.com/onevcat/VVSpringCollectionViewFlowLayout">点击这里下载</a>并直接使用。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/10/vc-transition-in-ios7/" title="link to WWDC 2013 Session笔记 - iOS7中的ViewController切换">WWDC 2013 Session笔记 - iOS7中的ViewController切换</a></h2>
+       <p class="excerpt">这是我的WWDC2013系列笔记中的一篇，完整的笔记列表请参看这篇总览。本文仅作为个人记录使用，也欢迎在许可协议范围内转载或使用，但是还烦请保留原文链接，谢谢您的理解合作。如果您觉得本站对您能有帮助，您可以使用RSS或邮件方式订阅本站，这样您将能在第一时间获取本站信息。本文涉及到的WWDC2013 Session有Session 201 Building User Interfaces for iOS 7Session 218 Custom Transitions Using View C...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-10-10 23:59:56 +0800" class="post-list__meta--date date">2013-10-10</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/10/vc-transition-in-ios7/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/08/shader-tutorial-2/" title="link to 猫都能学会的Unity3D Shader入门指南（二）">猫都能学会的Unity3D Shader入门指南（二）</a></h2>
+       <p class="excerpt">关于本系列这是Unity3D Shader入门指南系列的第二篇，本系列面向的对象是新接触Shader开发的Unity3D使用者，因为我本身自己也是Shader初学者，因此可能会存在错误或者疏漏，如果您在Shader开发上有所心得，很欢迎并恳请您指出文中纰漏，我会尽快改正。在之前的开篇中介绍了一些Shader的基本知识，包括ShaderLab的基本结构和语法，以及简单逐句地讲解了一个基本的shader。在具有这些基础知识后，阅读简单的shader应该不会有太大问题，在继续教程之前简单阅读一下...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-08-30 23:57:34 +0800" class="post-list__meta--date date">2013-08-30</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/08/shader-tutorial-2/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2013/08/spring-list-like-ios7-message/";
+        this.page.identifier = "/2013/08/spring-list-like-ios7-message/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

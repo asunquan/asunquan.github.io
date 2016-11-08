@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>iOS内购实现及测试Check List</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="iOS内购实现及测试Check List">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="iOS内购实现及测试Check List">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2013/11/ios-iap-checklist/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2013-11-18 00:01:16 +0800" itemprop="datePublished" class="post-meta__date date">2013-11-18</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">iOS内购实现及测试Check List</h1>
+  </header>
+
+  <section class="post">
+    <p><img src="/assets/images/2013/cannot-connect-its.png" alt="image"></p>
+
+<p>免费+应用内购买的模式已经被证明了是最有效的盈利模式，所以实现内购功能可能是很多开发者必做的工作和必备的技能了。但是鉴于内购这块坑不算少，另外因为sandbox测试所需要特定的配置也很多，所以对于经验不太多的开发者来说很容易就遇到各种问题，并且测试时出错Apple给出的也只有“Can not connect iTunes Store”或者&quot;Invalid Product IDs&quot;之类毫无价值的错误提示，并没有详细的错误说明，因此调试起来往往没有方向。有老前辈在<a href="http://troybrant.net/blog/2010/01/invalid-product-ids/">这里</a>整理过一个相对完整的check list了，但是因为年代已经稍微久远，所以内容上和现在的情况已经有一些出入。趁着在最近两个项目里做内购这块遇到的新问题，顺便在此基础上总结整理了一份比较新的中文Check list，希望能帮到后来人。</p>
+
+<p>如果您在实现和测试iOS应用内购的时候遇到问题，可以逐一对照下面所列出的条目，并逐一进行检查。相信可以排除大部分的错误。如果您遇到的问题不在这个列表范围内，欢迎在评论中指出，我会进行更新。</p>
+
+<ul>
+<li>您是否在iOS Dev Center中打开了对应应用AppID的<code>In-App Purchases</code>功能？登陆iOS Dev Center的Certificates, Identifiers &amp; Profiles下，在Identifiers中找到正在开发的App，In-App Purchase一项应当显示Enabled（如果使用Xcode5，可以直接在Xcode的Capabilities页面中打开In-App Purchases）。</li>
+<li>您是否在iTunes Connect中注册了您的IAP项目，并将其设为Cleared for Sale？</li>
+<li>您的plist中的<code>Bundle identifier</code>的内容是否和您的AppID一致？</li>
+<li>您是否正确填写了Version（CFBundleVersion）和Build（CFBuildNumber）两个数字？两者缺一不可。</li>
+<li>您用代码向Apple申请售卖物品列表时是否使用了完整的在iTC注册的Product ID？（使用在IAP管理中内购项目的Product ID一栏中的字符串）</li>
+<li>您是否在打开IAP以后重新生成过包含IAP许可的provisioning profile？</li>
+<li>你是否重新导入了新的包含IAP的provisioning profile？建议在Organizer中先删掉原来设备上的老的provisioning profile。</li>
+<li>您是否在用包含IAP的provisioning profile在部署测试程序？在Xcode5中，建议使用General中的Team选项来自动管理。</li>
+<li>您是否是在模拟器中测试IAP？虽然理论上说模拟器在某些情况下可以测试IAP，但是条件很多也不让人安心，因此您确实需要一台真机来做IAP测试。</li>
+<li>您是在企业版发布中测试IAP么？因为企业版没有iTC进行内购项目管理，也无法发布AppStore应用，所以您在企业版的build中不能使用IAP。</li>
+<li>您是否将设备上原来的app删除了，并重新进行了安装？记得在安装前做一下Clean和Clean Build Folder。</li>
+<li>您是否在运行应用前将设备上实际的Apple ID登出了？建议在设置-&gt;iTunes Store和App Stroe中将使用中的Apple ID登出，以未登录状态进入应用进行测试。</li>
+<li>你是否使用的是Test User？如果你还没有创建Test User，你需要到iTC中创建。</li>
+<li>您使用的测试账号是否是美国区账号？虽然不是一定需要，但是鉴于其他地区的测试账号经常抽风，加上美国区账号一直很稳定，因此强烈建议使用美国区账号。正常情况下IAP不需要进行信用卡绑定和其他信息填写，如果你遇到了这种情况，可以试试删除这个测试账号再新建一个其他地区的。</li>
+<li>您是否有新建账户进行测试？可能的话，可以使用新建测试账户试试看，因为某些特定情况下测试账户会被Apple锁定。</li>
+<li>您的应用是否是被拒状态（Rejected）或自己拒绝（Developer Rejected）了？被拒绝状态的应用的话对应还未通过的内购项目也会一起被拒，因此您需要重新将IAP项目设为Cleared for Sale。</li>
+<li>您的应用是否处于等待开发者发布（Pending Developer Release）状态？等待发布状态的IAP是无法测试的。</li>
+<li>您的内购项目是否是最近才新建的，或者进行了更改？内购项目需要一段时间才能反应到所有服务器上，这个过程一般是一两小时，也可能再长一些达到若干小时。</li>
+<li>您在iTC中Contracts, Tax, and Banking Information项目中是否有还没有设置或者过期了的项目？不完整的财务信息无法进行内购测试。</li>
+<li>您是在越狱设备上进行内购测试么？越狱设备不能用于正常内购，您需要重装或者寻找一台没有越狱的设备。</li>
+<li>您是否能正常连接到Apple的服务器，你可以访问<a href="https://devforums.apple.com/community/ios/connected/purchase">Apple开发者论坛关于IAP的板块</a>，如果苹果服务器正down掉，那里应该有热烈的讨论。</li>
+</ul>
+
+<hr>
+
+<p>如果您正在寻找一份手把手教你实现IAP的教程的话，这篇文章不是您的菜。关于IAP的实现和步骤，可以参考下面的教程：</p>
+
+<ul>
+<li>苹果的<a href="https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Introduction.html">官方IAP指南</a>和相应的<a href="https://developer.apple.com/library/mac/technotes/tn2259/_index.html">Technical Note</a></li>
+<li>Ray Wenderlich的<a href="http://www.raywenderlich.com/23266/in-app-purchases-in-ios-6-tutorial-consumables-and-receipt-validation">iOS6 IAP教程</a></li>
+<li>一篇图文并茂的<a href="http://blog.csdn.net/xiaominghimi/article/details/6937097">中文教程</a></li>
+<li>直接使用大神们封好的Store有关的库，比如<a href="https://github.com/mattt/CargoBay">mattt/CargoBay</a>，<a href="https://github.com/robotmedia/RMStore">robotmedia/RMStore</a>或者<a href="https://github.com/MugunthKumar/MKStoreKit">MugunthKumar/MKStoreKit</a>。推荐前两个，因为MKStoreKit有一些恼人的小bug。</li>
+</ul>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/12/code-vs-xib-vs-storyboard/" title="link to 代码手写UI，xib和StoryBoard间的博弈，以及Interface Builder的一些小技巧">代码手写UI，xib和StoryBoard间的博弈，以及Interface Builder的一些小技巧</a></h2>
+       <p class="excerpt">最近接触了几个刚入门的iOS学习者，他们之中存在一个普遍和困惑和疑问，就是应该如何制作UI界面。iOS应用是非常重视用户体验的，可以说绝大多数的应用成功与否与交互设计以及UI是否漂亮易用有着非常大的关系。而随着iOS开发发展至今，可以说在UI制作上大家逐渐分化为了三种主要流派：使用代码手写UI及布局；使用单个xib文件组织viewController或者view；使用StoryBoard来通过单个或很少的几个（关于这点稍后会进行展开）文件构建全部UI。应该使用哪种方式来制作UI已经是iOS...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-12-31 00:02:21 +0800" class="post-list__meta--date date">2013-12-31</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/12/code-vs-xib-vs-storyboard/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/10/vc-transition-in-ios7/" title="link to WWDC 2013 Session笔记 - iOS7中的ViewController切换">WWDC 2013 Session笔记 - iOS7中的ViewController切换</a></h2>
+       <p class="excerpt">这是我的WWDC2013系列笔记中的一篇，完整的笔记列表请参看这篇总览。本文仅作为个人记录使用，也欢迎在许可协议范围内转载或使用，但是还烦请保留原文链接，谢谢您的理解合作。如果您觉得本站对您能有帮助，您可以使用RSS或邮件方式订阅本站，这样您将能在第一时间获取本站信息。本文涉及到的WWDC2013 Session有Session 201 Building User Interfaces for iOS 7Session 218 Custom Transitions Using View C...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-10-10 23:59:56 +0800" class="post-list__meta--date date">2013-10-10</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/10/vc-transition-in-ios7/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2013/11/ios-iap-checklist/";
+        this.page.identifier = "/2013/11/ios-iap-checklist/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

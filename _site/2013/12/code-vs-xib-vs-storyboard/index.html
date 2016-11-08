@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>代码手写UI，xib和StoryBoard间的博弈，以及Interface Builder的一些小技巧</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="代码手写UI，xib和StoryBoard间的博弈，以及Interface Builder的一些小技巧">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="代码手写UI，xib和StoryBoard间的博弈，以及Interface Builder的一些小技巧">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2013/12/code-vs-xib-vs-storyboard/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2013-12-31 00:02:21 +0800" itemprop="datePublished" class="post-meta__date date">2013-12-31</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">代码手写UI，xib和StoryBoard间的博弈，以及Interface Builder的一些小技巧</h1>
+  </header>
+
+  <section class="post">
+    <p><img src="/assets/images/2013/code-xib-sb.png" alt="Code-vs-Xibs-vs-StroyBoard"></p>
+
+<p>最近接触了几个刚入门的iOS学习者，他们之中存在一个普遍和困惑和疑问，就是应该如何制作UI界面。iOS应用是非常重视用户体验的，可以说绝大多数的应用成功与否与交互设计以及UI是否漂亮易用有着非常大的关系。而随着iOS开发发展至今，可以说在UI制作上大家逐渐分化为了三种主要流派：使用代码手写UI及布局；使用单个xib文件组织viewController或者view；使用StoryBoard来通过单个或很少的几个（关于这点稍后会进行展开）文件构建全部UI。应该使用哪种方式来制作UI已经是iOS开发中亘古不变的争论话题了，或许永远不会有一个统一的结论。但是首先需要知道的是三种方式各有优劣，所以也各有自己最适用的场合，而不会有完全的孰优孰劣。对于初学iOS开发来说，一时间其实是很难判定最适合自己的UI架构方式的。在这篇文章里我希望能够通过自己的经验给出一些意见，以期能帮助入门者来挑选最适合自己应用场景的方案。对于老鸟的话，也不妨对照自己平日的使用习惯和运用场景，看看有没有可以改进或变化的地方。最后，因为我本人现在最习惯和喜欢的是用Interface Builder(之后简称IB)及xib来做UI，所以文末附上了一些IB使用时候的小技巧，算是做个总结。</p>
+
+<h3>代码手写UI</h3>
+
+<p>这种方法经常被学院派的极客或者依赖多人合作的大型项目大规模使用。Geek们喜欢用代码构建UI，是因为代码是键盘敲出来的，这样可以做到不开IB，手不离开键盘就完成工作，可以专注于编码环境，看起来很cool很高效，而且不到运行时大家都不知道会是什么样子，也显出了程序员这一职业的高大上及神秘气息（这个真的不是在黑..想想大家一起在设计师背后指点江山的场景吧）。大型多人合作项目使用代码构建UI，主要是看中纯代码在版本管理时的优势，检查追踪改动以及进行代码合并相对容易一些。</p>
+
+<p>另外，代码UI可以说具有最好的代码重用性。如果你的目的是写一些可以高度重用的控件提供给其他开发者使用，那毫无疑问最好的选择应该是使用代码来完成UIView的子类。这样进一步的修改和其他开发者在使用时，都会方便不少。使用代码也是最为强大的，会有xib或者StoryBoard做不了的事情，但是使用代码最终一定能够完成所要的需求。</p>
+
+<p>但是代码手写UI的劣势同时也是最明显的，主要就是一个字：慢。首先相比可视化的IB来说，完成一个并不太复杂的界面，你可能需要写上数百行的UI代码。不论是初始化一个Label，还是设定一个frame或者添加一个target-action，都需要写代码，这不仅在前期极为浪费时间，在之后维护时代码定位和寻找也会很痛苦。其次，因为你无法直观地看到你能得到的结果，所以你很可能需要不断地<code>Cmd+R</code>/<code>Cmd+.</code>来修改各个视图的位置大小。即使你用上了<a href="http://revealapp.com">Reveal</a>或者<a href="https://github.com/mikr/RestartLessOften">RestartLessOften</a>之类的工具，也还是无法特别方便地完成需要的布局。另外加上如果需要利用AutoLayout来进行尺寸适配的话，使用代码进行约束就更加头疼了。很多时候一个无法满足的约束的问题就够来回运行修改调试很长时间了。</p>
+
+<h3>Xibs</h3>
+
+<p>相对于代码，使用IB和xib文件来组织UI，可以省下大量代码和时间，从而得到更快的开发速度。如果你曾经受到过微软家Visual Basic或者其他Visual系的可视化界面的荼毒与残害，因此怀疑Interface Builder的纯正血统和工作能力，建议可以看看这些资料以纠正三观：<a href="http://www.programmer.com.cn/9234/">Jean-Marie Hullot的Interface Builder神话</a>以及<a href="http://www.youtube.com/watch?v=viLnOVBbcsE">西装革履的青涩乔帮主在NeXT时亲手用IB构建应用</a>（需要翻墙）。另外，不妨打开你的Mac上的Application文件夹中或者iPhone上Apple家的各种应用。你会惊奇地发现，IB远比你看到的要强大：小至计算器取色器这类小工具，大至iWork三件套，Aperture或Final Cut这样的专业级应用，无一不是使用IB来完成UI制作的。</p>
+
+<p>其实IB和xib是从iOS SDK初次面世开始就是捆绑在开发者工具套装内的内容了，而到了Xcode 4之后更被直接集成到了Xcode中成为了IDE的一部分。xib设计的一大目的其实是为了良好的MVC：一般来说，单个的xib文件对应一个ViewController，而对于一些自定义的view，往往也会使用单个xib并从main bundle进行加载的方式来载入。IB帮助完成view的创建，布局和与file owner的关系映射等一些列工作。对于初学者来说，牢记xib的文件都是view的内容，有助于建立起较好的MVC的概念，从而在开发中避免或少走弯路。</p>
+
+<p>xib文件之前一大被诟病的问题是文件内容过于复杂，可读性很差，即使只是简单打开没有编辑也有可能造成变化而导致合并和提交的苦难。在Xcode 5中Apple大幅简化了xib文件的格式，使其变得易读易维护。可以说现在对于xib文件在版本管理上其实和纯代码已经没有太大差异，只要仔细看过一遍xib的文件内容，自然能理解绝大部分，并很好地追踪并查找过往的修改记录了。</p>
+
+<p>当然xib也不是完美的。最大的问题在于xib中的设置往往并非最终设置，在代码中你将有机会覆盖你在xib文件中进行的UI设计。在不同的地方对同一个属性进行设置，这在之后的维护中将会是噩梦般的存在。因为其实IB还是有所局限的，它没有逻辑判断，也很难在运行时进行配置，而反之使用代码确是无所不能的。在使用xib时，辅以部分代码来补充和完成功能几乎是不可避免的。关于这点在开发时应该予以高度重视，如果选择xib，那么要尽量将xib的工作和代码的工作隔离开来：能够使用xib完成的内容就统一使用xib来做，而不要说三个Label其中两个在xib设置了字体而另一个却在代码中完成。尽量仅保持必要的、较少的IBOutlet和IBAction会是一个好方法。</p>
+
+<h3>StoryBoard</h3>
+
+<p>iOS5之后Apple提供了一种全新的方式来制作UI，那就是StoryBoard。简单理解来说，可以把StoryBoard看做是一组viewController对应的xib，以及它们之间的转换方式的集合。在StoryBoard中不仅可以看到每个ViewController的布局样式，也可以明确地知道各个ViewController之间的转换关系。相对于单个的xib，其代码需求更少，也由于集合了各个xib，使得对于界面的理解和修改的速度也得到了更大提升。减少代码量就是减少bug量，这也是程序开发中的真理之一。</p>
+
+<p>在Xcode5之后，StoryBoard已经成为新建项目的默认配置，这也代表了Apple对开发者的建议和未来的方向。WWDC2013的各个Sample Code中也基本都使用了StoryBoard来进行演示。可以预见到，之后Apple必定会在这方面进行继续强化，而反之纯代码或者单个xib的方式很可能不会再得到增强。</p>
+
+<p>如果不考虑iOS版本的支持（其实说实话现在已经很少还见到要从iOS4开始支持的app了吧），现在StoryBoard面临的最大问题就是多人协作。因为所有的UI都定义在一个文件中，因此很多开发者个人或企业的技术负责人认为StoryBoard是无法进行协作开发的，其实这更多的是一种对StoryBoard的陌生所造成的误解。虽然Apple并没有在WWDC明确提及，但是没有人规定整个项目只能有一个StoryBoard文件。一种可行的做法是将项目的不同部分分解成若干个StoryBoard，并安排开发人员对自己的部分进行负责。简单举例比如一个有4个tab功能相互独立的基于UITabBarViewController的应用，完全可以使用4个StoryBoard来分别代表4个tab，并在相互无干扰的情况下完成开发。这样一来就不会存在所谓的冲突问题了。StoryBoard的API是如此简单，现在的SDK中一共方法数量一只手就能数过来，所以具体方法在这里就不再罗嗦了。</p>
+
+<p>StoryBoard的另外的挑战来源于ViewController的重用和自定义的view的处理。对于前者，在正确封装接口以及良好设计的基础上，其实StoryBoard的VC重用与代码的VC重用是没有本质区别的，在StoryBoard中添加封装良好需要重用的Scene即可解决。而对于后者，因为StoryBoard中已经不允许有单个view的存在，因此很多时候我们还是需要借助于单个的xib来自定义UI。这一点可以说是由于StoryBoard的设计思路所造成的，StoryBoard更强调的是一种层次结构，是在全局的视角上来组织UI设计和迁移。而对于单个的view，更多的会注重于重用和定制，而与整个项目的流程没有太大关系。相信抓住这一要点，就能很好地了解什么时候使用xib，什么时候使用StoryBoard。</p>
+
+<p>关于StoryBoard最后要说的是，现在会有一些对于StoryBoard性能上的担忧。因为相对于单个xib来说，StoryBoard文件往往更大，加载速度也相应变慢。但是其实随着现在设备的更新换代，在iPhone4都难觅的今天，这点性能上的差距几乎可以忽略了。而再之后的设备，不论读取还是解析，只会越来越快。所以性能上的问题完全是没有担心的必要的。</p>
+
+<h3>我的观点和选择</h3>
+
+<p>我入门的时候是使用xib的，因为那时候还没有StoryBoard，而我也不是喜欢代码的学院派Geek。到现在，三种方式我都有尝试过，并分别得到了一些可能还并不是特别深刻体会。对于现在的我来说，xib是我的奶酪，也是我在自己的一些项目里一直使用的方式，我可以在极短短时间内用xib架起一套包括自定义要素和良好部件重用性复杂UI。但是在我尝试了几次使用StoryBoard制作demo之后，我已经决定在之后的项目转向使用StoryBoard。一方面因为确实是未来方向（每次新工程删StoryBoard很讨厌..），现在的StoryBoard专有的preview功能，以及之后AutoLayout的进一步改进等都很值得期待；另一方面也觉得奶酪放一个地方太久了会不好，趁着iOS7的大变革，也更新一下自己的观念和方式，把奶酪换个地方摆摆，也许会对以后大有裨益。</p>
+
+<p>对于初心者来说，我并不建议上手就直接使用代码来进行UI制作和布局，因为冗长的UI代码确实非常乏味无趣。尽快看到成品，至少尽快看到原型，是保持兴趣，继续深入和从事职业的有效动力。所以如果有可能有条件，在老鸟的指导下选择StoryBoard来进行快速构建（或者如果是单个人开发的话，可以不用考虑多个StoryBoard协作，就更容易），会是入门的好选择。而最新的教程和文档已经开始逐渐偏向StoryBoard，关于StoryBoard的问题在SO上关注度也会更高，这样在入门时会有更多的资料可以进行参考。</p>
+
+<p>这并不是说不需要关心代码UI或者xib，因为使用StoryBoard的时候在只能使用代码以及自定义单个view时，还是不可避免地需要接触它们的。这里想给的一点建议就是，虽然你不依赖代码来进行UI制作，但是了解并掌握如何使用纯代码来从头构建UI还是非常必要的：包括从新建Window开始，到初始化ViewController，添加必要的view，设定它们的property，以及添加和处理它们的各种响应及responser链等内容。现在iOS开发入门非常容易，Xcode和xib/StoryBoard帮助开发者隐藏了太多的细节，但是很多时候如果你不明白underhood到底是些什么，为什么这些xib/StoryBoard会这样运作的话，经常会出现卡在一些很可笑的和初级的bug上找不着北，这其实会是对时间的巨大浪费，很不值得。</p>
+
+<h3>一些IB小技巧</h3>
+
+<p>最后分享一些IB使用上的小技巧作为结束吧。其中很多方法也可以用在StoryBoard上，所以在向我自己之前xib使用者生涯致敬的同时，也算是一点小的备忘总结吧。</p>
+
+<h4>同时添加多个outlet</h4>
+
+<p>在IB中，选中一个view并右键点击，将会出现灰色的HUD，可以在其上方便地拖拉或设定事件和outlet。你可以同时打开多个这样的面板来一次性添加所有outlet。右键点击面板，随便拖动一下面板，然后再打开另一个。你会发现前一个面板也留下来了，这样你就可以方便地进行拖拽设定了。</p>
+
+<p><img src="/assets/images/2013/IB-tip1.png" alt="多个Outlet HUD"></p>
+
+<p>当然，对于成组和行为类似的IBOutlet，应该直接使用IBOutletCollection来进行处理会更方便。</p>
+
+<h4>可视化坐标距离</h4>
+
+<p>IB最烦人的问题就是对其。用代码的时候我们可以明确地指定x,y坐标，但是换到IB的时候我们更多的时候是靠拖拽UIView来布局。比如需要三个间隔相同的label，除了用强大的肉眼来估测距离是否相等以外，难道只能乖乖分别选中三个label，记下它们的坐标然后打开计算器来做加减法么？</p>
+
+<p>显然不要那么笨，试试看选中一个label，然后按住option键并将鼠标移动到其他label上试试？你可以发现view之间的距离都以很容易理解的方式显示出来了。不仅是同层次的view，被选中view与其他层次的view之间的距离关系也可以同样显示。</p>
+
+<p><img src="/assets/images/2013/IB-tip2.png" alt="显示View之间的距离"></p>
+
+<h4>在一组view层次中进行选择</h4>
+
+<p>对于一些复杂的view层级关系，我们往往直接在IB中选择会比较困难。比如view相互覆盖时，我们很难甚至不能在编辑视图中选中底层的view。这时候一般的做法是打开左侧的view层级面板，一层层展开然后选择自己需要的view。其实我们也有更简单的方法：按住<code>Cmd</code>和<code>Shift</code>，然后在需要选择的view上方按右键，就可以列出在点击位置上所有的view的列表。藉此就可以方便快速地选中想要的view了。</p>
+
+<p><img src="/assets/images/2013/IB-tip3.png" alt="在编辑视图中选则底层view"></p>
+
+<h4>添加辅助线</h4>
+
+<p>这么高大上的技巧必须放在最后啊...在左边的层级列表中双击某个view，然后<code>Cmd+_</code>或者<code>Cmd+|</code>即可在选中的view上添加一条水平或者垂直中心的辅助线。当然这个辅助线是可以随意移动的。如果干过设计的同学肯定明白这个的意义了，在之后的对齐和设计变更的时候都有重要的参考价值。</p>
+
+<p><img src="/assets/images/2013/IB-tip4.png" alt="为IB添加辅助线"></p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2014/01/black-magic-in-macro/" title="link to 宏定义的黑魔法 - 宏菜鸟起飞手册">宏定义的黑魔法 - 宏菜鸟起飞手册</a></h2>
+       <p class="excerpt">宏定义在C系开发中可以说占有举足轻重的作用。底层框架自不必说，为了编译优化和方便，以及跨平台能力，宏被大量使用，可以说底层开发离开define将寸步难行。而在更高层级进行开发时，我们会将更多的重心放在业务逻辑上，似乎对宏的使用和依赖并不多。但是使用宏定义的好处是不言自明的，在节省工作量的同时，代码可读性大大增加。如果想成为一个能写出漂亮优雅代码的开发者，宏定义绝对是必不可少的技能（虽然宏本身可能并不漂亮优雅XD）。但是因为宏定义对于很多人来说，并不像业务逻辑那样是每天会接触的东西。即使是能...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2014-01-17 00:03:36 +0800" class="post-list__meta--date date">2014-01-17</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2014/01/black-magic-in-macro/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/11/ios-iap-checklist/" title="link to iOS内购实现及测试Check List">iOS内购实现及测试Check List</a></h2>
+       <p class="excerpt">免费+应用内购买的模式已经被证明了是最有效的盈利模式，所以实现内购功能可能是很多开发者必做的工作和必备的技能了。但是鉴于内购这块坑不算少，另外因为sandbox测试所需要特定的配置也很多，所以对于经验不太多的开发者来说很容易就遇到各种问题，并且测试时出错Apple给出的也只有“Can not connect iTunes Store”或者&quot;Invalid Product IDs&quot;之类毫无价值的错误提示，并没有详细的错误说明，因此调试起来往往没有方向。有老前辈在这里整理过...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-11-18 00:01:16 +0800" class="post-list__meta--date date">2013-11-18</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/11/ios-iap-checklist/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2013/12/code-vs-xib-vs-storyboard/";
+        this.page.identifier = "/2013/12/code-vs-xib-vs-storyboard/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

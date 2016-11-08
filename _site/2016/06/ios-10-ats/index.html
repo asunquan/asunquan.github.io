@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>关于 iOS 10 中 ATS 的问题</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="关于 iOS 10 中 ATS 的问题">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="关于 iOS 10 中 ATS 的问题">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2016/06/ios-10-ats/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2016-06-17 12:34:11 +0800" itemprop="datePublished" class="post-meta__date date">2016-06-17</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">关于 iOS 10 中 ATS 的问题</h1>
+  </header>
+
+  <section class="post">
+    <p><img src="/assets/images/2016/https-lock.png" alt=""></p>
+
+<p>WWDC 15 提出的 ATS (App Transport Security) 是 Apple 在推进网络通讯安全的一个重要方式。在 iOS 9 和 OS X 10.11 中，默认情况下非 HTTPS 的网络访问是被禁止的。当然，因为这样的推进影响面非常广，作为缓冲，我们可以在 Info.plist 中添加 <code>NSAppTransportSecurity</code> 字典并且将 <code>NSAllowsArbitraryLoads</code> 设置为 <code>YES</code> 来禁用 ATS。相信大家都已经对这个非常熟悉了，因为我自己也维护了一些网络相关的框架，所以我还自己准备了一个<a href="https://gist.github.com/onevcat/b4604aecb4ce55651a4a">小脚本</a>来快速关闭 ATS。</p>
+
+<p>不过，WWDC 16 中，Apple 表示将继续在 iOS 10 和 macOS 10.12 里收紧对普通 HTTP 的访问限制。从 2017 年 1 月 1 日起，所有的新提交 app 默认是不允许使用 <code>NSAllowsArbitraryLoads</code> 来绕过 ATS 限制的，也就是说，我们最好保证 app 的所有网络请求都是 HTTPS 加密的，否则可能会在应用审核时遇到麻烦。</p>
+
+<p>本文写作的时间点 (2016 年 6 月 17 日)，这方面的相关规定和几个事实如下。但是似乎 Apple 安全部门对现在的情况也有些内部冲突，所以不排除在正式版中发生改变的可能性。我也会对此继续关注，并在需要的时候对本文进行更新。如果您发现了下面所述和事实不符的话，也欢迎留言提出，我会进行修正。</p>
+
+<ol>
+<li>默认情况下你的 app 可以访问加密足够强 (<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security">TLS</a> v1.2 以上，AES-128 和 SHA-2 以及 ECDHC 等) 的 HTTPS 内容。这对所有的网络请求都有效，包括 <code>NSURLSession</code>，<code>UIWebView</code> 以及 <code>WKWebView</code> 等。</li>
+<li>你依然可以添加 <code>NSAllowsArbitraryLoads</code> 为 <code>YES</code> 来禁用 ATS，不过如果你这么做的话，需要在提交 app 时进行说明，为什么需要访问非 HTTPS 内容。一般来说，可能类似浏览器类的 app 比较容易能通过。</li>
+<li>相比于使用 <code>NSAllowsArbitraryLoads</code> 将全部 HTTP 内容开放，选择使用 <code>NSExceptionDomains</code> 来针对特定的域名开放 HTTP 应该要相对容易过审核。“需要访问的域名是第三方服务器，他们没有进行 HTTPS 对应”会是审核时的一个可选理由，但是这应该只需要针对特定域名，而非全面开放。如果访问的是自己的服务器的话，可能这个理由会无法通过。</li>
+<li>对于网页浏览和视频播放的行为，iOS 10 中新加入了 <code>NSAllowsArbitraryLoadsInWebContent</code> 键。通过将它设置为 <code>YES</code>，可以让你的 app 中的 <code>WKWebView</code> 和使用 <code>AVFoundation</code> 播放的在线视频不受 ATS 的限制。这也应该是绝大多数使用了相关特性的 app 的选择。但是坏消息是这个键在 iOS 9 中并不会起作用。</li>
+</ol>
+
+<p>总结一下就是，对于 API 请求，基本上是必须使用 HTTPS 的，特别是如果你们自己可以管理服务器的话。可能需要后端的同学尽快升级到 HTTPS (不过话说虽然是用 Let&#39;s Encrypt 的，我一个个人博客都启用 HTTPS 了，作为 API 的用户服务器，还不开 HTTPS 真有点说不过去)。如果你的 app 只支持 iOS 10，并且有用户可以自由输入网址进行浏览的功能，或者是在线视频音频播放功能的话，简单地加入 <code>NSAllowsArbitraryLoadsInWebContent</code>，并且将组件换成 <code>WKWebKit</code> 或者 <code>AVFoundation</code> 就可以了。如果你还需要支持 iOS 9，并且需要访问网页和视频的话，可能只能去开启 <code>NSAllowsArbitraryLoads</code> 然后提交时进行说明，并且看 Apple 审核员的脸色决定让不让通过了。除了 <code>WKWebKit</code> 以外，另外一个访问网页的选择是使用 <code>SFSafariViewController</code>。因为其实 <code>SFSafariViewController</code> 就是一个独立于 app 的 Safari 进程，所以它完全不受 ATS 的限制。</p>
+
+<p>另外，当 <code>NSAllowsArbitraryLoads</code> 和 <code>NSAllowsArbitraryLoadsInWebContent</code> 同时存在时，根据系统不同，表现的行为也会不一样。简单说，iOS 9 只看 <code>NSAllowsArbitraryLoads</code>，而 iOS 10 会先看 <code>NSAllowsArbitraryLoadsInWebContent</code>。在 iOS 10 中，要是 <code>NSAllowsArbitraryLoadsInWebContent</code> 存在的话，就忽略掉 <code>NSAllowsArbitraryLoads</code>，如果它不存在，则遵循 <code>NSAllowsArbitraryLoads</code> 的设定。说起来可能有点复杂，我在这里总结了一下根据 <code>NSAppTransportSecurity</code> 中设定条件不同，所对应的系统版本和请求组件的行为的不同，可以作为你设置这个字典时的参考。</p>
+
+<table><thead>
+<tr>
+<th>ATS 设定</th>
+<th>使用的组件</th>
+<th style="text-align: center">iOS 9 HTTP</th>
+<th style="text-align: center">iOS 10 HTTP</th>
+<th>备注</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>NSAllowsArbitraryLoads: NO</td>
+<td>UIWebView</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>WKWebView</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td>默认行为</td>
+</tr>
+<tr>
+<td></td>
+<td>URLSession</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td></td>
+</tr>
+<tr>
+<td>NSAllowsArbitraryLoads: YES</td>
+<td>UIWebView</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">✅</td>
+<td>禁用 ATS</td>
+</tr>
+<tr>
+<td></td>
+<td>WKWebView</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">✅</td>
+<td>审核时需要说明理由</td>
+</tr>
+<tr>
+<td></td>
+<td>URLSession</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">✅</td>
+<td></td>
+</tr>
+<tr>
+<td>NSAllowsArbitraryLoads: NO &amp; NSAllowsArbitraryLoadsInWebContent: YES</td>
+<td>UIWebView</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td>只对网页内容禁用 ATS</td>
+</tr>
+<tr>
+<td></td>
+<td>WKWebView</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">✅</td>
+<td>对于大多数 app 的推荐做法，</td>
+</tr>
+<tr>
+<td></td>
+<td>URLSession</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td>保证安全性</td>
+</tr>
+<tr>
+<td>NSAllowsArbitraryLoads: NO &amp; NSAllowsArbitraryLoadsInWebContent: NO</td>
+<td>UIWebView</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>WKWebView</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>URLSession</td>
+<td style="text-align: center">❌</td>
+<td style="text-align: center">❌</td>
+<td></td>
+</tr>
+<tr>
+<td>NSAllowsArbitraryLoads: YES &amp; NSAllowsArbitraryLoadsInWebContent: NO</td>
+<td>UIWebView</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">❌</td>
+<td>对于 iOS 10，</td>
+</tr>
+<tr>
+<td></td>
+<td>WKWebView</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">❌</td>
+<td>NSAllowsArbitraryLoadsInWebContent 存在时忽略 NSAllowsArbitraryLoads 的设置</td>
+</tr>
+<tr>
+<td></td>
+<td>URLSession</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">❌</td>
+<td>iOS 9 将继续使用 NSAllowsArbitraryLoads</td>
+</tr>
+<tr>
+<td>NSAllowsArbitraryLoads: YES &amp; NSAllowsArbitraryLoadsInWebContent: YES</td>
+<td>UIWebView</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">❌</td>
+<td>对于 iOS 10，</td>
+</tr>
+<tr>
+<td></td>
+<td>WKWebView</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">✅</td>
+<td>NSAllowsArbitraryLoadsInWebContent 存在时忽略 NSAllowsArbitraryLoads 的设置</td>
+</tr>
+<tr>
+<td></td>
+<td>URLSession</td>
+<td style="text-align: center">✅</td>
+<td style="text-align: center">❌</td>
+<td>iOS 9 将继续使用 NSAllowsArbitraryLoads</td>
+</tr>
+</tbody></table>
+
+<blockquote>
+<p>该列表是根据 Apple prerelease 的<a href="https://developer.apple.com/library/prerelease/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html">文档</a>中关于 <code>NSAppTransportSecurity</code> 和 <code>NSAllowsArbitraryLoadsInWebContent</code> 部分的描述作出的。如果您发现这个行为发生了变化，或者上面的列表存在问题，欢迎留言，我会进行更正。</p>
+</blockquote>
+
+<p>关于 <code>UIWebView</code> 是否也可以在 <code>NSAllowsArbitraryLoadsInWebContent</code> 为 <code>YES</code> 时访问 HTTP，Apple 内部似乎也在争论，但是个人认为是时候淘汰 <code>UIWebView</code> 了。如果没有特殊的什么需求的话，尽早将 <code>UIWebView</code> 全部换为 <code>WkWebView</code> 会是明智的选择。</p>
+
+<p>不得不说，Apple 使用自己现在的强势地位，在推动技术进步上的做的努力是有目共睹的。不论是前几天强制支持 IPv6，还是现在的 HTTPS，其实都不是很容易就能作出的决定。而为用户构建一个更安全的使用环境，可能不仅是 Apple 单方面可以做的，也是需要开发者来配合的一件事情。尽快适配更进步和安全的使用方式，会是一件双赢的事情。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2016/08/notification/" title="link to 活久见的重构 - iOS 10 UserNotifications 框架解析">活久见的重构 - iOS 10 UserNotifications 框架解析</a></h2>
+       <p class="excerpt">TL;DRiOS 10 中以前杂乱的和通知相关的 API 都被统一了，现在开发者可以使用独立的 UserNotifications.framework 来集中管理和使用 iOS 系统中通知的功能。在此基础上，Apple 还增加了撤回单条通知，更新已展示通知，中途修改通知内容，在通知中展示图片视频，自定义通知 UI 等一系列新功能，非常强大。对于开发者来说，相较于之前版本，iOS 10 提供了一套非常易用的通知处理接口，是 SDK 的一次重大重构。而之前的绝大部分通知相关 API 都已经被标...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2016-08-08 09:22:11 +0800" class="post-list__meta--date date">2016-08-08</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2016/08/notification/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2016/06/ios-10-sdk/" title="link to 开发者所需要知道的 iOS 10 SDK 新特性">开发者所需要知道的 iOS 10 SDK 新特性</a></h2>
+       <p class="excerpt">总览距离 iPhone 横空出世已经过去了 9 个年头，iOS 的版本号也跨入了两位数。在我们回顾过去四五年 iOS 系统的发展的时候，不免感叹变化速度之快，迭代周期之短。iOS 7 翻天覆地的全新设计，iOS 8 中 Size Classes 的出现，应用扩展，以及 Cloud Kit 的加入，iOS 9 里的分屏多任务特性等等。Apple 近年都是在 WWDC 发布新的系统和软件，然后在秋季和冬季 (或者来年春季) 召开硬件产品的发布会。WWDC 上每一项软件的更新其实都预示了相应的硬...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2016-06-15 14:10:11 +0800" class="post-list__meta--date date">2016-06-15</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2016/06/ios-10-sdk/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2016/06/ios-10-ats/";
+        this.page.identifier = "/2016/06/ios-10-ats/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

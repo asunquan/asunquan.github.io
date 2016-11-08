@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>带边框的UIImage缩放</title>
+  <meta name="description" content="一个带边框的UIImage如果使用常规的缩放，边框部分将被按照缩放比例拉伸或压缩，有些时候这并不是我们所期望的..比如这个边框是根据图片大小变化的外框。比如下面的类似按钮的不明物体图片：主体为渐变蓝色，边框为外圈白色，灰色底板为背景。">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="带边框的UIImage缩放">
+  <meta name="twitter:description" content="一个带边框的UIImage如果使用常规的缩放，边框部分将被按照缩放比例拉伸或压缩，有些时候这并不是我们所期望的..比如这个边框是根据图片大小变化的外框。比如下面的类似按钮的不明物体图片：主体为渐变蓝色，边框为外圈白色，灰色底板为背景。">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="带边框的UIImage缩放">
+  <meta property="og:description" content="一个带边框的UIImage如果使用常规的缩放，边框部分将被按照缩放比例拉伸或压缩，有些时候这并不是我们所期望的..比如这个边框是根据图片大小变化的外框。比如下面的类似按钮的不明物体图片：主体为渐变蓝色，边框为外圈白色，灰色底板为背景。">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2011/12/uiimage/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2011-12-20 23:46:41 +0800" itemprop="datePublished" class="post-meta__date date">2011-12-20</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">带边框的UIImage缩放</h1>
+  </header>
+
+  <section class="post">
+    <p>一个带边框的UIImage如果使用常规的缩放，边框部分将被按照缩放比例拉伸或压缩，有些时候这并不是我们所期望的..比如这个边框是根据图片大小变化的外框。比如下面的类似按钮的不明物体图片：主体为渐变蓝色，边框为外圈白色，灰色底板为背景。</p>
+
+<p><img src="http://iphonedevelopertips.com/wp-content/uploads/2011/12/blueButton.gif" alt=""></p>
+
+<p>常见的按钮添加和背景设置如下：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(80, 130, 160, 44)];
+[button setTitle:@”Test Button” forState:UIControlStateNormal];
+// Image with without cap insets
+UIImage *buttonImage = [UIImage imageNamed:@”blueButton”];
+[button addTarget:self action:@selector(buttonPressed:) forControlEvents: UIControlEventTouchUpInside];
+[button setBackgroundImage:buttonImage forState:UIControlStateNormal];
+[[self view] addSubview:button];
+</code></pre></figure>
+<p>所得到的按钮会相当悲剧…</p>
+
+<p><img src="http://iphonedevelopertips.com/wp-content/uploads/2011/12/button0.gif" alt=""></p>
+
+<p>边框，特别是左右边框由于按钮frame过大被惨烈拉伸…
+iOS5中提供了一个新的UIImage方法，<a href="http://developer.apple.com/library/IOs/#documentation/UIKit/Reference/UIImage_Class/Reference/Reference.html">resizableImageWithCapInsets:</a>，可以将图片转换为以某一偏移值为偏移的可伸缩图像（偏移值内的图像将不被拉伸或压缩）。</p>
+
+<p>用法引述如下：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">resizableImageWithCapInsets:
+  Creates and returns a new image object with the specified cap insets.
+  - (UIImage *)resizableImageWithCapInsets:(UIEdgeInsets)capInsets
+    Parameters
+      capInsets
+      The values to use for the cap insets.
+    Return Value
+      A new image object with the specified cap insets.
+    Discussion
+      You use this method to add cap insets to an image or to change the existing cap insets of an image. In both cases, you get back a new image and the original image remains untouched.
+
+      During scaling or resizing of the image, areas covered by a cap are not scaled or resized. Instead, the pixel area not covered by the cap in each direction is tiled, left-to-right and top-to-bottom, to resize the image. This technique is often used to create variable-width buttons, which retain the same rounded corners but whose center region grows or shrinks as needed. For best performance, use a tiled area that is a 1x1 pixel area in size.
+</code></pre></figure>
+<p>输入参数为一个capInsets结构体：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">//Defines inset distances for views.
+typedef struct {
+CGFloat top, left, bottom, right;
+} UIEdgeInsets; 
+</code></pre></figure>
+<p>分别表示上左下右四个方向的偏移量。于是把上面按钮的UIImage改为如下形式：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">// Image with cap insets
+UIImage *buttonImage = [[UIImage imageNamed:@”blueButton”]
+resizableImageWithCapInsets:UIEdgeInsetsMake(0, 16, 0, 16)];
+</code></pre></figure>
+<p>可以得到如下按钮：</p>
+
+<p><img src="http://iphonedevelopertips.com/wp-content/uploads/2011/12/button1.gif" alt=""></p>
+
+<p>问题得到解决。</p>
+
+<p>但是值得注意的是该方法需要至少iOS5的运行环境，因此对于需要开发支持iOS5之前的App来说是不可行的。替代方案是<a href="http://developer.apple.com/library/IOs/#documentation/UIKit/Reference/UIImage_Class/DeprecationAppendix/AppendixADeprecatedAPI.html#//apple_ref/occ/instm/UIImage/stretchableImageWithLeftCapWidth:topCapHeight:">stretchableImageWithLeftCapWidth:topCapHeight:</a>，但是在iOS5中，这已经是被Deprecated的方法了，而且该方法只能以1px作为重复铺满拉伸区域，无法做到类似渐变等图片效果，是存在一定局限的。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/12/password/" title="link to 凑热闹，谈密码，Challenge-Response密码验证">凑热闹，谈密码，Challenge-Response密码验证</a></h2>
+       <p class="excerpt">CSDN的密码事件闹得沸沸扬扬，600万用户数据的泄露应该是中国互联网历史上最严重的帐号信息泄露事件。让人不可思议的是，2009年4月之前的用户密码居然是以明文存储。使用明文存储密码本身就是一件相当扯淡的事情，而当这种事情发生在以程序员为主要客户的大型网站上，真是让人哭笑不得。之后又陆续爆出人人、多玩以及各种知名网站的账户信息泄露的消息，虽然还未确知真伪，但也很是让人揪心。而“不能明文保存密码”这一个初级中的初级的错误之所以会在中国这篇神奇的土地上一次又一次的出现，我认为是与中国的网络审查...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-12-21 23:49:48 +0800" class="post-list__meta--date date">2011-12-21</time> &#8226; <span class="post-list__meta--tags tags">南箕北斗集</span><a class="btn-border-small" href=/2011/12/password/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/12/skyrim/" title="link to 直到我膝盖中了一箭...">直到我膝盖中了一箭...</a></h2>
+       <p class="excerpt">这句话就这么火了。其实通宵等了一夜天际，但是之后却一直没有大块时间，所以至今主线还没有玩完，今年之内估计也是没有机会完结了。在2011年各种组织评选年度游戏之前，我想我得为老滚5写点什么。今年是大作频出的年份，传送门2，巫师2，刺客信条：启示录，英雄无敌6，新的COD...当然，还有让人等了五年的上古卷轴5。一个人的一生并没有多少个五年可以等，而这个世界上也没有多少游戏值得人们等待五年。&lt;!--:--&gt;&lt;!--more--&gt;&lt;!--:zh--&gt;恰恰上古卷...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-12-10 23:36:43 +0800" class="post-list__meta--date date">2011-12-10</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2011/12/skyrim/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2011/12/uiimage/";
+        this.page.identifier = "/2011/12/uiimage/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

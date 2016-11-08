@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>Log的艺术，顺带赞NSLogger</title>
+  <meta name="description" content="写代码易，调程序难。不论是多么资深的程序员，都不可能在毛线球一般的代码中弄清到底发生了什么，特别是当在程序在N多个线程中来回跳转和涉及到难以理解的内存操作的时候，我们不可避免地需要log的帮助来整理思路，确认到底发生了什么。而这时候，输出log的好坏和时机，往往决定了花在调试上的时间。">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Log的艺术，顺带赞NSLogger">
+  <meta name="twitter:description" content="写代码易，调程序难。不论是多么资深的程序员，都不可能在毛线球一般的代码中弄清到底发生了什么，特别是当在程序在N多个线程中来回跳转和涉及到难以理解的内存操作的时候，我们不可避免地需要log的帮助来整理思路，确认到底发生了什么。而这时候，输出log的好坏和时机，往往决定了花在调试上的时间。">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Log的艺术，顺带赞NSLogger">
+  <meta property="og:description" content="写代码易，调程序难。不论是多么资深的程序员，都不可能在毛线球一般的代码中弄清到底发生了什么，特别是当在程序在N多个线程中来回跳转和涉及到难以理解的内存操作的时候，我们不可避免地需要log的帮助来整理思路，确认到底发生了什么。而这时候，输出log的好坏和时机，往往决定了花在调试上的时间。">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2011/12/nslogger/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2011-12-07 23:35:22 +0800" itemprop="datePublished" class="post-meta__date date">2011-12-07</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">Log的艺术，顺带赞NSLogger</h1>
+  </header>
+
+  <section class="post">
+    <p>写代码易，调程序难。不论是多么资深的程序员，都不可能在毛线球一般的代码中弄清到底发生了什么，特别是当在程序在N多个线程中来回跳转和涉及到难以理解的内存操作的时候，我们不可避免地需要log的帮助来整理思路，确认到底发生了什么。而这时候，输出log的好坏和时机，往往决定了花在调试上的时间。</p>
+
+<p>其实某种程度上来说，log是一门艺术，而从输出log上往往也能判断程序员的水平。新手往往都很可爱，NSLog(@&quot;Hello World&quot;)会是不变的模式。不得不承认这样的输出如果在恰当的时候也能一击致命，但是它所能带给我们的信息量实在太少了。水平再高一点的程序员大概会在关键事件的时候在保证代码通用性的前提下使用诸如<a title="Objective-C中的Debug表达式" href="http://www.onevcat.com/2011/12/debug-2/"><code>__func__</code></a>之类的东西监测程序流程。高级程序员在log方面就会显得大巧若拙，也许会把整个代码流的行为都进行log，而不漏掉任何一个细节，包括所有的内部状态、各种事件、异常等，完全受掌控的代码和预期中的程序行为是他们成功的关键。而传说中的大牛级人物可能把更多的注意力放在线程，网络等时序上可能出错的地方，无谓的内存释放或是某个超时的网络请求都不会遗漏。</p>
+
+<p>其实在面对纷繁芜杂的输出需求的时候，Cocoa环境默认的NSLog基本就是个废品：它不能给输出分门别类，不能按照需求输出除了字符的格式，也不能兼顾线程区别对待。而在高水平log的要求中，这些都应当是提供给开发者最基本、最便利的输出方式。</p>
+
+<p>于是<a href="https://github.com/onevcat/NSLogger">NSLogger</a>出现了，在<a href="https://github.com/fpillet">Florent Pillet</a>的打造下，一个开源强力的输出工具给了log这一古老的工作崭新的生命。标签输出，优先级查找，直接输出图像，多线程标记，时序控制，甚至是通过网络log到别人的终端或者是从别人的终端程序中记录log。在这里，只有想不到没有做不到，堪称是史上最为强大的logger，而且最重要的是他是BSD License的。在我看来，任何apple开发者都不应该错过他。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/12/skyrim/" title="link to 直到我膝盖中了一箭...">直到我膝盖中了一箭...</a></h2>
+       <p class="excerpt">这句话就这么火了。其实通宵等了一夜天际，但是之后却一直没有大块时间，所以至今主线还没有玩完，今年之内估计也是没有机会完结了。在2011年各种组织评选年度游戏之前，我想我得为老滚5写点什么。今年是大作频出的年份，传送门2，巫师2，刺客信条：启示录，英雄无敌6，新的COD...当然，还有让人等了五年的上古卷轴5。一个人的一生并没有多少个五年可以等，而这个世界上也没有多少游戏值得人们等待五年。&lt;!--:--&gt;&lt;!--more--&gt;&lt;!--:zh--&gt;恰恰上古卷...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-12-10 23:36:43 +0800" class="post-list__meta--date date">2011-12-10</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2011/12/skyrim/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/12/neltharion/" title="link to 别了，耐萨里奥">别了，耐萨里奥</a></h2>
+       <p class="excerpt">耐萨里奥，艾泽拉斯最强大的生物之一，受到泰坦祝福的大地守护者，黑龙领袖。他一直是睿智、高贵、沉着和强大力量的象征。在燃烧军团第一次入侵时，他率领了五色巨龙军团协助暗夜精灵抗击恶魔。也正是那时，他提议五大龙族领袖将力量注入巨龙之魂中，以抵抗军团。&lt;!--more--&gt;而不幸的是，在无数恶魔的萦绕下，在无尽的战斗中，在古老邪神的诱惑下，他癫狂了——他的身体一块块裂开，赤红的火焰从身体的裂缝中喷涌出来，他调转龙头，赶走了其他四色巨龙领袖。正是从此刻开始，他有了一个新的名字，死亡之翼。...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-12-05 23:33:41 +0800" class="post-list__meta--date date">2011-12-05</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2011/12/neltharion/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2011/12/nslogger/";
+        this.page.identifier = "/2011/12/nslogger/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

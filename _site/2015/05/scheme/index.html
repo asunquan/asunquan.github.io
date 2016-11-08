@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>Scheme 初步</title>
+  <meta name="description" content="之前定了每年学习一门语言的目标，自然不能轻言放弃。今年目标：简单掌握 Scheme。">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Scheme 初步">
+  <meta name="twitter:description" content="之前定了每年学习一门语言的目标，自然不能轻言放弃。今年目标：简单掌握 Scheme。">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Scheme 初步">
+  <meta property="og:description" content="之前定了每年学习一门语言的目标，自然不能轻言放弃。今年目标：简单掌握 Scheme。">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2015/05/scheme/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2015-05-08 11:59:45 +0800" itemprop="datePublished" class="post-meta__date date">2015-05-08</time> &#8226; <span class="post-meta__tags tags">南箕北斗集</span>
+    </div>
+    <h1 class="post-title">Scheme 初步</h1>
+  </header>
+
+  <section class="post">
+    <p>之前定了<a href="http://onevcat.com/2014/09/bye-kayac/">每年学习一门语言</a>的目标，自然不能轻言放弃。今年目标：简单掌握 Scheme。</p>
+
+<p>因为自己接触这门语言也不过寥寥数天，所以更多的会以引导的方式简单介绍语法，而不会 (也没有能力) 去探讨什么深入的东西。本文很多例程和图示参考了紫藤貴文的<a href="http://www.shido.info/lisp/idx_scm.html">《もうひとつの Scheme 入門》</a>这篇深入浅出的教程，这篇教程现在也有<a href="http://www.shido.info/lisp/idx_scm_e.html">英译版</a>和<a href="http://deathking.github.io/yast-cn/index.html">中译版</a>。我自己是参照这篇教程入门的，一方面这篇教程可以说是能找到合适初学者学习的很好的材料，另一方面也希望能挑战一下自己的日文阅读能力 (结果对比日文和英文看下来发现果然还是日文版写的比较有趣，英文翻译版本就太严肃了，而中文版感觉是照着英文译版二次翻译的，有不少内容上的缺失和翻译生硬的问题，蛮可惜的)。因为中文的 Scheme 的资料其实很少，所以顺便把自己学习的过程和一些体会整理记录下来，算是作为备忘。本文只涉及 Scheme 里最基础的一些语法部分，要是恰好能够帮助到后来的学习者入门 Scheme，那更是再好不过。</p>
+
+<h2>为什么选择学 Scheme</h2>
+
+<p>三方面的原因。</p>
+
+<p>首先是自己基本上对函数式语言的接触为零。平时工作和自己的开发中基本不使用函数式编程，大脑已经被指令式程序占满，有时候总显得不很灵光。而像 Swift 这样的语言其实引入了一些函数式编程的可能性。多接触一些函数式的语言，可能会对实际工作中解决某些问题有所帮助。而 Scheme 比起另一门常用 Lisp 方言 Common Lisp 来说，要简单不少。比较适合像我这样非科班出身，CS 功力不足的开发者。</p>
+
+<p>其次，<a href="http://mitpress.mit.edu/sicp/">Structure and Interpretation of Computer Programs (SICP)</a> 里的例程都是使用 Scheme 写的。虽然不太有可能有时间补习这本经典，但是如果不会一点 Scheme 的话，那就完全没有机会去读这本书了。</p>
+
+<p>最后，Scheme 很酷也很好玩，虽然在实际中可能并没有鸟用，但是和别人说起来自己会一点 Scheme 的话，那种感觉还是很棒的。</p>
+
+<p>其实还有一点对 hacker 们很重要，如果你喜欢使用像 <a href="https://www.gnu.org/software/emacs/">Emacs</a> 这样的基于 Lisp 的编辑器的话，使用 Scheme 就可以与它进行交互或者是扩展它的功能了。</p>
+
+<p>那让我们尽快开始吧。</p>
+
+<h2>成为 Scheme Hacker 的第一步</h2>
+
+<p>成为 Scheme Hacker 的第一步，当然是安装和配置运行环境，同时这也是最难跨过去的一步。想想有多少次你决心学习一门新语言的时候，在配置好开发环境后就再也没有碰过吧。所以我们需要尽快跨过这个步骤。</p>
+
+<p>最简单的开发环境点击这个<a href="http://repl.it/languages/Scheme">链接</a>，然后你就可以开始用 Scheme 编程了。如果你更喜欢在本地环境和终端里操作的话，可以下载 <a href="https://www.gnu.org/software/mit-scheme/">MIT/GUN Scheme</a>。在 OS X 上解包后是一个 .app 文件，运行 .app 包里的 <code>/Contents/Resources/mit-scheme</code> 就可以打开一个解释器了。</p>
+
+<p><img src="/assets/images/2015/scheme-terminal.png" alt=""></p>
+
+<h2>Hello 1 + 1</h2>
+
+<p>虽然大部分语言都是从 Hello World 开始的，但是对于 Scheme 来说，计算才是它的强项。所以我们从 1 + 1 开始。计算 1 + 1 程序在 Scheme 中是这样的：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (+ 1 1)
+
+;Value: 2
+
+1 ]=&gt;
+</code></pre></figure>
+<p><code>1 ]=&gt;</code> 是输入提示符，我们输入的内容是 <code>(+ 1 1)</code>，得到的结果是 2。虽然语句很简单，但是这里包含了 Scheme 的最基本的语素，有三个地方值得特别注意。</p>
+
+<ol>
+<li>成对的括号。一对括号表示的是一步计算，这里 <code>(+ 1 1)</code> 表示的就是 1 + 1 这一步运算。</li>
+<li>紧接括号的是函数名字，再然后是函数的参数。在这里，函数名字就是 &quot;+&quot;，两个 1 是它的参数。Scheme 中大部分的运算符其实都是函数。</li>
+<li>使用空格，tab 或是换行符来分割函数名以及参数。</li>
+</ol>
+
+<p>和别的很多语言一样，Scheme 在函数调用时也有计算优先级，会先对输入的参数进行计算，然后再进行函数调用。还是以上面的 1 + 1 为例。首先解释器看到加号，但是此时运算并没有开始。解释器会先计算第一个参数 1 的值 (其实就是 1)，然后计算第二个参数 1 的值 (其实还是 1)。然后再用两个计算得到的值来进行加法运算。</p>
+
+<p>另外，&quot;+&quot; 这个函数不仅可以接受两个参数，其实它是可以接受任意多个参数的。比如 <code>(+)</code> 的结果是 0，<code>(+ 1 2 3 4)</code> 的结果是 10。</p>
+
+<p>学会加法以后，乘法自然也不在话下了。</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (* 2 3)
+
+;Value: 6
+
+1 ]=&gt;
+</code></pre></figure>
+<p>减法和除法稍微不同一些，因为它们并不满足交换律，所以可能会有疑问。但是只要记住参数是平等的，它们会顺次计算就可以了。举个例子：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (- 10 5 3)
+
+;Value: 2
+
+1 ]=&gt; (/ 20 2 2)
+
+;Value: 5
+</code></pre></figure>
+<p>对于除法，有两个需要注意的地方。首先和我们熟悉的很多语言不同，Scheme 是默认有分数的概念的。比如在 C 系语言中，如果只是在整数范围的话，我们计算 <code>10 / 3</code> 的结果会是 <code>3</code>；如果是浮点型的话结果为 <code>3.33333</code>。而在 Scheme 中，结果是这样的：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (/ 10 3)
+
+;Value: 10/3
+</code></pre></figure>
+<p>这是一个分数，就是三分之十，绝对精确！</p>
+
+<p>另一个需要注意的是，如果 <code>/</code> 只有一个输入的话，它的意思是取倒数。</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (/ 2)
+
+;Value: 1/2
+</code></pre></figure>
+<p>如果你需要一个浮点数而不是分数的话，可以使用 <code>exact-&gt;inexact</code> 方法，将精确值转为非精确值：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (exact-&gt;inexact (/ 10 3))
+
+;Value: 3.3333333333333335
+</code></pre></figure>
+<p>Scheme 也内建定义了一些其他的数学运算符号，如果你感兴趣，可以查看 R6RS 的<a href="http://www.r6rs.org/final/html/r6rs/r6rs-Z-H-14.html#node_sec_11.7.4">相关章节</a>。</p>
+
+<blockquote>
+<p>R6RS (Revisedn Report on the Algorithmic Language Scheme, Version 6) 是当前的 Scheme 标准。</p>
+</blockquote>
+
+<h2>定义变量和方法，Hello World</h2>
+
+<p>通过简单的 1 + 1 运算我们可以大概知道 Scheme 中的奇怪的括号开头的意思了。有了这个作为基础，我们可以来看看如何定义变量和方法了。</p>
+
+<p>Scheme 中通过 <code>define</code> 来定义变量和方法：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">; s 是一个变量，值为 &quot;Hello World&quot;
+(define s &quot;Hello World&quot;)
+
+; f 是一个函数，它不接受参数，调用时返回 &quot;Hello World&quot;
+(define f (lambda () &quot;Hello World&quot;))
+</code></pre></figure>
+<p>上面的 <code>lambda</code> 可以生成一个闭包，它接受两个参数，第一个是一个空的列表 <code>()</code>，表示这个闭包不接受参数；第二个是 &quot;Hello World&quot; 这个字符串。在解释器中定义好两者之后，就可以进行调用了：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (define s &quot;Hello World&quot;)
+
+;Value: s
+
+1 ]=&gt; (define f (lambda () &quot;Hello World&quot;))
+
+;Value: f
+
+1 ]=&gt; s
+
+;Value 24: &quot;Hello World&quot;
+
+1 ]=&gt; f
+
+;Value 25: #[compound-procedure 25 f]
+
+1 ]=&gt; (f)
+
+;Value 26: &quot;Hello World&quot;
+</code></pre></figure>
+<p>既然我们已经知道了 <code>lambda</code> 的意义和用法，那么定义一个接受参数的函数也就不是什么难事了。比如上面的 <code>f</code>，我们想要定义一个接受名字的函数的话：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (define hello
+        (lambda (name)
+            (string-append &quot;Hello &quot; name &quot;!&quot;)
+        )
+      )
+
+;Value: hello
+
+1 ]=&gt; (hello &quot;onevcat&quot;)
+
+;Value 27: &quot;Hello onevcat!&quot;
+</code></pre></figure>
+<p>很简单，对吧？其实甚至可以更简单，define 的第一个参数可以是一个列表，其中第一个元素是函数名名字，之后的是参数列表。</p>
+
+<blockquote>
+<p>用专业一点的术语来说的话，就是 define 的第一个参数是一个 cons cell 的话，它的 car 是函数名，cdr 是参数。关于这些概念我们稍后再仔细说说。</p>
+</blockquote>
+
+<p>于是上面的方法可以简单地写作：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (define (hello name)
+        (string-append &quot;Hello &quot; name &quot;!&quot;))
+
+;Value: hello
+
+1 ]=&gt; (hello &quot;onevcat&quot;)
+
+;Value 28: &quot;Hello onevcat!&quot;
+</code></pre></figure>
+<p>光说不练假把式，所以留个小练习给大家吧，用 <code>define</code> 来定义一个函数，让其为输入的数字 +1。如果你无压力地搞定了的话，我们就可以继续看看 Scheme 里的条件语句怎么写了。</p>
+
+<h2>条件分支和布尔逻辑</h2>
+
+<p>不论是什么编程语言，条件分支或者类似的概念应该都是不可缺少的部分。在 Scheme 中，使用 <code>if</code> 可以进行条件分支的处理。和其他很多语言不一样的地方在于，函数式语言中函数才是一等公民，<code>if</code> 的行为也和一个其他的普通函数很相似，是作为一个函数来使用的。它的语法是：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">(if condition ture_action false_action)
+</code></pre></figure>
+<p>与普通函数先进行输入的取值不同，<code>if</code> 将会先对 <code>condition</code> 运算式进行取值判断。如果结果是 <code>true</code> (在 Scheme 中用 <code>#t</code> 代表 true，<code>#f</code> 代表 false)，则再对 <code>ture_action</code> 进行取值，否则就执行 <code>false_action</code>。比如我们可以实现一个 <code>abs</code> 函数来返回输入的绝对值：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (define (abs input)
+        (if (&lt; input 0) (- input) input))
+
+;Value: abs
+
+1 ]=&gt; (abs 100)
+
+;Value: 100
+
+1 ]=&gt; (abs -100)
+
+;Value: 100
+</code></pre></figure>
+<p>也许你已经猜到了，Scheme 的布尔逻辑也是遵循函数式的，最常用的就是 <code>and</code> 和 <code>or</code> 两种了。和常见 C 系语言类似的是，<code>and</code> 和 <code>or</code> 都会将参数从左到右取值，一旦遇到满足停止条件的值就会停止。但是和传统 C 系语言不同，布尔逻辑的函数返回的不一定就是 <code>#t</code> 或者 <code>#f</code>，而有可能是输入值，这和很多脚本语言的行为是比较一致的：<code>and</code> 会返回最后一个非 <code>#f</code> 的值，而 <code>or</code> 则返回第一个非 <code>#f</code> 的值：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (and #f 0)
+
+;Value: #f
+
+1 ]=&gt; (and 1 2 &quot;Hello&quot;)
+
+;Value 13: &quot;Hello&quot;
+
+1 ]=&gt; (or #f 0)
+
+;Value: 0
+
+1 ]=&gt; (or 1 2 &quot;Hello&quot;)
+
+;Value: 1
+
+1 ]=&gt; (or #f #f #f)
+
+;Value: #f
+</code></pre></figure>
+<p>在很多时候，Scheme 中的 <code>and</code> 和 <code>or</code> 并不全是用来做条件的组合，而是用来简化一些代码的写法，以及为了顺次执行一些代码的。比如说下面的函数在三个输入都为正数的情况下返回它们的乘积，可以想象和对比一下在指令式编程中同样功能的实现。</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">(define (pro3and a b c)
+    (and (positive? a)
+        (positive? b)
+        (positive? c)
+        (* a b c)
+    )
+)
+</code></pre></figure>
+<p>除了 <code>if</code> 之外，在 C 系语言里另一种常见的条件分支语句是 <code>switch</code>。Scheme 里对应的函数是 <code>cond</code>。<code>cond</code> 接受多个二元列表作为输入，从上至下依次判断列表的第一项是否满足，如果满足则返回第二项的求值结果并结束，否则一直继续到最后的 <code>else</code>：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">(cond
+  (predicate_1 clauses_1)
+  (predicate_2 clauses_2)
+    ......
+  (predicate_n clauses_n)
+  (else        clauses_else))
+</code></pre></figure>
+<p>在新版的 Scheme 中，标准里加入了更多的流程控制的函数，它们包括 <code>begin</code>，<code>when</code> 和 <code>unless</code> 等。</p>
+
+<p><code>begin</code> 将顺次执行一系列语句：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">(define (foo)
+  (begin
+    (display &quot;hello&quot;)
+    (newline)
+    (display &quot;world&quot;)
+  )
+)
+</code></pre></figure>
+<p><code>when</code> 当条件满足时执行一系列代码，而 <code>unless</code> 在条件不满足时执行一系列代码。这些改动可以看出一些现代脚本语言的特色，但是新的标准据说也在 Scheme 社区造成了不小争论。虽然结合使用 <code>if</code>，<code>and</code> 和 <code>or</code> 肯定是可以写出等效的代码的，但是这些额外的分支控制语句确实增加了语言的便利性。</p>
+
+<h2>循环</h2>
+
+<p>一门完备的编程语言必须的三个要素就是赋值，分支和循环。前两个我们已经看到了，现在来看看循环吧：</p>
+
+<h3>do</h3>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (do ((i 0 (+ i 1))) ; 初始值和 step 条件
+          ((&gt; i 4))       ; 停止条件，取值为 #f 时停止
+        (display i)       ; 循环主体 (命令)
+      )
+01234
+;Value: #t
+</code></pre></figure>
+<p>唯一要解释的是这里的条件是停止条件，而不是我们习惯的进入循环主体的条件。</p>
+
+<h3>递归</h3>
+
+<p>可以看出其实 <code>do</code> 写起来还是比较繁琐的。在 Scheme 中，一种更贴合语言特点的写法是使用递归的方式来完成循环：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (define (count n)
+          (and (display (- 4 n))
+               (if (= n 0) #t (count (- n 1)))
+          )
+      )
+
+;Value: count
+
+1 ]=&gt; (count 4)
+01234
+;Value: #t
+</code></pre></figure>
+<h3>列表和递归</h3>
+
+<p>也许你会说，用递归的方式看起来一点也不简单，甚至代码要比上面的 <code>do</code> 的版本更难理解。现在看来确实是这样的，那是因为我们还没有接触 Scheme 里一些很独特的概念，cons cell 和 list。我们在上面介绍 <code>define</code> 的时候曾经提到过，cons cell 的 <code>car</code> 和 <code>cdr</code>。结合这个数据结构，Scheme 里的递归就会变得非常好用。</p>
+
+<p>那么什么是 cons cell 呢？其实没有什么特别的，cons cell 就是一种数据结构，它对应了内存的两个地址，每个地址指向一个值。</p>
+
+<p><img src="/assets/images/2015/cons2.png" alt=""></p>
+
+<p>要初始化一个上面图示的 cons cell，可以使用  <code>cons</code> 函数：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (cons 1 2)
+
+;Value 13: (1 . 2)
+</code></pre></figure>
+<p>我们可以使用 <code>car</code> 和 <code>cdr</code> 来取得一个 cons cell 的两部分内容 (<code>car</code> 是 &quot;Contents of Address part of Register&quot; 的缩写，<code>cdr</code> 是 &quot;Contents of Decrement part of Register&quot;)：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (car (cons 1 2))
+
+;Value: 1
+
+1 ]=&gt; (cdr (cons 1 2))
+
+;Value: 2
+</code></pre></figure>
+<p>cons cell 每个节点的内容可以是任意的数据类型。一种最常见的结构是 <code>car</code> 中是数据，而 <code>cdr</code> 指向另一个 cons cell：</p>
+
+<p><img src="/assets/images/2015/conss2.png" alt=""></p>
+
+<p>上面这样的数据结构对应的生成代码为：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (cons 3 (cons 1 2))
+
+;Value 14: (3 1 . 2)
+</code></pre></figure>
+<p>有一种特殊的 cons cell 链，其最后一个 cons cell 的 <code>cdr</code> 为空列表 <code>&#39;()</code>，这类数据结构就是 Scheme 中的列表。</p>
+
+<p><img src="/assets/images/2015/list2.png" alt=""></p>
+
+<p>对于列表，我们有一种更简单的创建方式，就是类似 <code>&#39;(1 2 3)</code> 这样。对于列表来说，它的 <code>cdr</code> 值是一个子列表：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt;  &#39;(1 2 3)
+
+;Value 15: (1 2 3)
+
+1 ]=&gt; (car &#39;(1 2 3))
+
+;Value: 1
+
+1 ]=&gt; (cdr &#39;(1 2 3))
+
+;Value 16: (2 3)
+</code></pre></figure>
+<p>而循环其实质就是对一列数据进行处理的过程，结合 Scheme 列表的特性，我们意识到如果把列表运用在递归中的话，<code>car</code> 就是遍历的当前项，而 <code>cdr</code> 就是下一次递归的输入。Scheme 和递归调用可以说能配合得天衣无缝。</p>
+
+<p>比如我们定义一个将列表中的所有数都加上 1 的函数的话，可以这么处理：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">(define (ins_ls ls)
+    (if (null? ls)
+      &#39;()
+      (cons (+ (car ls) 1) (ins_ls (cdr ls)))
+    )
+)
+
+(ins_ls &#39;(1 2 3 4 5))
+
+;=&gt; (2 3 4 5 6)
+</code></pre></figure>
+<h3>尾递归</h3>
+
+<p>递归存在性能上的问题，因为递归的调用需要在栈上保持，然后再层层返回，这会造成很多额外的开销。对于小型的递归来说还勉强可以接受，但是对于递归调用太深的情况来说，这显然是不可扩展的做法。于是在 Scheme 中对于大型的递归我们一般会倾向于将它写为尾递归的方式。比如上面的加 1 函数，用尾递归重写的话：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">(define (ins_ls ls)
+    (ins_ls_interal ls &#39;()))
+
+(define (ins_ls_interal ls ls0)
+    (if (null? ls)
+        ls0
+        (ins_ls_interal (cdr ls) (cons ( + (car ls) 1) ls0))))
+
+(define (rev_ls ls)
+  (rev_ls_internal ls &#39;()))
+
+(define (rev_ls_internal ls ls0)
+  (if (null? ls)
+      ls0
+      (rev_ls_internal (cdr ls) (cons (car ls) ls0))))
+
+(rev_ls (ins_ls &#39;(1 2 3 4 5)))
+
+;=&gt; (2 3 4 5 6)
+</code></pre></figure>
+<h2>函数式</h2>
+
+<p>上面介绍了 Scheme 的最基本的赋值，分支和循环。可以说用这些东西就能够写出一些基本的程序了。一开始会比较难理解 (特别是递归)，但是相信随着深入下去和习惯以后就会好很多。到现在为止，除了在定义函数时，其实我们还没有直接触碰到 Scheme 的函数式特性。在 Scheme 里函数是一等公民，我们可以将一个函数作为参数传给另外的函数并进行调用，这就是高阶函数。</p>
+
+<p>一个最简单的例子是排序的时候我们可以将一个返回布尔值的函数作为排序规则：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (sort &#39;(7883 9099 6729 2828 7754 4179 5340 2644 2958 2239) &lt;)
+
+;Value 13: (2239 2644 2828 2958 4179 5340 6729 7754 7883 9099)
+</code></pre></figure>
+<p>更甚于我们可以使用一个匿名函数来控制这个排序，比如按照模 100 之后的大小 (也就是数字的后两位) 进行排序：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">1 ]=&gt; (sort &#39;(7883 9099 6729 2828 7754 4179 5340 2644 2958 2239)
+      (lambda (x y) (&lt; (modulo x 100) (modulo y 100))))
+
+;Value 14: (2828 6729 2239 5340 2644 7754 2958 4179 7883 9099)
+</code></pre></figure>
+<p>类似这样的特性在一些 modern 的语言里并不算罕见，但是要知道 Scheme 可是有些年头的东西了。类似的还有 <code>map</code>，<code>filter</code> 等。比如上面的 list 加 1 的例子，用 <code>map</code> 函数就可以非常简单地实现：</p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme">(map (lambda (x) (+ x 1)) &#39;(1 2 3 4 5))
+
+;=&gt; (2 3 4 5 6)
+</code></pre></figure>
+<h2>接下来...</h2>
+
+<p>篇幅有限，再往长写的话估计没什么人会想看完了。到这里为止关于 Scheme 的一些基础内容也算差不多了，大概阅读最简单的 Scheme 程序应该也没有太大问题了。在进一步的学习中，如果出现不认识的函数或者语法的话，可以求助 <a href="http://srfi.schemers.org/final-srfis.html">SRFI</a> 下对应的文档或是在 <a href="http://www.gnu.org/software/mit-scheme/documentation/mit-scheme-ref/index.html#Top">MIT/GNU Scheme 文档</a>中寻找。</p>
+
+<p>本文一开始提到的<a href="http://www.shido.info/lisp/idx_scm_e.html">教程</a>很适合入门，之后的话可以开始参看 <a href="http://mitpress.mit.edu/sicp/">SICP</a>，可以对程序设计和 Scheme 的思想有更深的了解 (虽然阅读 SICP 的目的不应该是学 Scheme，Scheme 只是帮助你进行阅读和练习的工具)。因为我自己也就是个愣头青的初学者，所以无法再给出其他建议了。如果您有什么好的资源或者建议，非常欢迎在评论中提出。</p>
+
+<p>另外，相比起 Scheme，如果你想要在实际的工程中使用 Lisp 家族的语言的话，<a href="http://racket-lang.org">Racket</a> 也许会是更好的选择。相比于面向数学和科学计算来说，Racket 支持对象类型等概念，更注重在项目实践方面的运用。</p>
+
+<p>就这样吧，我要继续去和 Scheme 过周末了。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2015/06/ios9-sdk/" title="link to 开发者所需要知道的 iOS 9 SDK 新特性">开发者所需要知道的 iOS 9 SDK 新特性</a></h2>
+       <p class="excerpt">本文为InfoQ中文站特供稿件，首发地址。如需转载，请与InfoQ中文站联系。年年岁岁花相似，岁岁年年人不同。今年的 WWDC 一如既往的热闹，但是因为要照顾家里刚出生的宝宝以及宝宝的娘，就只能在家里的“窝里蹲”家庭影院来关注这一全球 Apple 开发者的盛会了。生命不息，学习不止。一如以往几年，我会陆续写一些关于 WWDC 和新的 SDK 里我觉得有意思和我自己重点关注和学习的内容。现在回头看前几年写的东西，愈来愈感觉到以前青葱岁月的自己真是傻得可爱。不过一路以来的成长轨迹倒是很明显，也...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2015-06-11 09:24:16 +0800" class="post-list__meta--date date">2015-06-11</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2015/06/ios9-sdk/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2015/03/cross-platform/" title="link to 跨平台开发时代的 (再次) 到来？">跨平台开发时代的 (再次) 到来？</a></h2>
+       <p class="excerpt">这篇文章主要想谈谈最近又刮起的移动开发跨平台之风，并着重介绍和对比一下像是 Xamarin，NativeScript 和 React Native 之类的东西。不会有特别深入的技术讨论，大家可以当作一篇科普类的文章来看。故事的开始“一次编码，处处运行” 永远是程序员们的理想乡。二十年前 Java 正是举着这面大旗登场，击败了众多竞争对手。但是时至今日，事实已经证明了 Java 笨重的体型和缓慢的发展显然已经很难再抓住这个时代快速跃动的脚步。在新时代的移动大潮下，一个应用想要取胜，完美的使用...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2015-03-27 17:56:08 +0800" class="post-list__meta--date date">2015-03-27</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2015/03/cross-platform/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2015/05/scheme/";
+        this.page.identifier = "/2015/05/scheme/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

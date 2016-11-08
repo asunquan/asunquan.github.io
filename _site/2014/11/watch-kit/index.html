@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>Apple WatchKit 初探</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Apple WatchKit 初探">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Apple WatchKit 初探">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2014/11/watch-kit/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2014-11-19 16:40:22 +0800" itemprop="datePublished" class="post-meta__date date">2014-11-19</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">Apple WatchKit 初探</h1>
+  </header>
+
+  <section class="post">
+    <p><img src="/assets/images/2014/watchkit-0.png" alt=""></p>
+
+<p>随着今天凌晨 Apple 发布了第一版的 Watch Kit 的 API，对于开发者来说，这款新设备的一些更详细的信息也算是逐渐浮出水面。可以说第一版的 WatchKit 开放的功能总体还是令人满意的。Apple 在承诺逐渐开放的方向上继续前进。本来在 WWDC 之后预期 Today Widget 会是各类新颖 app 的舞台以及对 iOS 功能的极大扩展，但是随着像 Launcher 和 PCalc 这些创意型的 Today Widget 接连被下架事件，让开发者也不得不下调对 WatchKit 的预期。但是至少从现在的资料来看，WatchKit 是允许进行复杂交互以及完成一些独立功能的。虽然需要依托于 iPhone app，但是至少能够发挥的舞台和空间要比我原先想象的大不少。</p>
+
+<p>当然，因为设备本身的无论是电量还是运算能力的限制，在进行 Watch app 开发的时候也还是有很多掣肘。现在 Watch app 仅仅只是作为视图显示和回传用户交互的存在，但是考虑到这是这款设备的第一版 SDK，另外 Apple 也有承诺之后会允许真正运行在 Watch 上的 app 的出现，Apple Watch 和 WatchKit 的未来还是很值得期待的。</p>
+
+<p>废话不再多，我们来简单看看 WatchKit 的一些基本信息吧。</p>
+
+<h2>我们能做什么</h2>
+
+<h3>Watch app 架构</h3>
+
+<p>首先需要明确的是，在 iOS 系统上，app 本体是核心。所有的运行实体都是依托在本体上的：在 iOS 8 之前这是毋庸置疑的，而在 iOS 8 中添加的各种 Extension 也必须随同 app 本体捆绑，作为 app 的功能的补充。Watch app 虽然也类似于此，我们要针对 Apple Watch 进行开发，首先还是需要建立一个传统的 iOS app，然后在其中添加 Watch App 的 target。在添加之后，会发现项目中多出两个 target：其中一个是 WatchKit 的扩展，另一个是 Watch App。在项目相应的 group 下可以看到，WatchKit Extension 中含有代码 (<code>InterfaceController.h/m</code> 等)，而 Watch App 里只包含了 <code>Interface.storyboard</code>。现在暂时看来 Watch App 依然是传统 iOS 设备 app 的扩展和衍生，Apple 估计会采取和 Extension 同样的态度来对待 Watch Kit。而原生可以直接运行在手表上的 app 有消息说 2015 年中后期才可能被允许。</p>
+
+<p><img src="/assets/images/2014/watchkit-1.png" alt=""></p>
+
+<p>在应用安装时，负责逻辑部分的 WatchKit Extension 将随 iOS app 的主 target 被一同安装到 iPhone 中，而负责界面部分的 WatchKit App 将会在主程序安装后由 iPhone 检测有没有配对的 Apple Watch，并提示安装到 Apple Watch 中。所以在实际使用时，所有的运算、逻辑以及控制实际上都是在 iPhone 中完成的。在需要界面刷新时，由 iPhone 向 Watch 发送指令进行描画并在手表盘面上显示。反过来，用户触摸手表交互时的信息也由手表传回给 iPhone 并进行处理。而这个过程 WatchKit 会在幕后为我们完成，并不需要开发者操心。我们需要知道的就是，原则上来说，我们应该将界面相关的内容放在 Watch App 的 target 中，而将所有代码逻辑等放到 Extension 里。</p>
+
+<p>在手表上点击 app 图标运行 Watch App 时，手表将会负责唤醒手机上的 WatchKit Extension。而 WatchKit Extension 和 iOS app 之间的数据交互需求则由 App Groups 来完成，这和 Today Widget 以及其他一些 Extension 是一样的。如果你还没有了解过相关内容，可以参看我之前写过的一篇 <a href="http://onevcat.com/2014/08/notification-today-widget/">Today Extension 的教程</a>。</p>
+
+<h3>主要类</h3>
+
+<h4>WKInterfaceController 和生命周期</h4>
+
+<p><code>WKInterfaceController</code> 是 WatchKit 中的 <code>UIViewController</code> 一样的存在，也会是开发 Watch App 时花时间最多的类。每个 <code>WKInterfaceController</code> 或者其子类应该对应手表上的一个整屏内容。但是需要记住整个 WatchKit 是独立于 UIKit 而存在的，<code>WKInterfaceController</code> 是一个直接继承自 <code>NSObject</code> 的类，并没有像 <code>UIKit</code> 中 <code>UIResponser</code> 那样的对用户交互的响应功能和完备的回调。</p>
+
+<p>不仅在功能上相对 <code>UIViewController</code> 简单很多，在生命周期上也进行了大幅简化。每个 <code>WKInterfaceController</code> 对象必然会被调用的生命周期方法有三个，分别是该对象被初始化时的 <code>-initWithContext:</code>，将要呈现时的 <code>-willActivate</code> 以及呈现结束后的 <code>-didDeactivate</code>。同样类比 <code>UIViewController</code> 的话，可以将它们理解为分别对应 <code>-viewDidLoad</code>，<code>viewWillAppear:</code> 以及 <code>-viewDidDisappear:</code>。虽然看方法名和实际使用上可能你会认为 <code>-initWithContext:</code> 应该对应 <code>UIViewController</code> 的 <code>init</code> 或者 <code>initWithCoder:</code> 这样的方法，但是事实上在 <code>-initWithContext:</code> 时 <code>WKInterfaceController</code> 中的“视图元素” (请注意这里我加上了引号，因为它们不是真正的视图，稍后会再说明) 都已经初始化完毕可用，这其实和 <code>-viewDidLoad</code> 中的行为更加相似。</p>
+
+<p>我们一般在 <code>-initWithContext:</code> 和 <code>-willActivate</code> 中配置“视图元素”的属性，在 <code>-didDeactivate</code> 中停用像是 <code>NSTimer</code> 之类的会 hold 住 <code>self</code> 的对象。需要特别注意的是，在 <code>-didDeactivate</code> 中对“视图元素”属性进行设置是无效的，因为当前的 <code>WKInterfaceController</code> 已经非活跃。</p>
+
+<h4>WKInterfaceObject 及其子类</h4>
+
+<p><code>WKInterfaceObject</code> 负责具体的界面元素设置，包括像是 <code>WKInterfaceButton</code>，<code>WKInterfaceLabel</code> 或 <code>WKInterfaceImage</code> 这类物件，也就是我们上面所提到的“视图元素”。可能一开始会产生错觉，觉得 <code>WKInterfaceObject</code> 应该对应 <code>UIView</code>，但其实上并非如此。<code>WKInterfaceObject</code> 只是 WatchKit 的实际的 View 的一个在 Watch Extension 端的代理，而非 View 本身。Watch App 中实际展现和渲染在屏幕上的 view 对于代码来说是非直接可见的，我们只能在 Extension target 中通过对应的代理对象对属性进行设置，然后在每个 run loop 需要刷新 UI 时由 WatchKit 将新的属性值从手机中传递给手表中的 Watch App 并进行界面刷新。</p>
+
+<p>反过来，手表中的实际的 view 想要将用户交互事件传递给 iPhone 也需要通过 <code>WKInterfaceObject</code> 代理进行。每个可交互的 <code>WKInterfaceObject</code> 子类都对应了一个 action，比如 button 对应点击事件，switch 对应开或者关的状态，slider 对应一个浮点数值表明选取值等等。关联这些事件也很简单，直接从 StoryBoard 文件中 Ctrl 拖拽到实现中就能生成对应的事件了。虽然 UI 资源文件和代码实现是在不同的 target 中的，但是在 Xcode 中的协作已然天衣无缝。</p>
+
+<p>Watch App 采取的布局方式和 iOS app 完全不同。你无法自由指定某个视图的具体坐标，当然也不能使用像 AutoLayout 或者 Size Classes 这样的灵活的界面布局方案。WatchKit 提供的布局可能性和灵活性相对较小，你只能在以“行”为基本单位的同时通过 group 来在行内进行“列”布局。这带来了相对简单的布局实现，当然，同时也是对界面交互的设计的一种挑战。</p>
+
+<p><img src="/assets/images/2014/watchkit-2.png" alt=""></p>
+
+<p>另外值得一提的是，随着 WatchKit 的出现及其开发方式的转变，<a href="http://onevcat.com/2013/12/code-vs-xib-vs-storyboard/">代码写 UI 还是使用 StoryBoard</a> 这个争论了多年的话题可以暂时落下帷幕了。针对 Watch 的开发不能使用代码的方式。首先，所有的 <code>WKInterfaceObject</code> 对象都必须要设计的时候经由 StoryBoard 进行添加，运行时我们无法再向界面上添加或者移除元素 (如果有移除需要的，可以使用隐藏)；其次 <code>WKInterfaceObject</code> 与布局相关的某些属性，比如行高行数等，不能够在运行时进行变更和设定。基本来说在运行时我们只能够改变视图的内容，以及通过隐藏某些视图元素来达到有限地改变布局 (其他视图元素会试图填充被隐藏的元素)。</p>
+
+<p>总之，代码进行 UI 编写的传统，在 Apple 的不断努力下，于 WatchKit 发布的今天，被正式宣判了死刑。</p>
+
+<h4>Table 和 Context Menu</h4>
+
+<p>大部分 <code>WKInterfaceObject</code> 子类都很直接简单，但是有两个我想要单独说一说，那就是 <code>WKInterfaceTable</code> 和 <code>WKInterfaceMenu</code>。<code>UITableView</code> 大家都很熟悉了，在 WatchKit 中的 <code>WKInterfaceTable</code> 虽然也是用来展示一组数据，但是因为 WatchKit API 的数据传输的特点，使用上相较 <code>UITableView</code> 有很大不同和简化。首先不存在 DataSource 和 Delegate，<code>WKInterfaceTable</code> 中需要呈现的数据数量直接由其实例方法 <code>-setNumberOfRows:withRowType:</code> 进行设定。在进行设定后，使用 <code>-rowControllerAtIndex:</code> 枚举所有的 <code>rowController</code> 进行设定。这里的 <code>rowController</code> 是在 StoryBoard 中所设定的相当于 <code>UITableViewCell</code> 的东西，只不过和其他 <code>WKInterfaceObject</code> 一样，它是直接继承自 <code>NSObject</code> 的。你可以通过自定义 <code>rowController</code> 并连接 StoryBoard 的元素，并在取得 <code>rowController</code> 对其进行设定，即可完成 table 的显示。代码大概是这样的：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">//  MyRowController.swift
+import Foundation
+import WatchKit
+
+class MyRowController: NSObject {
+    @IBOutlet weak var label: WKInterfaceLabel!
+}
+
+//  InterfaceController.swift
+import WatchKit
+import Foundation
+
+class InterfaceController: WKInterfaceController {
+
+    @IBOutlet weak var table: WKInterfaceTable!
+    let data = [&quot;Index 0&quot;,&quot;Index 1&quot;,&quot;Index 2&quot;]
+
+    override init(context: AnyObject?) {
+        // Initialize variables here.
+        super.init(context: context)
+
+        // Configure interface objects here.
+        NSLog(&quot;%@ init&quot;, self)
+
+        // 注意需要在 StoryBoard 中设置 myRowControllerType
+        // 类似 cell 的 reuse id
+        table.setNumberOfRows(data.count, withRowType: &quot;myRowControllerType&quot;)
+        for (i, value) in enumerate(data) {
+            if let rowController = table.rowControllerAtIndex(i) as? MyRowController {
+                rowController.label.setText(value)
+            }
+        }
+    }
+}
+</code></pre></figure>
+<p><img src="/assets/images/2014/watchkit-3.png" alt=""></p>
+
+<p>对于点击事件，并没有一个实际的 delegate 存在，而是类似于其他 <code>WKInterfaceObject</code> 那样通过 action 将点击了哪个 row 作为参数发送回 <code>WKInterfaceController</code> 进行处理。</p>
+
+<p>另一个比较好玩的是 Context Menu，这是 WatchKit 独有的交互，在 iOS 中并不存在。在任意一个 <code>WKInterfaceController</code> 界面中，长按手表屏幕，如果当前 <code>WKInterfaceController</code> 中存在上下文菜单的话，就会尝试呼出找这个界面对应的 Context Menu。这个菜单最多可以提供四个按钮，用来针对当前环境向用户征询操作。因为手表屏幕有限，在信息显示的同时再放一些交互按钮是挺不现实的一件事情，也会很丑。而上下文菜单很好地解决了这个问题，相信长按呼出交互菜单这个操作会成为今后 Watch App 的一个很标准的交互操作。</p>
+
+<p>添加 Context Menu 非常简单，在 StoryBoard 里向 <code>WKInterfaceController</code> 中添加一个 Menu，并在这个 Menu 里添加对应的 MenuItem 就行了。在 <code>WKInterfaceController</code> 我们也有对应的 API 来在运行时根据上下文环境进行 MenuItem 的添加 (这是少数几个允许我们在运行时添加元素的方法之一)。</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">-addMenuItemWithItemIcon:title:action:
+-addMenuItemWithImageNamed:title:action:
+-addMenuItemWithImage:title:action:
+-clearAllMenuItems
+</code></pre></figure>
+<p><img src="/assets/images/2014/watchkit-4.png" alt=""></p>
+
+<p>但是 Menu 和 MenuItem 对应的类 <code>WKInterfaceMenu</code> 和 <code>WKInterfaceMenuItem</code> 我们是没有办法拿到的。没错，它们甚至都没有存在于文档里 :(</p>
+
+<h3>基础导航</h3>
+
+<p><code>WKInterfaceController</code> 的内建的导航关系基本上分为三类。首先是像 <code>UINavigationController</code> 控制的类似栈的导航方式。相关的 API 有 <code>-pushControllerWithName:context:</code>，<code>-popController</code> 以及 <code>-popToRootController</code>。后两个我想不必太多解释，对于第一个方法，我们需要使用目标 controller 的 <code>Identifier</code> 字符串 (没有你只能在 StoryBoard 里进行设置) 进行创建。<code>context</code> 参数也会被传递到目标 controller 的 <code>-initWithContext:</code> 中，所以你可以以此来在 controller 中进行数据传递。</p>
+
+<p>另一种是我们大家熟悉的 modal 形式，对应 API 是 <code>-presentControllerWithName:context:</code> 和 <code>-dismissController</code>。对于这种导航，和 <code>UIKit</code> 中的不同之处就是在目标 controller 中会默认在左上角加上一个 Cancel 按钮，点击的话会直接关闭被 present 的 controller。我只想说 Apple 终于想通了，每个 modal 出来的 controller 都是需要关闭的这个事实...</p>
+
+<p>最后一种导航方式是类似 <code>UIPageController</code> 的分页式导航。在 iOS app 中，在应用第一次开始时的教学模块中这种导航方式非常常见，而在 WatchKit 里可以说得到了发扬光大。事实上我个人也认为这会是 WatchKit 里最符合使用习惯的导航方式。在 WatchKit 上的 page 导航可能会和 iOS app 的 Tab 导航所提供的功能相对应。</p>
+
+<p>在实现上，page 导航需要在 StoryBoard 中用 segue 的方式将不同 page 进行连接，新添加的 <code>next page</code> segue 就是干这个的：</p>
+
+<p><img src="/assets/images/2014/watchkit-5.png" alt=""></p>
+
+<p>另外 modal 导航的另一个 API <code>-presentControllerWithNames:contexts:</code> 接受复数个的 <code>names</code> 和 <code>context</code>，通过这种方式 modal 呼出的复数个 Controller 也将以 page 导航方式呈现。</p>
+
+<p>当然，作为 StoryBoard 的经典使用方式，modal 和 push 的导航方式也是可以在 StoryBoard 中通过 segue 来实现的。同时 WatchKit 也为 segue 的方式提供了必要的 API。</p>
+
+<h3>一些界面实践</h3>
+
+<p>因为整个架构和 <code>UIKit</code> 完全不同，所以很多之前的实践是无法直接搬到 WatchKit App 中的。</p>
+
+<h4>图像处理</h4>
+
+<p>在 <code>UIKit</code> 中我们显示图片一般使用 <code>UIImageView</code>，然后为其 <code>image</code> 属性设置一个创建好的 <code>UIImage</code> 对象。而对于 WatchKit 来说，最佳实践是将图片存放在 Watch App 的 target 中 (也就是 StoryBoard 的那个 target)，在对 <code>WKInterfaceImage</code> 进行图像设置时，尽量使用它的 <code>-setImageNamed:</code> 方法。这个方法将只会把图像名字通过手机传递到手表，然后由手表在自己的 bundle 中寻找图片并加载，是最快的途径。注意我们的代码是运行在于手表的 Watch App 不同的设备上的，虽然我们也可以先通过 <code>UIImage</code> 的相关方法生成 <code>UIImage</code> 对象，然后再用 <code>-setImage:</code> 或者 <code>-setImageData:</code> 来设置手表上的图片，但是这样的话我们就需要将图片放到 Extension 的 target 中，并且需要将图片的数据通过蓝牙传到手表，一般来说这会造成不可忽视的延迟，会很影响体验。</p>
+
+<p>如果对于某些情况下，我们只能在 Extension 的 target 中获得图片 (比如从网络下载或者代码动态生成等)，并且需要重复使用的话，最好用 <code>WKInterfaceDevice</code> 的 <code>-addCachedImage:name:</code> 方法将其缓存到手表中。这样，当我们之后再使用这张图片的时候就可以直接通过 <code>-setImageNamed:</code> 来快速地从手表上生成并使用了。每个 app 的 cache 的尺寸大约是 20M，超过的话 WatchKit 将会从最老的数据开始删除，以腾出空间存储新的数据。</p>
+
+<h4>动画</h4>
+
+<p>因为无法拿到实际的视图元素，只有 <code>WKInterfaceObject</code> 这样的代理对象，以及布局系统的限制，所以复杂的动画，尤其是 <code>UIView</code> 系列或者是 <code>CALayer</code> 系列的动画是无法实现的。现在看来唯一可行的是帧动画，通过为 <code>WKInterfaceImage</code> 设置包含多个 image 的图像，或者是通过计时器定时替换图像的话，可以实现帧动画。虽然 Apple 自己的例子也通过这种方法实现了动画，但是对于设备的存储空间和能耗都可能会是挑战，还需要实际拿到设备以后进行实验和观察。</p>
+
+<h4>其他 Cocoa Touch 框架的使用</h4>
+
+<p>Apple 建议最好不要使用那些需要 prompt 用户许可的特性，比如 CoreLocation 定位等。因为实际的代码是在手机上运行的，这类许可也会在手机上弹出，但是用户并不一定正好在看手机，所以很可能造成体验下降。另外大部分后台运行权限也是不建议的。</p>
+
+<p>对于要获取这些数据和权限，Apple 建议还是在 iOS app 中完成，并通过 App Groups 进行数据共享，从而在 Watch Extension 中拿到这些数据。</p>
+
+<h4>代码分享</h4>
+
+<p>因为现在一个项目会有很多不同的 target，所以使用 framework 的方式封装不同 target 的公用部分的代码，而只在各 target 中实现界面相关的代码应该是必行的了。这么做的优点不仅是可以减少代码重复，也会使代码测试和品质得到提升。如果还没有进行逻辑部分的框架化和测试分离的话，在实现像各类 Extension 或者 Watch App 时可能会遇到非常多的麻烦。</p>
+
+<p>因为如果原有 app 有计划进行扩展推出各种 Extension 的话，将逻辑代码抽离并封装为 framework 应该是优先级最高的工作。另外新开的项目如果没有特殊原因，也强烈建议使用 framework 来组织通用代码。</p>
+
+<h3>Glance 和 Notification</h3>
+
+<p>除了 Watch App 本体以外，Glance 和手表的 Notification 也是重要的使用情景。Notification 虽然概念上比较简单，但是相对于 iOS 的通知来说是天差地别。WatchKit 的通知允许开发者自行构建界面，我们可以通过 payload 设置比较复杂和带有更多信息的通知，包括图像，大段文字甚至可以交互的按钮，而不是像 iOS 上那样被限制在文字和一个对话框内。首先无论是通过 Local 还是 Remote 进行的通知发送会先到达 iPhone，然后再由 iPhone 根据内容判断是否转发到手表。WatchKit App 接收到通知后先会显示一个简短的通知，告诉用户这个 app 有一个通知。如果用户对通知的内容感兴趣的话，可以点击或者抬手观看，这样由开发者自定义的长版本的通知就会显现。</p>
+
+<p>Glance 是 WatchKit 的新概念，它允许 Watch App 展示一个布局固定的 <code>WKInterfaceController</code> 页面。它和 Watch App 本体相对地位相当于 iOS 上的 Today Widget 和 iOS app 本身的地位，是作为手表上的 app 的最重要的信息展示出现的。Glance 正如其名，是短时存在的提醒，不能存在可交互的元素。不过如果用户点击 Glance 页面的话，是可以启动到 Watch App 的。现在关于 Glance 本身如何启动和呈现还不是很明确，猜测是某种类似 Today Widget 的呈现方式？(比如按下两次表侧面的旋钮)</p>
+
+<h2>疑问和改进方向</h2>
+
+<p>WatchKit 总体令人满意，提供的 API 和开发环境已经足够开发者作出一些有趣的东西。但是有几个现在看来很明显的限制和希望能加强的方向。</p>
+
+<p>首先是从现在来看 WatchKit 并没有提供任何获取设备传感信息的 API。不论是心跳、计步或者是用户是否正在佩戴 Watch 的信息我们都是拿不到的，这限制了很多数据收集和监视的健康类 app 的制作。如果希望请求数据，还是不得不转向使用 HealthKit。但是随着 iPhone 6 和 6s 的大屏化，在运动时携带 iPhone 的人可以说是变少了。如果 Watch 不能在没有 iPhone 配对的情况下收集记录，并在之后和 iPhone 连接后将数据回传的话，那 Apple 的健康牌就失败了一大半。相信 Apple 不会放过这种把用户捆绑的机会...不过如果第三方应用能实时获取用户的佩戴状况的话，相信会有很多有意思的应用出现。</p>
+
+<p>另外作为在发布会上鼓吹的交互革命的旋钮和触感屏幕，现在看来并没有开放任何 API 供开发者使用，所以我们无法得知用户旋转了手表旋钮这个重要的交互事件。现在看来我们能获取的操作仅只是用户点击屏幕上的按钮或者拖动滑条这个层级，从这个角度来说，现在的 WatchKit 还远没达到可以颠覆移动应用的地步。</p>
+
+<p>希望之后 Apple 会给我们带来其他的好消息吧。</p>
+
+<p>总之，舞台已经搭好，之后唱什么戏，就要看我们的了。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2015/01/swift-pointer/" title="link to Swift 中的指针使用">Swift 中的指针使用</a></h2>
+       <p class="excerpt">Apple 期望在 Swift 中指针能够尽量减少登场几率，因此在 Swift 中指针被映射为了一个泛型类型，并且还比较抽象。这在一定程度上造成了在 Swift 中指针使用的困难，特别是对那些并不熟悉指针，也没有多少指针操作经验的开发者 (包括我自己也是) 来说，在 Swift 中使用指针确实是一个挑战。在这篇文章里，我希望能从最基本的使用开始，总结一下在 Swift 中使用指针的一些常见方式和场景。这篇文章假定你至少知道指针是什么，如果对指针本身的概念不太清楚的话，可以先看看这篇五分钟 ...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2015-01-19 11:38:21 +0800" class="post-list__meta--date date">2015-01-19</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2015/01/swift-pointer/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2014/10/ib-customize-view/" title="link to WWDC 2014 Session笔记 - 可视化开发，IB 的新时代">WWDC 2014 Session笔记 - 可视化开发，IB 的新时代</a></h2>
+       <p class="excerpt">本文是我的 WWDC 2014 笔记 中的一篇，涉及的 Session 有What&#39;s New in Xcode 6What&#39;s New in Interface Builder如果说在 WWDC 14 之前 Interface Builder (IB) 还是可选项的话，我相信在此之后 IB 已经是毫无疑问的 iOS 开发标配了，纯代码界面可以说已经渐行渐远，可以逐渐离开我们的视线了。一言蔽之，就是 Apple 在催促大家使用 IB，特别是 Storyboard 做为界面开...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2014-10-24 23:02:07 +0800" class="post-list__meta--date date">2014-10-24</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2014/10/ib-customize-view/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2014/11/watch-kit/";
+        this.page.identifier = "/2014/11/watch-kit/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

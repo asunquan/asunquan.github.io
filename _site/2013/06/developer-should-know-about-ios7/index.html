@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>开发者所需要知道的iOS7 SDK新特性</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="开发者所需要知道的iOS7 SDK新特性">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="开发者所需要知道的iOS7 SDK新特性">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2013/06/developer-should-know-about-ios7/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2013-06-10 23:45:02 +0800" itemprop="datePublished" class="post-meta__date date">2013-06-10</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">开发者所需要知道的iOS7 SDK新特性</h1>
+  </header>
+
+  <section class="post">
+    <p><img src="/assets/images/2013/ios-7-logo.png" alt="iOS 7"></p>
+
+<p>春风又绿加州岸，物是人非又一年。WWDC 2013 keynote落下帷幕，新的iOS开发旅程也由此开启。在iOS7界面重大变革的背后，开发者们需要知道的又有哪些呢。同去年一样，我会先简单纵览地介绍iOS7中我个人认为开发者需要着重关注和学习的内容，之后再陆续对自己感兴趣章节进行探索。计划继承类似<a href="http://onevcat.com/2012/06/%E5%BC%80%E5%8F%91%E8%80%85%E6%89%80%E9%9C%80%E8%A6%81%E7%9F%A5%E9%81%93%E7%9A%84ios6-sdk%E6%96%B0%E7%89%B9%E6%80%A7/">WWDC2012的笔记</a>的形式，希望对国内开发者有所帮助。</p>
+
+<p>相关笔记整理如下：</p>
+
+<ul>
+<li>总览 <a href="http://onevcat.com/2013/06/developer-should-know-about-ios7/">开发者所需要知道的iOS7 SDK新特性</a></li>
+<li>工具 <a href="http://onevcat.com/2013/06/new-in-xcode5-and-objc/">WWDC2013笔记 Xcode5和ObjC新特性</a> </li>
+<li>UIKit动力学 <a href="http://onevcat.com/2013/06/uikit-dynamics-started/">WWDC2013笔记 UIKit力学模型入门</a></li>
+<li>SpriteKit入门 <a href="http://onevcat.com/2013/06/sprite-kit-start/">WWDC2013笔记 SpriteKit快速入门和新时代iOS游戏开发指南</a></li>
+<li>后台应用运行和多任务新特性 <a href="http://onevcat.com/2013/08/ios7-background-multitask/">WWDC2013笔记 iOS7中的多任务</a></li>
+<li>iOS7中弹簧式列表的制作 <a href="http://onevcat.com/2013/09/spring-list-like-ios7-message">WWDC 2013 Session笔记 - iOS7中弹簧式列表的制作</a> </li>
+<li>iOS7中自定义ViewController切换效果 <a href="http://onevcat.com/2013/10/vc-transition-in-ios7/">WWDC 2013 Session笔记 - iOS7中的ViewController切换</a></li>
+</ul>
+
+<hr>
+
+<h3>UI相关</h3>
+
+<h4>全新UI设计</h4>
+
+<p>iOS7最大的变化莫过于UI设计，也许你会说UI设计“这是设计师大大们应该关注的事情，不关开发者的事，我们只需要替换图片就行了”。那你就错了。UI的变化必然带来使用习惯和方式的转变，如何运用iOS7的UI，如何是自己的应用更切合新的系统，都是需要考虑的事情。另外值得注意的是，使用iOS7 SDK（现在只有Xcode5预览版提供）打包的应用在iOS7上运行时将会自动使用iOS7的新界面，所以原有应用可能需要对新界面进行重大调整。具体的iOS7中所使用的UI元素的人际交互界面文档，可以从<a href="https://developer.apple.com/library/prerelease/ios/design/index.html#//apple_ref/doc/uid/TP40013289">这里</a>找到（应该是需要开发者账号才能看）。</p>
+
+<p>简单总结来说，以现在上手体验看来新的UI变化改进有如下几点：</p>
+
+<ul>
+<li>状态栏，导航栏和应用实际展示内容不再界限：系统自带的应用都不再区分状态栏和navigation bar，而是用统一的颜色力求简洁。这也算是一种趋势。</li>
+<li>BarItem的按钮全部文字化：这点做的相当坚决，所有的导航和工具条按钮都取消了拟物化，原来的文字（比如“Edit”，“Done”之类）改为了简单的文字，原来的图标（比如新建或者删除）也做了简化。</li>
+<li>程序打开加入了动画：从主界面到图标所在位置的一个放大，同时显示应用的载入界面。</li>
+</ul>
+
+<p>自己实验了几个现有的AppStore应用在iOS7上的运行情况：</p>
+
+<ul>
+<li><a href="https://itunes.apple.com/app/id533469911?mt=8">Pomodoro Do</a>： 这是我自己开发的应用，运行正常，但是因为不是iOS7 SDK打包，所以在UI上使用了之前系统的，问题是导航栏Tint颜色丢失，导致很难看，需要尽快更新。</li>
+<li>Facebook：因为使用了图片自定义导航栏，而没有直接使用系统提供的材质，所以没什么问题。</li>
+<li>面包旅行：直接Crash，无法打开，原因未知。</li>
+</ul>
+
+<p>这次UI大改可以说是一次对敏捷开发的检验，原来的应用（特别是拟物化用得比较重的应用）虽然也能运行，但是很多UI自定义的地方需要更改不说，还容易让用户产生一种“来到了另一个世界”的感觉，同时可以看到也有部分应用无法运行。而对于苹果的封闭系统和只升不降的特性，开发者以及其应用必须要尽快适应这个新系统，这对于迭代快速，还在继续维护的应用来说会是一个机会。相信谁先能适应新的UI，谁就将在iOS7上占到先机。</p>
+
+<h4>UIKit的力学模型（UIKit Dynamics）</h4>
+
+<p>这个专题的相关笔记</p>
+
+<blockquote>
+<p>UIKit动力学 <a href="http://onevcat.com/2013/06/uikit-dynamics-started/">WWDC2013笔记 UIKit力学模型入门</a> <a href="http://onevcat.com/2013/06/uikit-dynamics-started/">http://onevcat.com/2013/06/uikit-dynamics-started/</a></p>
+</blockquote>
+
+<p>新增了<code>UIDynamicItem</code>委托，用来为UIView制定力学模型行为，当然其他任何对象都能通过实现这组接口来定义动力学行为，只不过在UIKit中可能应用最多。所谓动力学行为，是指将现实世界的我们常见的力学行为或者特性引入到UI中，比如重力等。通过实现UIDynamicItem，UIKit现在支持如下行为：</p>
+
+<ul>
+<li>UIAttachmentBehavior 连接两个实现了UIDynamicItem的物体（以下简称动力物体），一个物体移动时，另一个跟随移动</li>
+<li>UICollisionBehavior 指定边界，使两个动力物体可以进行碰撞</li>
+<li>UIGravityBehavior 顾名思义，为动力物体增加重力模拟</li>
+<li>UIPushBehavior 为动力物体施加持续的力</li>
+<li>UISnapBehavior 为动力物体指定一个附着点，想象一下类似挂一幅画在图钉上的感觉</li>
+</ul>
+
+<p>如果有开发游戏的童鞋可能会觉得这些很多都是做游戏时候的需求，一种box2d之类的2D物理引擎的既视感跃然而出。没错的亲，动态UI，加上之后要介绍的Sprite Kit，极大的扩展了使用UIKit进行游戏开发的可能性。另外要注意UIDynamicItem不仅适用于UIKit，任何对象都可以实现接口来获得动态物体的一些特性，所以说用来做一些3D的或者其他奇怪有趣的事情也不是没有可能。如果觉得Cocos2D+box2d这样的组合使用起来不方便的话，现在动态UIKit+SpriteKit给出了新的选择。</p>
+
+<h3>游戏方面</h3>
+
+<p>这个专题的相关笔记</p>
+
+<blockquote>
+<p>SpriteKit入门 <a href="http://onevcat.com/2013/06/sprite-kit-start/">WWDC2013笔记 SpriteKit快速入门和新时代iOS游戏开发指南</a> <a href="http://onevcat.com/2013/06/sprite-kit-start/">http://onevcat.com/2013/06/sprite-kit-start/</a></p>
+</blockquote>
+
+<p>iOS7 SDK极大加强了直接使用iOS SDK制作和分发游戏的体验，最主要的是引入了专门的游戏制作框架。</p>
+
+<h4>Sprite Kit Framework</h4>
+
+<p>这是个人认为iOS7 SDK最大的亮点，也是最重要的部分，iOS SDK终于有自己的精灵系统了。Sprite Kit Framework使用硬件加速的动画系统来表现2D和2.5D的游戏，它提供了制作游戏所需要的大部分的工具，包括图像渲染，动画系统，声音播放以及图像模拟的物理引擎。可以说这个框架是iOS SDK自带了一个较完备的2D游戏引擎，力图让开发者专注于更高层的实现和内容。和大多数游戏引擎一样，Sprite Kit内的内容都按照场景（Scene）来分开组织，一个场景可以包括贴图对象，视频，形状，粒子效果甚至是CoreImage滤镜等等。相对于现有的2D引擎来说，由于Sprite Kit是在系统层级进行的优化，渲染时间等都由框架决定，因此应该会有比较高的效率。</p>
+
+<p>另外，Xcode还提供了创建粒子系统和贴图Atlas的工具。使用Xcode来管理粒子效果和贴图atlas，可以迅速在Sprite Kit中反应出来。</p>
+
+<h4>Game Controller Framework</h4>
+
+<p>为Made-for-iPhone/iPod/iPad (MFi) game controller设计的硬件的对应的框架，可以让用户用来连接和控制专门的游戏硬件。参考WWDC 2013开场视频中开始的赛车演示。现在想到的是，也许这货不仅可以用于游戏…或者苹果之后会扩展其应用，因为使用普及率很高的iPhone作为物联网的入口，似乎会是很有前途的事情。</p>
+
+<h4>GameCenter改进</h4>
+
+<p>GameCenter一直是苹果的败笔...虽然每年都在改进，但是一直没看到大的起色。今年也不例外，都是些小改动，不提也罢。</p>
+
+<h3>多任务强化</h3>
+
+<p>这个专题的相关笔记</p>
+
+<blockquote>
+<p>后台应用运行和多任务新特性 <a href="http://onevcat.com/2013/08/ios7-background-multitask/">WWDC2013笔记 iOS7中的多任务</a> <a href="http://onevcat.com/2013/08/ios7-background-multitask/">http://onevcat.com/2013/08/ios7-background-multitask/</a></p>
+</blockquote>
+
+<ul>
+<li>经常需要下载新内容的应用现在可以通过设置<code>UIBackgroundModes</code>为<code>fetch</code>来实现后台下载内容了，需要在AppDelegate里实现<code>setMinimumBackgroundFetchInterval:</code>以及<code>application:performFetchWithCompletionHandler:</code>来处理完成的下载，这个为后台运行代码提供了又一种选择。不过考虑到Apple如果继续严格审核的话，可能只有杂志报刊类应用能够取得这个权限吧。另外需要注意开发者仅只能指定一个最小间隔，最后下没下估计就得看系统娘的心情了。</li>
+<li>同样是后台下载，以前只能推送提醒用户进入应用下载，现在可以接到推送并在后台下载。UIBackgroundModes设为remote-notification，并实现<code>application:didReceiveRemoteNotification:fetchCompletionHandler:</code></li>
+</ul>
+
+<p>为后台下载，开发者必须使用一个新的类<code>NSURLSession</code>，其实就是在NSURLConnection上加了个后台处理，使用类似，API十分简单，不再赘述。</p>
+
+<h3>AirDrop</h3>
+
+<p>这个是iOS7的重头新功能，用户可以用它来分享照片，文档，链接，或者其他数据给附近的设备。但是不需要特别的实现，被集成在了标准的UIActivityViewController里，并没有单独的大块API提供。数据的话，可以通过实现UIActivityItemSource接口后进行发送。大概苹果也不愿意看到超出他们控制的文件分享功能吧，毕竟这和iOS设计的初衷不一样。如果你不使用UIActivityViewController的话，可能是无法在应用里实装AirDrop功能了。</p>
+
+<p>另外，结合自定义的应用文件类型，可以容易地实现在后台接收到特定文件后使用自己的应用打开，也算是增加用户留存和回访的一个办法。但是这样做现在看来比较讨厌的是会有将所有文件都注册为可以打开的应用（比如Evernote或者Dropbox之类），导致接收到AirDrop发送的内容的时候会弹出很长一排选项，体验较差，只能说希望Apple以后能改进吧</p>
+
+<h3>地图</h3>
+
+<p>Apple在继续在地图应用上的探索，MapKit的改进也乏善可陈。我一直相信地图类应用的瓶颈一定在于数据，但是对于数据源的建立并不是一年两年能够完成的。Google在这一块凭借自己的搜索引擎有着得天独厚的优势，苹果还差的很远很远。看看有哪些新东西吧：</p>
+
+<ul>
+<li>MKMapCamera，可以将一个MKMapCamera对象添加到地图上，在指明位置，角度和方向后将呈现3D的样子…大概可以想象成一个数字版的Google街景..</li>
+<li>MKDirections 获取Apple提供的基于方向的路径，然后可以用来将路径绘制在自己的应用中。这可能对一些小的地图服务提供商产生冲击，但是还是那句话，地图是一个数据的世界，在拥有完备数据之前，Apple不是Google的对手。这个状况至少会持续好几年（也有可能是永远）。</li>
+<li>MKGeodesicPolyline 创建一个随地球曲率的线，并附加到地图上，完成一些视觉效果。</li>
+<li>MKMapSnapshotter 使用其拍摄基于地图的照片，也许各类签到类应用会用到</li>
+<li>改变了overlay物件的渲染方式</li>
+</ul>
+
+<h3>Inter-App Audio 应用间的音频</h3>
+
+<p>AudioUnit框架中加入了在同一台设备不同应用之间发送MIDI指令和传送音频的能力。比如在一个应用中使用AudioUnit录音，然后在另一个应用中打开以处理等。在音源应用中声明一个AURemoteIO实例来标为Inter-App可用，在目标应用中使用新的发现接口来发现并获取音频。</p>
+
+<p>想法很好，也算是在应用内共享迈出了一步，不过我对现在使用AudioUnit这样的低层级框架的应用数量表示不乐观。也许今后会有一些为更高层级设计的共享API提供给开发者使用。毕竟要从AudioUnit开始处理音频对于大多数开发者来说并不是一件很容易的事情。</p>
+
+<h3>点对点连接 Peer-to-Peer Connectivity</h3>
+
+<p>可以看成是AirDrop不能直接使用的补偿，代价是需要自己实现。MultipeerConnectivity框架可以用来发现和连接附近的设备，并传输数据，而这一切并不需要有网络连接。可以看到Apple逐渐在文件共享方面一步步放开限制，但是当然所有这些都还是被限制在sandbox里的。</p>
+
+<h3>Store Kit Framework</h3>
+
+<p>Store Kit在内购方面采用了新的订单系统，这将可以实现对订单的本机验证。这是一次对应内购破解和有可能验证失败导致内购失败的更新，苹果希望藉此减少内购的实现流程，减少出错，同时遏制内购破解泛滥。前者可能没有问题，但是后者的话，因为objc的动态特性，决定了只要有越狱存在，内购破解也是早晚的事情。不过这一点确实方便了没有能力架设验证服务器的小开发者，这方面来说还是很好的。</p>
+
+<h3>最后</h3>
+
+<p>当然还有一些其他小改动，包括MessageUI里添加了附件按钮，Xcode开始支持模块了等等。完整的iOS7新特性列表可以在<a href="https://developer.apple.com/library/prerelease/ios/releasenotes/General/WhatsNewIniOS/Articles/iOS7.html#//apple_ref/doc/uid/TP40013162-SW1">这里</a>找到（暂时应该也需要开发者账号）。最后一个好消息是，苹果放慢了废弃API的速度，这个版本并没有特别重要的API被标为Deprecated，Cheers。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/06/new-in-xcode5-and-objc/" title="link to WWDC 2013 Session笔记 - Xcode5和ObjC新特性">WWDC 2013 Session笔记 - Xcode5和ObjC新特性</a></h2>
+       <p class="excerpt">这是我的WWDC2013系列笔记中的一篇，完整的笔记列表请参看这篇总览。本文仅作为个人记录使用，也欢迎在许可协议范围内转载或使用，但是还烦请保留原文链接，谢谢您的理解合作。如果您觉得本站对您能有帮助，您可以使用RSS或邮件方式订阅本站，这样您将能在第一时间获取本站信息。本文涉及到的WWDC2013 Session有Session 400 What&#39;s New in Xcode 5Session 401 Xcode Core ConceptsSession 407 Debugging...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-06-12 23:48:32 +0800" class="post-list__meta--date date">2013-06-12</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2013/06/new-in-xcode5-and-objc/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2013/05/talk-about-warning/" title="link to 谈谈Objective-C的警告">谈谈Objective-C的警告</a></h2>
+       <p class="excerpt">一个有节操的程序员会在乎自己的代码的警告，就像在乎饭碗边上有只死蟑螂那样。——@onevcat重视编译警告现在编译器有时候会很吵，而编译器给出的警告对开发者来说是很有用的信息。警告不会阻止继续编译和链接，也不会导致程序不能运行，但是很多时候编译器会先你一步发现问题所在，对于Objective-C来说特别如此。Clang不仅对于明显的错误能够提出警告（比如某方法或者接口未实现），也能对很多潜在可能的问题做出提示（比如方法已经废弃或者有问题的转换），而这些问题在很多时候都可能成为潜在的致命错误...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2013-05-23 23:43:19 +0800" class="post-list__meta--date date">2013-05-23</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2013/05/talk-about-warning/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2013/06/developer-should-know-about-ios7/";
+        this.page.identifier = "/2013/06/developer-should-know-about-ios7/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

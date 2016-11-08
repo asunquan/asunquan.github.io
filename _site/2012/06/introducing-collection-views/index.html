@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>WWDC 2012 Session笔记——205 Introducing Collection Views</title>
+  <meta name="description" content="这是博主的WWDC2012笔记系列中的一篇，完整的笔记列表可以参看这里。如果您是首次来到本站，也许您会有兴趣通过RSS，或者通过页面左侧的邮件订阅的方式订阅本站。">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="WWDC 2012 Session笔记——205 Introducing Collection Views">
+  <meta name="twitter:description" content="这是博主的WWDC2012笔记系列中的一篇，完整的笔记列表可以参看这里。如果您是首次来到本站，也许您会有兴趣通过RSS，或者通过页面左侧的邮件订阅的方式订阅本站。">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="WWDC 2012 Session笔记——205 Introducing Collection Views">
+  <meta property="og:description" content="这是博主的WWDC2012笔记系列中的一篇，完整的笔记列表可以参看这里。如果您是首次来到本站，也许您会有兴趣通过RSS，或者通过页面左侧的邮件订阅的方式订阅本站。">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2012/06/introducing-collection-views/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2012-06-30 22:41:15 +0800" itemprop="datePublished" class="post-meta__date date">2012-06-30</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">WWDC 2012 Session笔记——205 Introducing Collection Views</h1>
+  </header>
+
+  <section class="post">
+    <p>这是博主的WWDC2012笔记系列中的一篇，完整的笔记列表可以参看<a href="http://onevcat.com/2012/06/%E5%BC%80%E5%8F%91%E8%80%85%E6%89%80%E9%9C%80%E8%A6%81%E7%9F%A5%E9%81%93%E7%9A%84ios6-sdk%E6%96%B0%E7%89%B9%E6%80%A7/">这里</a>。如果您是首次来到本站，也许您会有兴趣通过<a href="http://onevcat.com/atom.xml">RSS</a>，或者通过页面左侧的邮件订阅的方式订阅本站。</p>
+
+<p>在之前的<a href="http://www.onevcat.com/2012/06/%E5%BC%80%E5%8F%91%E8%80%85%E6%89%80%E9%9C%80%E8%A6%81%E7%9F%A5%E9%81%93%E7%9A%84ios6-sdk%E6%96%B0%E7%89%B9%E6%80%A7/">iOS6 SDK新特性前瞻</a>中我曾经提到过UICollectionView，当时只把CollectionView当作是一个现在已有的开源GridView，仔细研究了下WWDC2012相关的Session后发现并不是那么简单。Apple这次真的给广大开发者带来了一个非常powerful的view，其强大程度可以说远超UITableView。接下来的这篇笔记将对应Session 205，作为使用UICollectionView的入门，之后还将完成一篇关于深入使用UICollectionView以及相应的Layout的笔记。</p>
+
+<p>废话到此，正式开始。</p>
+
+<h3>什么是UICollectionView</h3>
+
+<p>UICollectionView是一种新的数据展示方式，简单来说可以把他理解成多列的UITableView(请一定注意这是UICollectionView的最最简单的形式)。如果你用过iBooks的话，可能你还对书架布局有一定印象：一个虚拟书架上放着你下载和购买的各类图书，整齐排列。其实这就是一个UICollectionView的表现形式，或者iPad的iOS6中的原生时钟应用中的各个时钟，也是UICollectionView的最简单的一个布局，如图：</p>
+
+<p><img src="http://www.onevcat.com/wp-content/uploads/2012/06/QQ20120630-1.png" alt="iOS6 iPad版时钟应用">
+最简单的UICollectionView就是一个GridView，可以以多列的方式将数据进行展示。标准的UICollectionView包含三个部分，它们都是UIView的子类：</p>
+
+<ul>
+<li>Cells 用于展示内容的主体，对于不同的cell可以指定不同尺寸和不同的内容，这个稍后再说</li>
+<li>Supplementary Views 追加视图 如果你对UITableView比较熟悉的话，可以理解为每个Section的Header或者Footer，用来标记每个section的view</li>
+<li>Decoration Views 装饰视图 这是每个section的背景，比如iBooks中的书架就是这个</li>
+</ul>
+
+<p><img src="http://www.onevcat.com/wp-content/uploads/2012/06/QQ20120630-2.png" alt="">
+<img src="http://www.onevcat.com/wp-content/uploads/2012/06/QQ20120630-3.png" alt=""></p>
+
+<p>不管一个UICollectionView的布局如何变化，这三个部件都是存在的。再次说明，复杂的UICollectionView绝不止上面的几幅图，关于较复杂的布局和相应的特性，我会在本文稍后和<a href="http://www.onevcat.com/2012/08/advanced-collection-view/%22">下一篇笔记</a>中进行一些深入。</p>
+
+<hr>
+
+<h3>实现一个简单的UICollectionView</h3>
+
+<p>先从最简单的开始，UITableView是iOS开发中的非常非常非常重要的一个类，相信如果你是开发者的话应该是对这个类非常熟悉了。实现一个UICollectionView和实现一个UITableView基本没有什么大区别，它们都同样是datasource和delegate设计模式的：datasource为view提供数据源，告诉view要显示些什么东西以及如何显示它们，delegate提供一些样式的小细节以及用户交互的相应。因此在本节里会大量对比collection view和table view来进行说明，如果您还不太熟悉table view的话，也是个对照着复习的好机会。</p>
+
+<h4>￼￼￼￼UICollectionViewDataSource</h4>
+
+<ul>
+<li>section的数量 ￼-numberOfSectionsInCollection:</li>
+<li>某个section里有多少个item ￼-collectionView:numberOfItemsInSection:</li>
+<li>对于某个位置应该显示什么样的cell ￼-collectionView:cellForItemAtIndexPath:</li>
+</ul>
+
+<p>实现以上三个委托方法，基本上就可以保证CollectionView工作正常了。当然，还有提供Supplementary View的方法</p>
+
+<ul>
+<li>  collectionView:viewForSupplementaryElementOfKind:atIndexPath:</li>
+</ul>
+
+<p>对于Decoration Views，提供方法并不在UICollectionViewDataSource中，而是直接UICollectionViewLayout类中的(因为它仅仅是视图相关，而与数据无关)，放到稍后再说。</p>
+
+<h4>关于重用</h4>
+
+<p>为了得到高效的View，对于cell的重用是必须的，避免了不断生成和销毁对象的操作，这与在UITableView中的情况是一致的。但值得注意的时，在UICollectionView中，不仅cell可以重用，Supplementary View和Decoration View也是可以并且应当被重用的。在iOS5中，Apple对UITableView的重用做了简化，以往要写类似这样的代码：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@&quot;MY_CELL_ID&quot;]; 
+if (!cell) {    //如果没有可重用的cell，那么生成一个 
+    cell = [[UITableViewCell alloc] init]; 
+} 
+//配置cell，blablabla 
+return cell
+</code></pre></figure>
+<p>而如果我们在TableView向数据源请求数据之前使用<code>-registerNib:forCellReuseIdentifier:</code>方法为@“MY_CELL_ID&quot;注册过nib的话，就可以省下每次判断并初始化cell的代码，要是在重用队列里没有可用的cell的话，runtime将自动帮我们生成并初始化一个可用的cell。</p>
+
+<p>这个特性很受欢迎，因此在UICollectionView中Apple继承使用了这个特性，并且把其进行了一些扩展。使用以下方法进行注册：</p>
+
+<ul>
+<li>-registerClass:forCellWithReuseIdentifier:</li>
+<li>-registerClass:forSupplementaryViewOfKind:withReuseIdentifier:</li>
+<li>-registerNib:forCellWithReuseIdentifier:</li>
+<li>-registerNib:forSupplementaryViewOfKind:withReuseIdentifier:</li>
+</ul>
+
+<p>相比UITableView有两个主要变化：一是加入了对某个Class的注册，这样即使不用提供nib而是用代码生成的view也可以被接受为cell了；二是不仅只是cell，Supplementary View也可以用注册的方法绑定初始化了。在对collection view的重用ID注册后，就可以像UITableView那样简单的写cell配置了：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">- (UICollectionView*)collectionView:(UICollectionView*)cv cellForItemAtIndexPath:(NSIndexPath*)indexPath { 
+    MyCell *cell = [cv dequeueReusableCellWithReuseIdentifier:@”MY_CELL_ID”]; 
+    // Configure the cell&#39;s content 
+    cell.imageView.image = ... 
+    return cell; 
+}
+</code></pre></figure>
+<p>需要吐槽的是，对collection view，取重用队列的方法的名字和UITableView里面不一样了，在Identifier前面多加了Reuse五个字母，语义上要比以前清晰，命名规则也比以前严谨了..不知道Apple会不会为了追求完美而把UITableView中的命名不那么好的方法deprecate掉。</p>
+
+<h4>UICollectionViewDelegate</h4>
+
+<p>数据无关的view的外形啊，用户交互啊什么的，由UICollectionViewDelegate来负责：</p>
+
+<ul>
+<li>  cell的高亮</li>
+<li>  cell的选中状态</li>
+<li>  可以支持长按后的菜单</li>
+</ul>
+
+<p>关于用户交互，UICollectionView也做了改进。每个cell现在有独立的高亮事件和选中事件的delegate，用户点击cell的时候，现在会按照以下流程向delegate进行询问：</p>
+
+<ol>
+<li> -￼collectionView:shouldHighlightItemAtIndexPath: 是否应该高亮？</li>
+<li> -￼collectionView:didHighlightItemAtIndexPath: 如果1回答为是，那么高亮</li>
+<li> -￼collectionView:shouldSelectItemAtIndexPath: 无论1结果如何，都询问是否可以被选中？</li>
+<li> -collectionView:didUnhighlightItemAtIndexPath: 如果1回答为是，那么现在取消高亮</li>
+<li> -collectionView:didSelectItemAtIndexPath: 如果3回答为是，那么选中cell</li>
+</ol>
+
+<p>状态控制要比以前灵活一些，对应的高亮和选中状态分别由highlighted和selected两个属性表示。</p>
+
+<h4>关于Cell</h4>
+
+<p>相对于UITableViewCell来说，UICollectionViewCell没有这么多花头。首先UICollectionViewCell不存在各式各样的默认的style，这主要是由于展示对象的性质决定的，因为UICollectionView所用来展示的对象相比UITableView来说要来得灵活，大部分情况下更偏向于图像而非文字，因此需求将会千奇百怪。因此SDK提供给我们的默认的UICollectionViewCell结构上相对比较简单，由下至上：</p>
+
+<ul>
+<li>首先是cell本身作为容器view</li>
+<li>然后是一个大小自动适应整个cell的backgroundView，用作cell平时的背景</li>
+<li>再其上是selectedBackgroundView，是cell被选中时的背景</li>
+<li>最后是一个contentView，自定义内容应被加在这个view上</li>
+</ul>
+
+<p>这次Apple给我们带来的好康是被选中cell的自动变化，所有的cell中的子view，也包括contentView中的子view，在当cell被选中时，会自动去查找view是否有被选中状态下的改变。比如在contentView里加了一个normal和selected指定了不同图片的imageView，那么选中这个cell的同时这张图片也会从normal变成selected，而不需要额外的任何代码。</p>
+
+<h4>￼UICollectionViewLayout</h4>
+
+<p>终于到UICollectionView的精髓了…这也是UICollectionView和UITableView最大的不同。UICollectionViewLayout可以说是UICollectionView的大脑和中枢，它负责了将各个cell、Supplementary View和Decoration Views进行组织，为它们设定各自的属性，包括但不限于：</p>
+
+<ul>
+<li>位置</li>
+<li>尺寸</li>
+<li>透明度</li>
+<li>层级关系</li>
+<li>形状</li>
+<li>等等等等…</li>
+<li>
+Layout决定了UICollectionView是如何显示在界面上的。在展示之前，一般需要生成合适的UICollectionViewLayout子类对象，并将其赋予CollectionView的collectionViewLayout属性。关于详细的自定义UICollectionViewLayout和一些细节，我将写在之后一篇笔记中。</li>
+</ul>
+
+<p>Apple为我们提供了一个最简单可能也是最常用的默认layout对象，￼￼￼UICollectionViewFlowLayout。Flow Layout简单说是一个直线对齐的layout，最常见的Grid View形式即为一种Flow Layout配置。上面的照片架界面就是一个典型的Flow Layout。</p>
+
+<ul>
+<li>首先一个重要的属性是itemSize，它定义了每一个item的大小。通过设定itemSize可以全局地改变所有cell的尺寸，如果想要对某个cell制定尺寸，可以使用-collectionView:layout:sizeForItemAtIndexPath:方法。</li>
+<li><p>间隔 可以指定item之间的间隔和每一行之间的间隔，和size类似，有全局属性，也可以对每一个item和每一个section做出设定：</p>
+
+<ul>
+<li>@property (CGSize) minimumInteritemSpacing</li>
+<li>@property (CGSize) minimumLineSpacing</li>
+<li>-collectionView:layout:minimumInteritemSpacingForSectionAtIndex:</li>
+<li>-collectionView:layout:minimumLineSpacingForSectionAtIndex:</li>
+</ul></li>
+<li><p>滚动方向 由属性scrollDirection确定scroll view的方向，将影响Flow Layout的基本方向和由header及footer确定的section之间的宽度</p>
+
+<ul>
+<li>UICollectionViewScrollDirectionVertical</li>
+<li>UICollectionViewScrollDirectionHorizontal</li>
+</ul></li>
+<li><p>Header和Footer尺寸 同样地分为全局和部分。需要注意根据滚动方向不同，header和footer的高和宽中只有一个会起作用。垂直滚动时section间宽度为该尺寸的高，而水平滚动时为宽度起作用，如图。</p>
+
+<ul>
+<li>@property (CGSize) headerReferenceSize</li>
+<li>@property (CGSize) footerReferenceSize</li>
+<li>-collectionView:layout:referenceSizeForHeaderInSection:</li>
+<li>-collectionView:layout:referenceSizeForFooterInSection:</li>
+</ul></li>
+<li><p>缩进</p>
+
+<ul>
+<li>@property UIEdgeInsets sectionInset;</li>
+<li>-collectionView:layout:insetForSectionAtIndex:</li>
+</ul></li>
+</ul>
+
+<h4>总结</h4>
+
+<p>一个UICollectionView的实现包括两个必要部分：UICollectionViewDataSource和UICollectionViewLayout，和一个交互部分：UICollectionViewDelegate。而Apple给出的UICollectionViewFlowLayout已经是一个很强力的layout方案了。</p>
+
+<hr>
+
+<h3>几个自定义的Layout</h3>
+
+<p>但是光是UICollectionViewFlowLayout的话，显然是不够用的，而且如果单单是这样的话，就和现有的开源各类Grid View没有区别了…UICollectionView的强大之处，就在于各种layout的自定义实现，以及它们之间的切换。先看几个相当exiciting的例子吧～</p>
+
+<p>比如，堆叠布局：</p>
+
+<p><img src="http://www.onevcat.com/wp-content/uploads/2012/06/QQ20120630-4.png" alt=""></p>
+
+<p>圆形布局：</p>
+
+<p><img src="http://www.onevcat.com/wp-content/uploads/2012/06/QQ20120630-5-300x290.png" alt=""></p>
+
+<p>和Cover Flow布局：</p>
+
+<p><img src="http://www.onevcat.com/wp-content/uploads/2012/06/QQ20120630-6.png" alt=""></p>
+
+<p>所有这些布局都采用了同样的数据源和委托方法，因此完全实现了model和view的解耦。但是如果仅这样，那开源社区也已经有很多相应的解决方案了。Apple的强大和开源社区不能比拟的地方在于对SDK的全局掌控，CollectionView提供了非常简单的API可以令开发者只需要一次简单调用，就可以使用CoreAnimation在不同的layout之间进行动画切换，这种切换必定将大幅增加用户体验，代价只是几十行代码就能完成的布局实现，以及简单的一句API调用，不得不说现在所有的开源代码与之相比，都是相形见拙了…不得不佩服和感谢UIKit团队的努力。</p>
+
+<p>关于上面几种自定义Layout和实现细节，和其他高级CollectionView应用，将在<a href="http://www.onevcat.com/2012/08/advanced-collection-view/" title="WWDC 2012 Session笔记——219 Advanced Collection Views and Building Custom Layouts">下一篇笔记</a>中进行详细说明～</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/07/pomodoro-do/" title="link to Pomodoro Do - 拖延症患者的福音">Pomodoro Do - 拖延症患者的福音</a></h2>
+       <p class="excerpt">由于完全是自己完成的应用啦，所以详细介绍就写的偏向广告一点吧～欢迎大家购买使用，并给我提意见哦～我会不断完善这款app的。App Store地址：https://itunes.apple.com/app/id791903475?ls=1&amp;mt=8Pomodoro Do官方主页：http://pomo.onevcat.com/i果儿评测：Pomodoro Do——拖延症什么的，我才不怕呢PunApp：用一顆番茄來改變你的人生 – Pomodoro Do 評測什么是Pomodoro D...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-07-25 22:50:56 +0800" class="post-list__meta--date date">2012-07-25</time> &#8226; <span class="post-list__meta--tags tags">南箕北斗集</span><a class="btn-border-small" href=/2012/07/pomodoro-do/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/06/modern-objective-c/" title="link to WWDC 2012 Session笔记——405 Modern Objective-C">WWDC 2012 Session笔记——405 Modern Objective-C</a></h2>
+       <p class="excerpt">这是博主的WWDC2012笔记系列中的一篇，完整的笔记列表可以参看这里。如果您是首次来到本站，也许您会有兴趣通过RSS，或者通过页面左侧的邮件订阅的方式订阅本站。2007年的时候，Objective-C在TIOBE编程语言排名里还排在可怜的第45位，而随着移动互联网的迅速发展和iPhone，iPad等iOS设备的广阔市场前景，Objective-C也迅速崛起，走进了开发者的视野。在最近的TIOBE排名中，Objective-C达到了惊人的第4名，可以说已经成为当今世界上一门非常重要的编程语...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-06-24 22:39:08 +0800" class="post-list__meta--date date">2012-06-24</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2012/06/modern-objective-c/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2012/06/introducing-collection-views/";
+        this.page.identifier = "/2012/06/introducing-collection-views/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

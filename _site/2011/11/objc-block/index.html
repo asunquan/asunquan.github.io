@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>Objective-C中的Block</title>
+  <meta name="description" content="技术是需要沉淀的。接触iOS开发也有大半年时间了，从一开始的纯白到现在自我感觉略懂一点，其实进步是明显的。无数牛人表示技术博是完成菜鸟到高手蜕变的途径之一，虽然这个博客并非是为技术而生，但是也许作为工科背景下的我来说，每天都写文艺的东西显然并不现实。于是就有了这个集子：能工巧匠集。用这篇开篇，">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Objective-C中的Block">
+  <meta name="twitter:description" content="技术是需要沉淀的。接触iOS开发也有大半年时间了，从一开始的纯白到现在自我感觉略懂一点，其实进步是明显的。无数牛人表示技术博是完成菜鸟到高手蜕变的途径之一，虽然这个博客并非是为技术而生，但是也许作为工科背景下的我来说，每天都写文艺的东西显然并不现实。于是就有了这个集子：能工巧匠集。用这篇开篇，">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Objective-C中的Block">
+  <meta property="og:description" content="技术是需要沉淀的。接触iOS开发也有大半年时间了，从一开始的纯白到现在自我感觉略懂一点，其实进步是明显的。无数牛人表示技术博是完成菜鸟到高手蜕变的途径之一，虽然这个博客并非是为技术而生，但是也许作为工科背景下的我来说，每天都写文艺的东西显然并不现实。于是就有了这个集子：能工巧匠集。用这篇开篇，">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2011/11/objc-block/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2011-11-09 22:55:12 +0800" itemprop="datePublished" class="post-meta__date date">2011-11-09</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">Objective-C中的Block</h1>
+  </header>
+
+  <section class="post">
+    <p>技术是需要沉淀的。接触iOS开发也有大半年时间了，从一开始的纯白到现在自我感觉略懂一点，其实进步是明显的。无数牛人表示技术博是完成菜鸟到高手蜕变的途径之一，虽然这个博客并非是为技术而生，但是也许作为工科背景下的我来说，每天都写文艺的东西显然并不现实。于是就有了这个集子：能工巧匠集。用这篇开篇，</p>
+
+<p>写一些在开发过程中的积累和感悟，大部分应该是Objectiv-C和XCode的内容，包括基本语法特性和小技巧，或者自己喜欢的一些开源代码的用法分析等等。也许以后会扩展到Unity3D或者UDK的一些3D引擎的心得，当然也有可能会有别的一些自己认为值得分享的东西。这个集子的目的，一来是记录自己一步一步成长的脚印，二来也算是为新来者铺一条直一点的道路。集子里的东西仅仅是自己的心得体会，高手路过请一笑置之..感恩。</p>
+
+<p>iOS SDK 4.0开始，Apple引入了block这一特性，而自从block特性诞生之日起，似乎它就受到了Apple特殊的照顾和青睐。字面上说，block就是一个代码块，但是它的神奇之处在于在内联(inline)执行的时候(这和C++很像)还可以传递参数。同时block本身也可以被作为参数在方法和函数间传递，这就给予了block无限的可能。</p>
+
+<p>在日常的coding里绝大时间里开发者会是各种block的使用者，但是当你需要构建一些比较基础的，提供给别人用的类的时候，使用block会给别人的使用带来很多便利。当然如果你已经厌烦了一直使用delegate模式来编程的话，偶尔转转写一些block，不仅可以锻炼思维，也能让你写的代码看起来高端洋气一些，而且因为代码跳转变少，所以可读性也会增加。</p>
+
+<p>先来看一个简单的block吧：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">// Defining a block variable
+BOOL (^isInputEven)(int) = ^(int input) {
+    if (input % 2 == 0) {
+        return YES;
+    } else {
+        return NO;
+    }
+};
+</code></pre></figure>
+<p>以上定义了一个block变量，block本身就是一个程序段，因此有返回值有输入参数，这里这个block返回的类型为BOOL。天赋异秉的OC用了同样不走寻常路的&quot;
+<sup>&quot;符号来表示block定义的开始（就像用减号和加号来定义方法一样），block的名称紧跟在</sup>
+<sup>符号之后，这里是isInputEven（也即以后使用inline方式调用该block时所需要的名称）。这段block接受一个int型的参数，而在等号后面的int</sup> input是对这个传入int参数的说明：在该block内，将使用input这个名字来指代传入的int参数。一开始看block的定义和写法时可能会比较痛苦，但是请谨记它只是把我们常见的方法实现换了一种写法而已，请以习惯OC中括号发送消息的速度和决心，尽快习惯block的写法吧！</p>
+
+<p>调用这个block的方法就非常简单和直观了，类似调用c函数的方式即可：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">// Call similar to a C function call
+int x = -101;
+NSLog(@&quot;%d %@ number&quot;, x, isInputEven(x) ? @&quot;is an even&quot; : @&quot;is not an even&quot;);
+</code></pre></figure>
+<p>不出意外的话输出为<strong>-101 is not an even number</strong></p>
+
+<p>以上的用法没有什么特别之处，只不过是类似内联函数罢了。但是block的神奇之处在于block外的变量可以无缝地直接在block内部使用，比如这样：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">float price = 1.99; 
+float (^finalPrice)(int) = ^(int quantity) {
+    // Notice local variable price is 
+    // accessible in the block
+    return quantity * price;
+};
+int orderQuantity = 10;
+NSLog(@&quot;Ordering %d units, final price is: $%2.2f&quot;, orderQuantity, finalPrice(orderQuantity));
+</code></pre></figure>
+<p>输出为<strong>Ordering 10 units, final price is: $19.90</strong></p>
+
+<p>相当开心啊，block外的<code>price</code>成功地在block内部也能使用了，这意味着内联函数可以使用处于同一scope里的局部变量。但是需要注意的是，你不能在block内部改变本地变量的值，比如在
+<sup>{}里写`price</sup> = 0.99<code>这样的语句的话，你亲爱的compiler一定是会叫的。而更需要注意的是</code>price`这样的局部变量的变化是不会体现在block里的！比如接着上面的代码，继续写：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">price = .99;
+NSLog(@&quot;Ordering %d units, final price is: $%2.2f&quot;, orderQuantity, finalPrice(orderQuantity));
+</code></pre></figure>
+<p>输出还是<strong>Ordering 10 units, final price is: $19.90，</strong>这就比较忧伤了，可以理解为在block内的<code>price</code>是readonly的，只在定义block时能够被赋值（补充说明，实际上是因为<code>price</code>是value type，block内的<code>price</code>是在申明block时复制了一份到block内，block外面的<code>price</code>无论怎么变化都和block内的<code>price</code>无关了。如果是reference type的话，外部的变化实际上是会影响block内的）。</p>
+
+<p>但是如果确实需要传递给block变量值的话，可以考虑下面两种方法：</p>
+
+<p>1、将局部变量声明为<code>__block</code>，表示外部变化将会在block内进行同样操作，比如：  </p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">// Use the __block storage modifier to allow changes to &#39;price&#39;
+__block float price = 1.99;
+float (^finalPrice)(int) = ^(int quantity) {
+    return quantity * price;
+};
+
+int orderQuantity = 10;
+price = .99;
+
+NSLog(@&quot;With block storage modifier - Ordering %d units, final price is: $%2.2f&quot;, orderQuantity, finalPrice(orderQuantity));
+</code></pre></figure>
+<p>此时输出为<strong>With block storage modifier – Ordering 10 units, final price is: $9.90</strong></p>
+
+<p>2、使用实例变量——这个比较没什么好说的，实例内的变量横行于整个实例内..可谓霸道无敌...=_=</p>
+
+<p>block外的对象和基本数据一样，也可以作为block的参数。而让人开心的是，block将自动retain传递进来的参数，而不需担心在block执行之前局部对象变量已经被释放的问题。这里就不深究这个问题了，只要严格遵循Apple的thread safe来写，block的内存管理并不存在问题。（更新，ARC的引入再次简化了这个问题，完全不用担心内存管理的问题了）</p>
+
+<p>由于block的灵活的机制，导致iOS SDK 4.0开始，Apple大力提倡在各种地方应用block机制。最典型的当属UIView的动画了：在4.0前写一个UIView的Animation大概是这样的：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">[UIView beginAnimations:@&quot;ToggleSiblings&quot;context:nil];
+[UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:self.view cache:YES];
+[UIViewsetAnimationDuration:1.0f];
+// Make your changes
+[UIView commitAnimations];
+</code></pre></figure>
+<p>在一个不知名的小角落里的begin/commit两行代码间写下需要进行的动作，然后静待发生。而4.0后这样的方法直接被discouraged了(虽然还没Deprecated)，取而代之的正是block：</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">[UIView animateWithDuration:5.0f animations:^{
+    view.opacity = 0.5f;
+}];
+</code></pre></figure>
+<p>简单明了，一切就这么发生了..</p>
+
+<p>可能有人会觉得block的语法很奇怪，不像是OOP的风格，诚然直接使用的block看起来破坏了OOP的结构，也让实例的内存管理出现了某些“看上去奇怪”的现象。但是通过<code>typedef</code>的方法，可以将block进行简单包装，让它的行为更靠近对象一些： </p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">typedef double (^unary_operation_t)(double op);
+</code></pre></figure>
+<p>定义了一个接受一个double型作为变量，类型为unary_operation_t的block，之后在使用前用类似C的语法声明一个unary_operation_t类型的&quot;实例&quot;，并且定义内容后便可以直接使用这个block了～</p>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">unary_operation_t square;
+square = ^(double operand) {
+    return operand * operand;
+}
+</code></pre></figure>
+<p><del>啰嗦一句的还是内存管理的问题，block始终不是对象，而block的内存管理自然也是和普通对象不一样。系统会为block在堆上分配内存，而当把block当做对象进行处理时（比如将其压入一个NSMutableArray），我们需要获取它的一份copy（比如[square copy]），并且在Array retain了这个block后将其释放（[square autorelease]是不错的选择）。而对于block本身和调用该block的实例，则可以放心：SDK会将调用block的实例自动retain，直至block执行完毕后再对实例release，因此不会出现block执行到一半，实例就被dealloc这样的尴尬的局面。</del> 在ARC的时代，这些都是废话了。打开ARC，然后瞎用就可以了。ARC解决了block的最让开发者头疼的最大的也是唯一的问题，内存管理。关于block的内存管理方面，有一个很好玩的小quiz，可以做做玩～<a href="http://blog.parse.com/2013/02/05/objective-c-blocks-quiz/">传送门</a></p>
+
+<p>iOS SDK 4.0以后，随着block的加入很多特性也随之添加或者发生了升级。Apple所推荐的block使用范围包括以下几个方面： </p>
+
+<ul>
+<li>枚举——通过block获取枚举对象或控制枚举进程</li>
+<li>View动画——简单明了的方式规定动画</li>
+<li>排序——在block内写排序算法</li>
+<li>通知——当某事件发生后执行block内的代码</li>
+<li>错误处理——当错误发生时执行block代码</li>
+<li>完成处理——当方法执行完毕后执行block代码</li>
+<li>GCD多线程——多线程控制，关于这个以后有机会再写…</li>
+</ul>
+
+<p>仔细研读4.0的SDK的话，会发现很多常用类中都加入了不少带block作为参数的方法，改变固有思维习惯，适应并尽可能利用block给程序上带来的便捷，无疑是提高效率和使代码优雅的很好的途径～</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/11/rest/" title="link to 难得的休假">难得的休假</a></h2>
+       <p class="excerpt">海南是个不错的地方，十多年前来就很不错，现在的话貌似也还行。难得能在这种忙得死人的时候能拿出三天时间跑到海南放松一下…刚做完一个会议报告就被大家围着提问，十分钟的演讲，提问居然持续了十五分钟，这不是明摆着坑我么...看来之前的准备还是过于浅显了。下次有这样的会议报告的话一定努力做得让大家看不懂才行。讲完以后现在可以开始休息两天了～这半年来被各种杂务缠身，不过貌似现在已经习惯这样的忙碌生活了，突然有机会放松下来心里居然会有一些不安。而幸好，海南正好是一个能够让人轻松下来的地方，只要躲开白天的...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-11-20 22:57:19 +0800" class="post-list__meta--date date">2011-11-20</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2011/11/rest/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2011/10/seeking-job/" title="link to 近期求职总结-AHRP和DeNA面试">近期求职总结-AHRP和DeNA面试</a></h2>
+       <p class="excerpt">AHRP2012秋季项目已经结束，春季项目博主可以以内定者的身份进行内推，具体可以参看这篇帖子。在求职路上已经走了一段时间了，一直不太顺利，趁现在有时间有心情稍微整理一下近期在求职中的感受，也算做一个阶段总结吧。其实一开始目标就比较明确了，不太想继续在做硕士期间的方向走下去，而是想做一些移动互联开发相关的事情，同时也看好智能电视和近距传输这样有可能在近期再一次改变人类生活的东西。所以简历大都扔到了IT公司。投出去的简历无非三种结果：第一是毫无回音的，比如支付宝；第二是通知笔试但是被我拒了，...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2011-10-31 22:52:17 +0800" class="post-list__meta--date date">2011-10-31</time> &#8226; <span class="post-list__meta--tags tags">胡言乱语集</span><a class="btn-border-small" href=/2011/10/seeking-job/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2011/11/objc-block/";
+        this.page.identifier = "/2011/11/objc-block/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

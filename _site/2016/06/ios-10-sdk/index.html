@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>开发者所需要知道的 iOS 10 SDK 新特性</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="开发者所需要知道的 iOS 10 SDK 新特性">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="开发者所需要知道的 iOS 10 SDK 新特性">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2016/06/ios-10-sdk/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2016-06-15 14:10:11 +0800" itemprop="datePublished" class="post-meta__date date">2016-06-15</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">开发者所需要知道的 iOS 10 SDK 新特性</h1>
+  </header>
+
+  <section class="post">
+    <p><img src="/assets/images/2016/ios-10-title.png" alt=""></p>
+
+<h3>总览</h3>
+
+<p>距离 iPhone 横空出世已经过去了 9 个年头，iOS 的版本号也跨入了两位数。在我们回顾过去四五年 iOS 系统的发展的时候，不免感叹变化速度之快，迭代周期之短。<a href="https://onevcat.com/2013/06/developer-should-know-about-ios7/">iOS 7</a> 翻天覆地的全新设计，<a href="https://onevcat.com/2014/07/developer-should-know-about-ios8/">iOS 8</a> 中 Size Classes 的出现，应用扩展，以及 Cloud Kit 的加入，<a href="https://onevcat.com/2015/06/ios9-sdk/">iOS 9</a> 里的分屏多任务特性等等。Apple 近年都是在 WWDC 发布新的系统和软件，然后在秋季和冬季 (或者来年春季) 召开硬件产品的发布会。WWDC 上每一项软件的更新其实都预示了相应的硬件的方向，相信今年也不会例外。</p>
+
+<p>对于开发者来说，好消息是 iOS 10 中并没有加入太多内容。按照适配的需求，来年的 iOS 开发至少应该可以从 iOS 8 甚至 iOS 9 开始，我们将有时间对之前的版本特性进行更好的梳理，消化和实践。相比于开疆扩土，iOS 10 更专注的是对现有内容的改进，以弥补之前迅速发展所留下的一些问题，这其实正是 Apple 当下所亟需做的事情。</p>
+
+<h3>生态整合与 Extension 开发</h3>
+
+<p>在 iOS 10 里 Apple 延续了前几年的策略，那就是进行平台整合。全世界现在没有另外一家厂商在掌握了包括桌面，移动到穿戴的一系列硬件设备的同时，还掌控了相应的从操作系统，到应用软件，再到软件商店这样一套完整的布局。Apple 显然也非常明白这个优势意味着什么。所以近年来 Apple 一直强调平台整合，如果你的应用能够同时在 iOS，watchOS 以及 macOS 上工作的话，毫无疑问将会更容易吸引用户以及 Apple 的喜爱。</p>
+
+<p>另外一点则是各个应用之间的整合和交互。不难发现，随着近年来 extension 开发的兴起，Apple 逐渐在从 app 是“用户体验的核心”这个理念中转移，变为用户应该也可以在通知中心，桌面挂件或者手表这样的地方完成必要交互。而应用之间的交互在以前可以说是 iOS 系统的禁区，但是去年随着 <a href="https://workflow.is">Workflow</a> 的成功，Apple 对于应用之间的交互有助于用户生产力的提升有了清晰的认识。今年 SDK 中几个重大更新其实都是围绕这个主题来进行的。</p>
+
+<p>iOS 10 中，Apple 为我们添加了茫茫多 extension 的新模板，以至于在同事之间开玩笑都是我们马上就要丢掉 iOS app 开发者的工作，而转变为 iOS extension 开发者这样了。新加入的扩展的种类和数量都足以说明使用应用扩展以及进行扩展开发在今后 iOS 开发中的重要地位。如果你对扩展开发还一无所知，可以先看看这篇<a href="https://onevcat.com/2014/08/notification-today-widget/">入门文章</a>，里面简单介绍了关于扩展的基本概念，不同开发 target 之间代码共享的方式，以及通用的扩展开发方法等。</p>
+
+<p><img src="/assets/images/2016/extentions-ios-10.png" alt=""></p>
+
+<h4>SiriKit</h4>
+
+<p>Siri API 的开放自然是 iOS 10 SDK 中最激动人心也是亮眼的特性。SiriKit 为我们提供一全套从语音识别到代码处理，最后向用户展示结果的流程。Apple 加入了一套全新的框架 Intents.framework 来表示 Siri 获取并解析的结果。你的应用需要提供一些关键字表明可以接受相关输入，而 Siri 扩展只需要监听系统识别的用户意图 (intent)，作出合适的响应，修改以及实际操作，最后通过 IntentsUI.framework 提供反馈。整个过程非常清晰明了，但是这也意味着开发者所能拥有的自由度有限。</p>
+
+<p>在 iOS 10 中，我们只能用 SiriKit 来做六类事情，分别是：</p>
+
+<ul>
+<li>语音和视频通话</li>
+<li>发送消息</li>
+<li>发送或接收付款</li>
+<li>搜索照片</li>
+<li>约车</li>
+<li>管理健身</li>
+</ul>
+
+<p>如果你的应用恰好正在处理这些领域的问题的话，添加 Intents Extension 的支持会是很棒的选择。它将提高用户使用你的应用的可能性，也能让用户在其他像是地图这样的系统级应用中使用你的服务。</p>
+
+<blockquote>
+<p>SiriKit 笔记 (待填坑)</p>
+</blockquote>
+
+<h4>User Notifications</h4>
+
+<p>通知中心向来是 iOS 上的兵家必争之地。如何提供适时有效的通知，往往决定了用户活跃和留存的可能性。在 iOS 10 上，Apple 对通知进行了加强和革新。现在，为了更好地处理和管理通知，和本地及推送通知相关的 API 被封装到了全新的框架 UserNotifications.framework 中。在 iOS 10 中，开发者的服务器有机会在本地或者远程通知发送给用户之前再进行修改。</p>
+
+<p>另外，在之前加入了 notification action 以及 text input 的基础上，iOS 10 又新增了为通知添加音频，图片，甚至视频的功能。现在，你的通知不仅仅是提醒用户回到应用的入口，更成为了一个展示应用内容，向用户传递多媒体信息的窗口。</p>
+
+<blockquote>
+<p>User Notifications 笔记 - <a href="https://onevcat.com/2016/08/notification/">活久见的重构 - iOS 10 UserNotifications 框架解析</a></p>
+</blockquote>
+
+<h4>iMessage Apps</h4>
+
+<p>Message 应用大概是 Apple 在宣传 iOS 10 时着力最多的部分了。虽然新的贴纸包，自动转换颜文字，发送全屏效果等功能都很酷炫，但是对于程序开发者来说，可能还是对 iMessage Apps 更感兴趣。Xcode 8 中，Apple 在 iOS Application 模板中添加了一类新的项目类型，Messages Application。同时，模拟器甚至还开发了新的双人对话模式，以供开发者调试这类 app。</p>
+
+<p>虽然名义上是独立 app，但实际上工作的依然是一个 extension。在该扩展中，Messages.framework 将承担与系统的 message 界面交互的主要职责。你通过提供一个自定义的 View Controller，来获取用户在使用你的 message app 时进行对话的上下文，以及发送接收等操作，并做出合适的响应。这个扩展在用来进行直接在 Message 应用中一些自定义共享会很好玩。但是鉴于 Apple 暂时没有打算将 Message.app 跨平台的原因，可能也注定了这只会是一种补充，而无法成为主流。</p>
+
+<blockquote>
+<p>iMessage Apps 笔记 (待填坑)</p>
+</blockquote>
+
+<h3>IDE 和工具改进</h3>
+
+<p>除了整合平台战略思想下的一些 SDK 改变，今年和 iOS 开发者相关的更多的是开发工具的进步和革新了。</p>
+
+<h4>Xcode 8</h4>
+
+<p>Xcode 8 展现出了很多有意思的新特性，比如更强大的 View Debugging，可以帮助我们追查内存引用问题的 Memory Debugging 等。这些工具十分强大，也将帮助我们在开发过程中及早发现问题，而不要将它们带入在最终产品中去。</p>
+
+<p>在 app 签名方面，Apple 终于意识到了他们在 Xcode 7 中所犯得错误。我想可能不止一个人被证书和描述文件出问题时的 &quot;Fix Issue&quot; 按钮坑过。这个按钮不仅不会修正问题，反而会直接注销现有的开发者证书，然后“自作主张”地重新申请。大多数情况下，这让事情变得更加糟糕。特别是对于新加入的开发者，他们并不理解 Apple 的证书系统，错误的操作和处置，往往让开发环境变得不可挽回。Xcode 8 中，同一个开发者帐号现在允许多个开发证书，而完全重做的 app 签名系统也足够好用，并且避免了误操作的可能性。在兼顾自动配置的基础上，也为大型项目和复杂的 CI 环境提供了足够灵活的配置空间，这绝对值得点赞。</p>
+
+<p>另外 Xcode 终于提供了进行代码编辑器扩展的能力。现在开发者可以创建 <code>XCSourceEditorExtension</code> 来对 Xcode 的功能进行扩展了，在没有文档帮助和官方支持的情况下摸索着为 Xcode 制作插件的历史也即将结束。</p>
+
+<blockquote>
+<p>Xcode 8 笔记 (待填坑)</p>
+</blockquote>
+
+<h4>Swift 3</h4>
+
+<p>Swift 开源已经过去半年时间。在 Swift 2.2 中我们已经看到了开源的社区力量对语言产生的深刻影响，而在 Swift 3 中这一影响的效果将更加明显。</p>
+
+<p>最大的变化在于 Foundation 框架的重新导入，可能过一段时间再回头看的话，这将标志着 Swift 与 Objective-C 彻底分家。Foundation 框架中的 API 现在以更符合 Swift 的方式被导入到语言中。大体来说，这些变化包括去除 <code>NS</code> 前缀，将绝大部分 class 转换为 struct (虽然底层还是 copy-on-write 的引用实现，可以参看 <code>ReferenceConvertible</code> 协议的内容)，去掉 API 中重复的语义等。如果在当前你还能看出 Swift 和 Objective-C 在使用 Foundation 或者说开发 app 时同根同源的话，Swift 3 正式发布后可能情况会大不相同。</p>
+
+<p>由于引用类型向值类型的转换，也将导致我们在使用 Swift 开发时的思考方式发生变化。以往的 Foundation 框架中类型的可变性是由不可变类型和它的可变类型版本 (比如 <code>NSData</code> 和 <code>NSMutableData</code>) 来进行区分的。而在 Swift 3 中，一般来说将只有作为结构体的不可变类型 (比如 <code>Data</code>)，对于这类结构体的改变，将会是更安全的基于写时复制的行为，而不再是原来可变对象那样的危险的内存操作。这在很多时候除了保证数据共享时的安全性以外，内部的引用特性也保证了调用速度。实际上，因为减少了不必要的复制 (比如根据一个不可变对象创建相应的可变对象)，实际上通过 Swift 3 的 API 使用 Foundation 的速度将比原来更快！</p>
+
+<p>关于 Swift 3 的更多内容，我会在我的《Swifter - 100 个 Swift 必备 tips》一书中通过补充章节的方式进行说明。同时，该书现有的 Swift 2 相关的描述和示例也会按照 Swift 3 的语法规范和特性进行更新，以适应最新版本。您可以访问 <a href="http://swifter.tips/buy">swifter.tips</a> 获取这本书的更多相关内容。</p>
+
+<h3>Apple 生态和其他</h3>
+
+<p>另外影响比较重大消息是，在 iOS 9 引入的 ATS 将在来年更加严格。2017 年起，新提交的 app 将不再被允许进行 http 的访问，所有的 app 内的网络请求必须加密，通过 https 完成。所以如果你家 app 的服务器或者某些访问页面还是 http 的话，需要尽早过度到 https。</p>
+
+<p>另外，watchOS 3 和 tvOS 也有一些新的内容。其中最重要的当属 watchOS 中可以使用 SceneKit 和 SpriteKit。虽然这两个框架本意是做游戏，但是 watch 的小屏幕和低性能可能并不足以支撑我们在这样一个受限平台很好的作品。但是这两个框架可以为交互乏味的 watchOS 提供很好的动画效果的补充，可能会是它们在 watchOS 上更合适的用途。</p>
+
+<p>最后，OS X 改名为 macOS，有些媒体和开发者将其解读为去乔布斯化，其实我更倾向于这是一种强迫症和完美主义的基本需求。不管名字如何改变，Apple 在 iOS，macOS，watchOS 和 tvOS 这四个产品线上的布局已经完成，整个生态现在看来也还十分健康。Apple 在用户权益和隐私上的重视，以及像是在 https 上的推动，无疑都是这个时代前进的动力。</p>
+
+<h3>总结</h3>
+
+<p>像往年一样，我会在之后逐渐补充 session 笔记，通过一些简单的例子说明相关的新增框架的使用方式。届时你也可以在这篇文章中找到相关链接，或者通过<a href="https://store.objccn.io/subscribe/">订阅</a>的方式来确保在第一时间获取相关内容 (订阅时请不要使用 QQ 邮箱，会无法收到邮件)。不过直接访问 Apple 开发者网站 <a href="https://developer.apple.com/wwdc/">WWDC 相关的内容</a>会是获取这些知识更快的方式。</p>
+
+<p>Happy WWDC. Happy Coding!</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2016/06/ios-10-ats/" title="link to 关于 iOS 10 中 ATS 的问题">关于 iOS 10 中 ATS 的问题</a></h2>
+       <p class="excerpt">WWDC 15 提出的 ATS (App Transport Security) 是 Apple 在推进网络通讯安全的一个重要方式。在 iOS 9 和 OS X 10.11 中，默认情况下非 HTTPS 的网络访问是被禁止的。当然，因为这样的推进影响面非常广，作为缓冲，我们可以在 Info.plist 中添加 NSAppTransportSecurity 字典并且将 NSAllowsArbitraryLoads 设置为 YES 来禁用 ATS。相信大家都已经对这个非常熟悉了，因为我自己也维...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2016-06-17 12:34:11 +0800" class="post-list__meta--date date">2016-06-17</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2016/06/ios-10-ats/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2016/04/first-wwdc/" title="link to 写给初次参加 WWDC 的开发者的简明攻略">写给初次参加 WWDC 的开发者的简明攻略</a></h2>
+       <p class="excerpt">今天 Apple 宣布了 WWDC 16 的抽选开始，而 4 月 22 日周五将出抽选结果并开始购票。随着我们国内开发者收入水平的逐步提升，以及日益增长的与全球开发者接触和自我提高的需求，最近参与 WWDC 的中国开发者明显比以前要多，而抽选机制也正给了我们很好的参加机会，至少我们不需要熬夜和一群“疯子”在十几秒内抢票了。如果您看到这篇文章的时候已经抽中了门票，并且付款成功并计划在 6 月的时候前往三藩的话，先大声说“恭喜恭喜恭喜你”！鉴于很多的参会者可能是第一次参加 WWDC，甚至可能是...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2016-04-19 20:10:11 +0800" class="post-list__meta--date date">2016-04-19</time> &#8226; <span class="post-list__meta--tags tags">南箕北斗集</span><a class="btn-border-small" href=/2016/04/first-wwdc/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2016/06/ios-10-sdk/";
+        this.page.identifier = "/2016/06/ios-10-sdk/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>行走于 Swift 的世界中</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="行走于 Swift 的世界中">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="行走于 Swift 的世界中">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2014/06/walk-in-swift/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2014-06-07 17:23:44 +0800" itemprop="datePublished" class="post-meta__date date">2014-06-07</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">行走于 Swift 的世界中</h1>
+  </header>
+
+  <section class="post">
+    <p><img src="/assets/images/2014/swift.png" alt=""></p>
+
+<blockquote>
+<p>2014 年 7 月 13 日更新：根据 beta 3 的情况修正了文中过时的部分</p>
+</blockquote>
+
+<p>从周一 Swift 正式公布，到现在周五，这几天其实基本一直在关注和摸索 Swift 了。对于一门新语言来说，开荒阶段的探索自然是激动人心的，但是很多时候资料的缺失和细节的隐藏也让人着实苦恼。这一周，特别是最近几天的感受是，Swift 并不像我<a href="http://onevcat.com/2014/06/my-opinion-about-swift/">上一篇表达自己初步看法的文章</a>里所说的那样，相对于 objc 来说有更好的学习曲线。甚至可以说 objc 在除了语法上比较特别以外，其概念还是比较容易的。而 Swift 在漂亮的语法之后其实隐藏了很多细节和实现，而如果无法理解这些细节和实现，就很难明白这门新语言在设计上的考虑。在实际编码中，也会有各种各样的为什么编译不通过，为什么运行时出错这样的问题。本文意在总结一下这几天看 Swift 时候遇到的自己觉得重要的一些概念，并重新整理一些对这门语言的想法。可能有些内容是需要您了解 Swift 的基本概念的，所以这并不是一篇教你怎么写 Swift 或者入门的文章，建议您先读读 Apple 官方给出的 Swift 的<a href="https://itunes.apple.com/us/book/the-swift-programming-language/id881256329?mt=11">电子书</a>，至少将第一章的 Tour 部分读完（这里也有质量很不错的但是暂时还没有完全翻译完成的<a href="http://numbbbbb.github.io/the-swift-programming-language-in-chinese/">中文版本</a>）。不过因为自己也才接触一周不到，肯定说不上深入，还希望大家一起探讨。</p>
+
+<h3>类型？什么是类型？</h3>
+
+<p>这是一个基础的问题，类型 (Types) 在 Swift 中是非常重要的概念，在 Swift 中类型是用来描述和定义一组数据的有效值，以及指导它们如何进行操作的一个蓝图。这个概念和其他编程语言中“类”的概念很相似。Swift 的类型分为命名类型和复合类型两种；命名类型比较简单，就是我们日常用的 <code>类 (class)</code>，<code>结构体 (struct)</code>，<code>枚举 (enum)</code> 以及<code>接口 (protocol)</code>。在 Swift 中，这四种命名类型为我们定义了所有的基本结构，它们都可以有自己的成员变量和方法，这和其他一般的语言是不太一样的（比如很少有语言的enum可以有方法，protocol可以有变量）。另外一种类型是复合类型，包括<code>函数 (func)</code> 和 <code>多元组 (tuple)</code>。它们在使用的时候不会被命名，而是由 Swift 内部自己定义。</p>
+
+<p>我们在实际做开发时，一般会接触很多的命名类型。在 Swift 的世界中，一切看得到的东西，都一定属于某一种类型。在 PlayGround 或者是项目中，通过在某个实际的被命名的类型上 <code>Cmd + 单击</code>，我们就能看到它的定义。比如在 Swift 世界中的所有基本型 <code>Int</code>，<code>String</code>，<code>Array</code>，<code>Dictionay</code> 等等，其实它们都是结构体。而这些基本类型通过定义本身，以及众多的 <code>extension</code>，实现了很多接口，共同提供了基本功能。这也正是 Swift 的类型的一种很常见的组织方式。</p>
+
+<p>而相对的，Cocoa 框架中的类，基本都被映射为了 Swift 的 <code>class</code>。如果你有比较深厚的 objc 功底的话，应该会听说过 objc 的类其实是一组包含了元数据 (metadata) 的结构体，而在 objc 中我们可以使用 <code>+class</code> 来拿到某个 Class 的 isa，从而确定类的组成和描述。而在 Swift 的 native 层面上，在 type safe 的基础上，不再需要 isa 来指导对象如何构建，而这个过程会通过确定的命名类型完成。正因为这个原因，Swift 中干脆把 NSObject 的 <code>class</code> 方法都拿掉，因为 Swift 和 ObjC 在这个根本问题上的分歧，最终导致了在使用 Swift 调用 Cocoa 框架时的各种麻烦和问题。</p>
+
+<h3>参照和值，Array和Dictionary背后的一些故事</h3>
+
+<blockquote>
+<p>2014 年 7 月 13 日更新
+由于 beta 3 中 <code>Array</code> 被完全重写，这一节关于 <code>Array</code> 的一些行为和表述完全过时了。
+关于 <code>Array</code> 的用法现在简化了很多，请参见新加的 “真 参照和值，Array和Dictionary背后的一些故事”</p>
+</blockquote>
+
+<p>如果你坚持看到了这里，那么恭喜你...本文最无趣和枯燥的部分已经结束了（同时也应该吓走了不少抱着玩玩看的心态来看待 Swift 的读者吧..笑），那么开始说一些细节的东西吧。</p>
+
+<p>首先要明白的概念是，参照和值。在 C 系语言里摸爬滚打过的同学都知道，我们在调用一个函数的时候，往里传的参数有两种可能。一种是传递类似一个数字或者结构体这样的基本元素，这时候这个整数的值会被在内存中复制一份然后传到函数内部；另一种情况是传递一个对象，为了性能和内存上的考虑，这时候一般不会去将对象的内容复制一遍，而是会传递的一个指向同一块内存的指针。</p>
+
+<p>在 Swift 中一个与其他语言都不太一样的地方是，它的 Collection 类型，也就是 <code>Array</code> 和 <code>Dictionary</code>，并不是 <code>class</code> 类型，而是 <code>struct</code> 结构体。那么按照我们以往的经验，在传值或者赋值的时候应该是会复制一份。我们来试试看是不是这样的～</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var dic = [0:0, 1:0, 2:0]
+var newDic = dic
+//Check dic and newDic
+dic[0] = 1
+dic    //[0: 1, 1: 0, 2: 0]
+newDic //[0: 0, 1: 0, 2: 0]
+
+var arr = [0,0,0]
+var newArr = arr
+arr[0] = 1
+//Check arr and newArr
+arr    //[1, 0, 0]
+newArr //[1, 0, 0]
+</code></pre></figure>
+<p><code>Dictionary</code> 的值没有问题，我们改变了 <code>dic</code> 中的值，但是 <code>newDic</code> 保持了原来的值，说明 <code>newDic</code> 确实被复制了一份。而当我们检查到 <code>Array</code> 的时候，发生了一点神奇的事情。虽然 <code>Array</code> 是 <code>struct</code>，但是当我们改变 <code>arr</code> 时，新的 <code>newArr</code> 也发生了改变，也就是说，<code>arr</code> 和 <code>newArr</code> 其实是同一个参照。这里的原因其实在 Apple 的<a href="https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/ClassesAndStructures.html">官方文档</a>中有一些说明。Swift 考虑到实际使用的情景，对 <code>Array</code> 做了特殊的处理。除非需要（比如 <code>Array</code> 的大小发生改变，或者显式地要求进行复制），否则 <code>Array</code> 在传递的时候会使用参照。</p>
+
+<p>在这里如果你想要只改变 <code>arr</code> 的值，而保持新赋予的 <code>newArr</code> 不变的话，你需要显式地对 <code>arr</code> 进行 <code>copy()</code>，像下面这样。</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr = [0,0,0]
+var copiedArr = arr.copy()
+
+arr[0] = 1
+arr       //[1, 0, 0]
+copiedArr //[0, 0, 0]
+</code></pre></figure>
+<p>这时候 <code>arr</code> 和 <code>copiedArr</code> 将指向不同的内存地址，对原来的数组重新赋值的时候，就不会再影响新的数组了。另一种等效的做法是通过 <code>Array</code> 的初始化方法建立一个新的 <code>Array</code>：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr = [0,0,0]
+var newArr = Array(arr)
+
+arr[0] = 1
+arr       //[1, 0, 0]
+newArr    //[0, 0, 0]
+</code></pre></figure>
+<p>值得一提的是，对于 <code>Array</code> 这个 <code>struct</code> 的这种特殊行为，Apple 还准备了另一个函数 <code>unshare()</code> 给我们使用。<code>unshare()</code> 的作用是如果对象数组不是唯一参照，则复制一份，并将作用的参照指向新的地址（这样它就变成唯一参照，不会意外改变原来的别的同样的参照了）；而如果这个参照已经是唯一参照了的话，就什么都不做。</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr = [0,0,0]
+var newArr = arr
+
+//Breakpoint 1
+arr.unshare()
+
+//Breakpoint 2
+arr[0] = 1
+arr       //[1, 0, 0]
+newArr    //[0, 0, 0]
+</code></pre></figure>
+<p>这个设计的意图是为了更安全地使用这个优化过的行为奇怪的数组结构体。关于 <code>unshare()</code> 的行为，我们也可以通过使用 LLDB 断点来观察内存地址的变化。参见下图：</p>
+
+<p><img src="/assets/images/2014/swift_unshare_array.png" alt="unshare array in swift"></p>
+
+<p>另外一个要加以注意的是，<code>Array</code> 在 copy 时执行的不是深拷贝，所以 <code>Array</code> 中的参照类型在拷贝之后仍然会是参照。Array 中嵌套 Array 的情况亦是如此：对一个 Array 进行的 copy 只会将被拷贝的 <code>Array</code> 指向新的地址，而保持其中所有其他 <code>Array</code> 的引用。当然你可以为 <code>Array</code> (或者准确说是 Array<ArrayType>)写一个递归的深拷贝扩展，但这是另外一个故事了。</p>
+
+<h3>真 参照和值，Array和Dictionary背后的一些故事</h3>
+
+<blockquote>
+<p>2014 年 7 月 13 日更新</p>
+</blockquote>
+
+<p>Apple 在 beta 3 里重写了 <code>Array</code>，它的行为简化了许多。首先 <code>copy</code> 和 <code>unshare</code> 两个方法被删掉了，而类似的行为现在以更合理的方式在幕后帮我们完成了。还是举上面的那个例子：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var dic = [0:0, 1:0, 2:0]
+var newDic = dic
+//Check dic and newDic
+dic[0] = 1
+dic    //[0: 1, 1: 0, 2: 0]
+newDic //[0: 0, 1: 0, 2: 0]
+
+var arr = [0,0,0]
+var newArr = arr
+arr[0] = 1
+//Check arr and newArr
+arr    //[1, 0, 0]
+newArr //before beta3:[1, 0, 0], after beta3:[0, 0, 0]
+</code></pre></figure>
+<p><code>Dictionary</code> 当然还是 OK，但是对于 <code>Array</code> 中元素的改变，在 beta 3 中发生了变化。现在不再存在作为一个值类型但是却在赋值和改变时表现为参照类型的 <code>Array</code> 的特例，而是彻头彻尾表现出了值类型的特点。这个改变避免了原来需要小心翼翼地对 <code>Array</code> 进行 <code>copy</code> 或者 <code>unshare</code> 这样的操作，而 Apple 也承诺在性能上没有问题。文档中提到其实现在的行为和之前是一贯的，只不过对于数组的复制工作现在是在背后由 Apple 只在必要的时候才去做。所以可以猜测其实在背后 <code>Array</code> 和 <code>Dictionary</code> 的行为并不是像其他 struct 那样简单的在栈上分配，而是类似参照那样，通过栈上指向堆上位置的指针来实现的。而对于它的复制操作，也是在相对空间较为宽裕的堆上来完成的。当然，现在还无法（或者说很难）拿到最后的汇编码，所以这只是一个猜测而已。最后如果能够证实对错的话，我会再进行更新。</p>
+
+<p>总之，beta 3 之后，原来飘忽不定难以捉摸（其实真正理解之后还是很稳定的，也很适合出笔试题）的 <code>Array</code> 现在彻底简单化了。基本只需要记住它的行为在表面上和其他的值类型完全无异，而性能方面的考量可以交给 Apple 来做。</p>
+
+<h3>Array vs Slice</h3>
+
+<p>因为 <code>Array</code> 类型实在太重要了，因此不得不再多说两句。查看 <code>Array</code> 在 Swift 中的定义，我们可以发现其实 <code>Array</code> 实现了两个很重要的接口 <code>MutableCollection</code> 和 <code>Sliceable</code>。第一个接口比较简单，为 <code>Array</code> 实现了下标等特性，通过 <code>Collection</code> 通用的一些概念，可以从数据结构中获取元素，比较简单。而第二个接口 <code>Sliceable</code> 实现了通过 Range 来取出部分数组，这里稍微有点特殊。</p>
+
+<p>Swift 引入了在其他很多语言中很流行的用 <code>..</code> 和 <code>...</code> （beta3 中 <code>..</code> 被改成了 <code>..&lt;</code>，虽说是为了更明确的意义，但是看起来会比较奇怪）来表示 Range 的概念。从一个数组里面取出一个子数组其实是蛮普遍的一个需求，但是如果你足够细心的话，可能会发现我们无法写这样的代码：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr = [0,0,0]
+var partOfArr: Array = arr[0...1]
+//Could not find an overload for &#39;subscript&#39; that accepts the supplied arguments
+</code></pre></figure>
+<p>你会得到一个编译错误，告诉你没有重载下标。在我们去掉我们强制加上的 <code>: Array</code> 类型设置之后，编译能通过了。这就告诉我们，我们使用 Rang 从 Array 中取出来的东西，并不是 <code>Array</code> 类型。那它到底是个什么东西？使用 REPL 可以很容易看到，在使用 Range 从 Array 里取出来的其实是一个 <code>Slice</code>，而不是一个 <code>Array</code>。</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">  1&gt; var arr = [0,0,0]
+arr: Int[] = size=3 {
+  [0] = 0
+  [1] = 0
+  [2] = 0
+}
+  2&gt; var slice = arr[0...1]
+slice: Slice&lt;Int&gt; = size=2 {
+  [0] = 0
+  [1] = 0
+}
+</code></pre></figure>
+<p>So, what is a slice？查看 <code>Slice</code> 的定义，可以看到它几乎和 <code>Array</code> 一模一样，实现了同样的接口，拥有同样的成员，那么为什么不直接干脆给个爽快，而要新弄一个 <code>Slice</code> 呢？Apple gets crazy？当然不是..Slice的存在当然有其自己的价值和含义，而这和我们刚才提到的值和引用有一些关系。</p>
+
+<p>So, why is a slice？让我们先尝试 play with it。接着上面的情况，运行下面的代码试试看：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr : Array = [0,0,0]
+var slice = arr[0...1]
+
+arr[0] = 1
+arr      //[1, 0, 0]
+slice    //[1, 0]
+
+slice[1] = 2
+arr      //[1, 2, 0]
+slice    //[1, 2]
+</code></pre></figure>
+<p>我想你已经明白一些什么了吧？这里的 <code>slice</code> 和 <code>arr</code> 当然不可能是同一个引用（它们的类型都不一样），但是很有趣的是，通过 Range 拿到的 <code>Slice</code> 中的元素，是指向原来的 <code>Array</code> 的。这个特性就非常有趣了，我们可以对感兴趣的数组片段进行观察或者操作，并且它们的值和原来的数组是对应的同步的。</p>
+
+<p>理所当然的，在对应着的 <code>Array</code> 或者 <code>Slice</code> 其中任意一个的内存指向发生变化时（比如添加或移除了元素，重新赋值等等），这种关系就会被打破。</p>
+
+<p>对于 <code>Slice</code> 和 <code>Array</code>，其实是可以比较简单地转换的。因为 <code>Collection</code> 接口是实现了 <code>+</code> 重载的，于是我们可以简单地通过相加来生成一个 <code>Array</code> (如果我们愿意的话)。不过，要是真的有需要的话，使用 <code>Array</code> 的初始化方法会是比较好的选择：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr : Array = [0,0,0]
+var slice = arr[0...1]
+var result1 : Array = [] + slice
+var result2 : Array = Array(slice)
+</code></pre></figure>
+<p>使用 Range 下标的方式，不仅可以取到这个 Range 内的 <code>Slice</code>，还可以对原来的数组进行批量&quot;赋值&quot;：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr : Array = [0,0,0]
+arr[0...1] = [1,1]
+
+arr         //[1, 1, 0]
+</code></pre></figure>
+<p>细心的同学可能注意到了，这里我把“赋值”打上了双引号。实际上这里做的是替换，数组的内存已经发生了变化。因为 Swift 没有强制要求替换的时候 Range 的范围要和用来替换的 <code>Collection</code> 的元素个数一致，所以其实这里一定会涉及内存的分配和新的数组生成。我们可以看看下面的例子：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr : Array = [0,0,0]
+var otherArr = arr
+arr[0...1] = [1,1]
+
+arr           //[1, 1, 0]
+otherArr      //[0, 0, 0]
+
+arr[0..1] = [1,1]
+arr           //[1, 1, 1, 0]
+</code></pre></figure>
+<p>给一个数组进行 Range 赋值，背后其实调用了数组的 <code>replaceRange</code> 方法，将取到的 <code>Slice</code>，替换成了赋给它的 <code>Array</code> 或者 <code>Slice</code>。而只要 Range 有效，我们就可以很灵活地写出类似这样的所谓的插入方法：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var arr : Array = [0,0,0]
+arr[1..1] = [1, 1]
+arr    //[0, 1, 1, 0, 0]
+</code></pre></figure>
+<p>这里的 <code>1..1</code> 是一个起点为 1，长度为 0 的Range，于是它取到的是原来 <code>[0, 0, 0]</code> 中 index 为 1 的位置的一个空 <code>Slice</code>，将其替换为 <code>[1, 1]</code>。清楚明白。</p>
+
+<p>既然都提到了这么多次 <code>Range</code>，还是需要说明一下这个 Swift 里很重要的概念（其实在 objc 里 <code>NSRange</code> 也很重要，只不过没有像 Swift 里这么普遍）。<code>Range</code> 结构体中有两个非常重要的值，<code>startIndex</code> 和 <code>endIndex</code>，它表示了这个 Range 的范围。而这个值永远是右开的，也就是说，它们会和 <code>x..y</code> 这样的表示中 <code>x</code> 和 <code>y</code> 分别相等。对于 <code>x &lt; y</code> 的情况下的 Range，是存在数学上的表达意义的，比如 <code>2..1</code> 这样的 Range 表示从 2 开始往前数 1。但是在实际从 <code>Array</code> 或者 <code>Slice</code> 中取值时这种表达是没有意义，并且会抛出一个运行时的 EXC_BAD_INSTRUCTION 的，在使用的时候还要加以注意。</p>
+
+<h3>颜文字很好，但是...</h3>
+
+<p>有了上面的一些基础，我们可以来谈谈 <code>String</code> 了。当说到我们可以在原生的 <code>String</code> 中使用 UniCode 字符时，全场一片欢呼。没错，以后我们可以把代码写成这样了！</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">let π = 3.14159
+let 你好 = &quot;你好世界&quot;
+let 🐶🐮 = &quot;🐶🐮”
+</code></pre></figure>
+<p>Cool...虽然我不认为有多少人会去把变量名弄成中文或者猫猫狗狗，但是毕竟字符串本身还是需要支持中文日文阿拉伯文甚至 emoji 的对吧。</p>
+
+<p>另外一个很赞的是，Apple 把所有 <code>NSString</code> 的方法都“移植”到了 <code>String</code> 类型上，而且将 Cocoa 框架中所有涉及 <code>NSString</code> 的地方都换成了 <code>String</code>。这是一件很棒的事情，这意味着我们可以无缝在 Swift 上像原来写 objc 时候那样使用 <code>String</code>，而不必担心 <code>String</code> 和 <code>NSString</code> 之间类型转换等麻烦的问题。可能看过 session 或者细读了文档的同学会发现，新的 <code>String</code> 里，没有了原来的 <code>-length</code> 方法，取而代之，Apple 推荐我们使用 <code>countElements</code> 来获取字符串的长度。这是很 make sense 的一件事情，因为我们无法确定字符串中每个字符的字节长度，所以 Apple 为了帮助我们方便计算字符数，给了这个 O(N) 的方法。</p>
+
+<p>这样的字符串带来了一个挺不方便的结果，那就是我们无法直接通过 <code>Int</code> 的下标来访问 <code>String</code> 中的字符。我们查看 Swift 中 <code>String</code> 的定义，可以看到它其实是实现了 <code>subscript (i: String.Index) -&gt; Character { get }</code> 的（其 Range 访问也相应需要一个 <code>Range&lt;String.Index&gt;</code> 版本的泛型）。如果我们能知道字符对应的 <code>String.Index</code>，我们就可以写出方便的下标访问了。举个例子，如果有下面这样的两个 <code>String</code>。</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var str = &quot;1234&quot;
+var imageStr = &quot;🐶🐱🐭🐰&quot;
+</code></pre></figure>
+<p>我们现在想要通过拿到上面那个 ASCII 字符串的某个数字所在的 <code>String.Index</code>，来获取下面对应位置的图标，比如 2 对应猫，应该如何做呢？一开始大概很容易想到这样的代码：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var range = str.rangeOfString(&quot;2&quot;) //记得导入 Cocoa 或者 UIKit
+imageStr[range] //EXC_BAD_INSTRUCTION
+</code></pre></figure>
+<p>很不幸，EXC_BAD_INSTRUCTION，这表示 Swift 中有一个 Assertion 阻止了我们继续。其实 <code>String.Index</code> 和一般的 <code>Int</code> 之类的 index 不太一样，因为每一个 Index 代表的字节的长度是有差别的，所以它只能实现 <code>BidirectionalIndex</code>，而不能像其他的等长结构那样实现 <code>RandomAccessIndex</code> 接口（关于这两个接口分别是什么已经做了什么，留给大家自己研究下吧）。于是，在不同字符串之间的 Index 进行转换时，我们大概不得不使用一种笨办法，那就是计算步长和差值。对于我们的例子，我们会先算出在 <code>str</code> 中 2 与初始 Index 的距离，然后讲这个距离在 <code>imageStr</code> 中以 <code>imageStr</code> 的 String.Index 进行套用，算出适合其的第二个字符的 Range，然后进行 Range 的下标访问，如下：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var range = str.rangeOfString(&quot;2&quot;)
+var aDistance: Int = distance(str.startIndex, range.startIndex)
+var imageStrStartIndex = advance(imageStr.startIndex, aDistance)
+var range2 = imageStrStartIndex..imageStrStartIndex.successor()
+
+var substring: String = imageStr[range2]
+</code></pre></figure>
+<p><img src="/assets/images/2014/swift_substring-compressor.png" alt="Happy Cat"></p>
+
+<p>大部分时候其实我们不会这么来映射字符串，不过对于 Swift 字符串的实现和与 NSString 的差异，还是值得研究一番的。</p>
+
+<h3>幽灵一般的 Optional</h3>
+
+<p>Swift 引入的最不一样的可能就是 Optional Value 了。在声明时，我们可以通过在类型后面加一个 <code>?</code> 来将变量声明为 Optional 的。如果不是 Optional 的变量，那么它就必须有值。而如果没有值的话，我们使用 Optional 并且将它设置为 <code>nil</code> 来表示没有值。</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">//num 不是一个 Int
+var num: Int?
+//num 没有值
+num = nil  //nil
+//num 有值
+num = 3    //{Some 3}
+</code></pre></figure>
+<p>Apple 在 Session 上告诉我们，Optinal Value 其实就是一个盒子，你盒子里可能装着实际的值，也可能什么都没装。</p>
+
+<p>我们看到 Session 里或者文档里天天说 Optional Optional，但是我们在代码里基本一个 Optional 都没有看到，这是为什么呢？而且，上面代码中给 <code>num</code> 赋值为 3 的时候的那个输出为什么看起来有点奇怪？其实，在声明类型时的这个 <code>?</code> 仅仅只是 Apple 为了简化写法而提供的一个语法糖。实际上我们是有 Optional 类型的声明，就这里的 <code>num</code> 为例，最正规的写法应该是这样的：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">//真 Optional 声明和使用
+var num: Optional&lt;Int&gt;
+num = Optional&lt;Int&gt;()
+num = Optional&lt;Int&gt;(3)
+</code></pre></figure>
+<p>没错，<code>num</code> 不是 <code>Int</code> 类型，它是一个 <code>Optional</code> 类型。到底什么是 <code>Optional</code> 呢，点进去看看：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">enum Optional&lt;T&gt; : LogicValue, Reflectable {
+    case None
+    case Some(T)
+    init()
+    init(_ some: T)
+
+    /// Allow use in a Boolean context.
+    func getLogicValue() -&gt; Bool
+
+    /// Haskell&#39;s fmap, which was mis-named
+    func map&lt;U&gt;(f: (T) -&gt; U) -&gt; U?
+    func getMirror() -&gt; Mirror
+}
+</code></pre></figure>
+<p>你也许会大吃一惊。我们每天和 Swift 打交道用的 Optional 居然是一个泛型枚举 <code>enum</code>，而其实我们在使用这个枚举时，如果没有值，我们就规定这个枚举的是 <code>.None</code>，如果有，那么它就是 <code>Some(value)</code>（带值枚举这里不展开了，有不明白的话请看文档吧）。而这个枚举又恰好实现了 <code>LogicValue</code> 接口，这也就是为什么我们能使用 <code>if</code> 来对一个 Optinal 的值进行判断并进一步进行 unwrap 的依据。</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var num: Optional&lt;Int&gt; = 3
+if num {       //因为有 LogicValue，
+               //.None 时 getLogicValue() 返回 false
+               //.Some 时返回 true
+   var realInt = num!
+   realInt     //3
+}
+</code></pre></figure>
+<p>既然 <code>var num: Int? = nil</code> 其实给 <code>num</code> 赋的值是一个枚举的话，那这个 <code>nil</code> 到底又是什么？它被赋值到哪里去了？一直注意的是，Swift 里的 nil 和 objc 里的 nil 完全不是一回事儿。objc 的 nil 是一个实实在在的指针，它指向一个空的对象。而这里的 nil 虽然代表空，但它只是一个语意上的概念，确是有实际的类型的，看看 Swift 的 <code>nil</code> 到底是什么吧：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">/// A null sentinel value.
+var nil: NilType { get }
+</code></pre></figure>
+<p><code>nil</code> 其实只是 <code>NilType</code> 的一个变量，而且这个变量是一个 getter。Swift 给了我们一个文档注释，告诉我们 <code>nil</code> 其实只是一个 null 的标记值。实际上我们在声明或者赋值一个 Optional 的变量时，<code>?</code> 语法糖做的事情就是声明一个 <code>Optional&lt;T&gt;</code>，然后查看等号右边是不是 nil 这个标记值。如果不是，则使用 <code>init(_ some: T)</code> 用等号右边的类型 T 的值生成一个 <code>.Some</code> 枚举并赋值给这个 Optional 变量；如果是 nil，将其赋为 None 枚举。</p>
+
+<p>所以说，Optional背后的故事，其实被这个小小的 <code>?</code> 隐藏了。</p>
+
+<p>我想，Optional 讨论到这里就差不多了，还有三个小问题需要说明。</p>
+
+<p>首先，<code>NilType</code> 这个类型非常特殊，它似乎是个 built in 的类型，我现在没有拿到关于它的任何资料。我本身逆向是个小白，现在看起来 Swift 的逆向难度也比较大，所以关于 <code>NilType</code> 的一些行为还是只能猜测。而关于 <code>nil</code> 这一 <code>NilType</code> 的类型的变量来说，猜测的话，它可能是 <code>Optional.None</code> 的一种类似多型表现，因为首先它确实是指向 0x0 的，并且与 Optional.None 的 content 的内容指向一致。但是具体细节还要等待挖掘或者公布了。</p>
+
+<blockquote>
+<p>2014 年 7 月 13 日更新
+从 beta3 开始 <code>nil</code> 是一个编译关键字了，<code>NilType</code> 则被从 Swift 中移除了。这个改变解决了上面提到的很多悬而未决的问题，比如对 nil 的多次封装以及如何实现自己的可 nil 的类等等。现在添加了一个叫做 <code>NilLiteralConvertible</code> 的接口来使某个类可以使用 nil 语法，而避免了原来的让人费解的隐式转换。但是现在还有一个问题，那就是 Optional 是实现了 <code>LogicValue</code> 接口的，这就是得像 <code>BOOL?</code> 这样的类型在使用的时候会一不小心就很危险。</p>
+</blockquote>
+
+<p>其次，Apple 推荐我们在 unwrap 的时候使用一种所谓的隐式方法，即下面这种方式来 unwrap：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var num: Int? = 3
+if let n = num {
+    //have a num
+} else {
+    //no num
+}
+</code></pre></figure>
+<p>最后，这样隐式调用足够安全，性能上似乎应该也做优化（有点忘了..似乎说过），推荐在 unwrap 的时候尽可能写这样的推断，而减少直接进行 unwrap 这种行为。</p>
+
+<p>最后一个问题是 Optional 的变量也可以是 Optinal。因为 Optional 就相当于一个黑盒子，可以知道盒子里有没有东西 (通过 LogicValue)，也可以打开这个盒子 (unwrap) 来拿到里面的东西 (你要的类型的变量或者代表没有东西的 nil)。请注意，这里没有任何规则限制一个 Optional 的量不能再次被 Optional，比如下面这种情况是完全 OK 的：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var str: String? = &quot;Hi&quot;         //{Some &quot;Hi&quot;}
+var anotherStr: String?? = str  //
+</code></pre></figure>
+<p>这其实是没有多少疑问的，很完美的两层 Optional，使用的时候也一层层解开就好。但是如果是 nil 的话，在这里就有点尴尬...</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var str: String? = nil
+var anotherStr: String?? = nil
+</code></pre></figure>
+<p>因为我们在 LLDB 里输出的时候，得到了两个 nil</p>
+
+<p><img src="/assets/images/2014/lldb_optional-compressor.png" alt="two nils"></p>
+
+<p>如果说 <code>str</code> 其实是 <code>Optional&lt;String&gt;.None</code>，输出是 nil 的话还可以理解，但是我们知道 (好吧，如果你认真读了上面的 Optional 的内容的话会知道)，<code>anotherStr</code> 其实是 <code>Optional&lt;Optional&lt;String&gt;&gt;.Some(Optional&lt;String&gt;.None)</code>，这是其实一个有效的非空 <code>Optional</code>，至少第一层是。而如果放在 PlayGround 里，<code>anotherStr</code> 得到的输出又是正确的 <code>{nil}</code>。What hanppened? Another Apple bug? </p>
+
+<p>答案是 No，这里不是 bug。为了方便观察，LLDB 会在输出的时候直接帮我们尽可能地做隐式的 unwrap，这也就导致了我们在 LLDB 中输出的值只剩了一个裸的 nil。如果想要看到 Optional 本身的值，可以在 Xcode 的 variable 观察窗口点右键，选中 <code>Show Raw values</code>，这样就能显示出 None 和 Some 了。或者我们可以直接使用 LLDB 的 <code>fr v -R</code> 命令来打印整个 raw 的值：</p>
+
+<p><img src="/assets/images/2014/swift_print_raw-compressor.png" alt="LLDB-frv"></p>
+
+<p>可以清楚看到，<code>anotherStr</code> 是 <code>.Some</code> 包了一个 <code>.None</code>。</p>
+
+<p>(这里有个自动 unwrap 的小疑问，就是写类似 <code>var anotherStr: String? = str</code> 这样的代码也能通过，应该是 <code>?</code> 语法在这里有个隐式解包，需要进一步确认)</p>
+
+<h3>? 那是什么??，! 原来如此!!</h3>
+
+<p>问号和叹号现在的用法都是原来 objc 中没有的概念。说起来简单也简单，但是背后也还是不少玄机。原来就已经存在的用法就不说了，这里把新用法从浅入深逐个总结一下吧。</p>
+
+<p>首先是 <code>?</code>：</p>
+
+<ul>
+<li><code>?</code> 放在类型后面作为 Optional 类型的标记</li>
+</ul>
+
+<p>这个用法上面已经说过，其实就是一个 <code>Optional&lt;T&gt;</code> 的语法糖，自动将等号后面的内容 wrap 成 Optional。给个用例，不再多说：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">var num: Int? = nil        //声明一个 Int 的 Optional，并将其设为啥都没有
+var str: String? = &quot;Hello&quot; //声明一个 String 的 Optional，并给它一个字符串
+</code></pre></figure>
+<ul>
+<li><code>?</code> 放在某个 Optional 变量后面，表示对这个变量进行判断，并且隐式地 unwrap。比如说：</li>
+</ul>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">foo?.somemethod()
+</code></pre></figure>
+<p>相比起一般的先判断再调用，类似这样的判断的好处是一旦判断为 <code>nil</code> 或者说是 <code>false</code>，语句便不再继续执行，而是直接返回一个 nil。上面的写法等价于</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">if let maybeFoo = foo {
+    maybeFoo.somemethod()
+}
+</code></pre></figure>
+<p>这种写法更存在价值的地方在于可以链式调用，也就是所谓的 Optional Chaining，这样可以避免一大堆的条件分支，而使代码变得易读简洁。比如：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">if let upper = john.residence?.address?.buildingIdentifier()?.uppercaseString {
+    println(&quot;John&#39;s uppercase building identifier is \(upper).&quot;)
+}
+</code></pre></figure>
+<p>注意最后 <code>buildingIdentifier</code> 后面的问号是在 <code>()</code> 之后的，这代表了这个 Optional 的判断对象是 <code>buildingIdentifier()</code> 的返回值。</p>
+
+<ul>
+<li><code>?</code> 放在某个 optional 的 protocol 方法的括号前面，以表示询问是否可以对该方法调用</li>
+</ul>
+
+<p>这中用法相当于以前 objc 中的 <code>-respondsToSelector:</code> 的判断，如果对象响应这个方法的话，则进行调用。例子：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">delegate?.questionViewControllerDidGetResult?(self, result)
+</code></pre></figure>
+<p>中的第二个问号。注意和上面在 <code>()</code> 后的问号不一样，这里是在 <code>()</code> 之前的，表示对方法的询问。</p>
+
+<p>其实在 Swift 中，默认的 potocol 类型是没有 optional 的方法的，因为基于这个前提，可以对类型安全进行确保。但是 Cocoa 框架中的 protocol 还是有很多 optional 的方法，对于这些可选的接口方法，或者你想要声明一个带有可选方法的接口时，必须要在声明 <code>protocol</code> 时再其前面加上 <code>@objc</code> 关键字，并在可选方法前面加上 <code>@optional</code>：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">@objc protocol CounterDataSource {
+    @optional func optionalMethod() -&gt; Int
+    func requiredMethod() -&gt; Int
+    @optional var optionalGetter: Int { get }
+}
+</code></pre></figure>
+<p>然后是 <code>!</code> 新用法的总结</p>
+
+<ul>
+<li><code>!</code> 放在 Optional 变量的后面，表示强制的 unwrap 转换：</li>
+</ul>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">foo!.somemethod()
+</code></pre></figure>
+<p>这将会使一个 <code>Optional&lt;T&gt;</code> 的量被转换为 <code>T</code>。但是需要特别注意，如果这个 Optional 的量是 nil 的话，这种转换会在运行时让程序崩溃。所以在直接写 <code>!</code> 转换的时候一定要非常注意，只有在有必死决心和十足把握时才做 <code>!</code> 强转。如果待转换量有可能是 nil 的话，我们最好使用 <code>if let</code> 的语法来做一个判断和隐式转换，保证安全。</p>
+
+<ul>
+<li><code>!</code> 放在类型后面，表示强制的隐式转换。</li>
+</ul>
+
+<p>这种情况下和 <code>?</code> 放在类型后面的行为比较类似，都是一个类型声明的语法糖。<code>?</code> 声明的是 <code>Optional</code>，而 <code>!</code> 其实声明的是一个 <code>ImplicitlyUnwrappedOptional</code> 类型。首先需要明确的是，这个类型是一个 <code>struct</code>，其中关键部分是一个 <code>Optional&lt;T&gt;</code> 的 value，和一组从这个 value 里取值的 getter 和 方法：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">struct ImplicitlyUnwrappedOptional&lt;T&gt; : LogicValue, Reflectable {
+    var value: T?
+    //...
+    static var None: T! { get }
+    static func Some(value: T) -&gt; T!
+    //...
+}
+</code></pre></figure>
+<p>从外界来看，其实这和 <code>Optional</code> 的变量是类似的，有 <code>Some</code> 有 <code>None</code>。其实从本质上来说，<code>ImplicitlyUnwrappedOptional</code> 就是一个存储了 <code>Optional</code>，实现了 <code>Optional</code> 对外的方法特性的一个类型，唯一不同的是，<code>Optional</code> 需要我们手动进行进行 unwrap (不管是使用 <code>var!</code> 还是 <code>let if</code> 赋值，总要我们做点什么)，而 <code>ImplicitlyUnwrappedOptional</code> 则会在使用的时候自动地去 unwrap，并对继续之后的操作调用，而不必去增加一次手动的显示/隐式操作。</p>
+
+<p>为什么要这么设计呢？主要是基于 objc 的 Cocoa 框架的两点考虑和妥协。</p>
+
+<p>首先是 objc 中是有指向空对象的指针的，就是我们所习惯的 <code>nil</code>。在 Swift 中，为了处理和 objc 的 nil 的兼容，我们需要一个可为空的量。而因为 Swift 的目的就是打造一个完全类型安全的语言，因此不仅对于 class，对于其他的类型结构我们也需要类型安全。于是很自然地，我们可以使用 Optional 的空来对 objc 做等效。因为 Cocoa 框架有大量的 API 都会返回 nil，因此我们在用 Swift 表达它们的时候，也需要换成对应的既可以表示存在，也可以表示不存在的 <code>Optional</code>。</p>
+
+<p>那这样的话，不是直接用 <code>Optional</code> 就好了么？为什么要弄出一个 <code>ImplicitlyUnwrappedOptional</code> 呢？因为易用性。如果全部用 <code>Optional</code> 包装的话，在调用很多 API 时我们就都需要转来转去，十分麻烦。而对于 <code>ImplicitlyUnwrappedOptional</code> 因为编译器为我们进行了很多处理，使得我们在确信返回值或者要传递的值不是空的时候，可以很方便的不需要做任何转换，直接使用。但是对于那些 Cocoa 有可能返回 nil，我们本来就需要检查的方法，我们还是应该写 if  来进行转换和检查。</p>
+
+<p>比如说，以下的写法就会在运行时导致一个 EXC_BAD_INSTRUCTION</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">let formatter = NSDateFormatter()
+let now = formatter.dateFromString(&quot;not_valid&quot;)
+let soon = now.dateByAddingTimeInterval(5.0) // EXC_BAD_INSTRUCTION
+</code></pre></figure>
+<p>因为 <code>dateFromString</code> 返回的是一个 <code>NSDate!</code>，而我们的输入在原来会导致一个 <code>nil</code> 的返回，这里我们在使用 now 之前需要进行检查：</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">let formatter = NSDateFormatter()
+let now = formatter.dateFromString(&quot;not_valid&quot;)
+if let realNow = now {
+    realNow.dateByAddingTimeInterval(5.0)
+} else {
+    println(&quot;Bad Date&quot;)
+}
+</code></pre></figure>
+<p>这和以前在 objc 时代做的事情差不多，或者，用更 Swift 的方式做</p>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift">let formatter = NSDateFormatter()
+let now = formatter.dateFromString(&quot;not_valid&quot;)
+let soon = now?.dateByAddingTimeInterval(5.0)
+</code></pre></figure>
+<h3>如何写出正确的 Swift 代码</h3>
+
+<p>现在距离 Swift 发布已经接近小一周了。很多开发者已经开始尝试用 Swift 写项目。但是不管是作为练习还是作为真正的工程，现在看来大家在写 Swift 时还是带了浓重的 objc 的影子。就如何写出带有 Swift 范儿的代码，在这里给出一点不成熟的小建议。</p>
+
+<ol>
+<li>理解 Swift 的类型组织结构。Swift 的基础组织非常漂亮，主要的基础类型大部分使用了 <code>struct</code> 来完成，然后在之上定义并且实现了各种接口，这样的设计模式其实是值得学习和借鉴的。当然，在实际操作中可能会有很大难度，因为接口比之前灵活许多，可以继承，可以放变量等等，因此在定义接口时如何保持接口的单一性和扩展性是一个不小的考验。</li>
+<li>善用泛型。很多时候 Swift 的 Generic 并不是显式的，类型推断帮助我们做了很多的事情，因此 Generic 这个概念可能被忽视的比较多。关于泛型这个强大的工具，因为原来 objc 中是没有的，而泛型的一个代表语言 C# 虽然平时有写，但很多时候只是当作类型安全的保证在用，我自己也没有太多心得。但是在日常开发中还是多思考和总结，相信会很有进步。</li>
+<li>尽快养成符合 Swift 的语法和习惯，比如 <code>if let</code>，比如对常量习惯性地用 <code>let</code> 而不要用 <code>var</code>，在上下文明确的时候省掉原来习惯写的 <code>self</code>，枚举只使用 <code>.</code>，合适地使用 <code>_</code> 这样的符号来增加可读性等等。既然写 Swift，就应该入乡随俗，尊重这门语言的规范，这样不管在之后和别人的讨论交流上，还是自我的长期发展上，都会很有帮助。</li>
+<li>安心等 Apple 进一步完善。现在 Swift 还处在相对很早期的阶段，很多东西虽然已经基本定型了，但是也有不少可塑性。编译器和调试器现在感觉还不太好用（当然，因为还在 beta，也不是说责怪什么），而且对于原来基于 objc 写的 Cocoa 框架还是有很多水土不服的地方。我个人来说，现在的水平使用 Swift 写还凑合 app 这样的级别应该问题不大，在这篇文章之后我暂时不会再进一步深挖 Swift，而是打算等待正式版出来之后再看情况使用。现在 Swift 仅在 <code>String</code> 上可以和 Cocoa 框架完美对接，而对于像 <code>Array</code> 这样的类型，虽然通过一些巧妙的方式完成了桥接，但是在实际使用上可能还是需要借助大量的 <code>NSArray</code>，在转换上略显麻烦。按照现在来看，Apple 应该至少会将 Cocoa 框架另外几个重要的类迅速适配 Swift 的语言习惯，如果能找到 一种很方便地使用 Cocoa 框架的方法的话，objc 程序员转型 Swift 就应该相对容易一些了。</li>
+</ol>
+
+<p>洋洋洒洒不小心写了这么多（其实我还删了两节..因为写不动了），希望能对您学习和深入了解 Swift 有所帮助吧。因为很晚了，我没有仔细校对，文中肯定有不少错误（技术上和文字上的），欢迎您指出，我会尽快改正。</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2014/07/developer-should-know-about-ios8/" title="link to 开发者所需要知道的 iOS8 SDK 新特性">开发者所需要知道的 iOS8 SDK 新特性</a></h2>
+       <p class="excerpt">WWDC 2014 已经过去一个多月。最激动人心的莫过于 Swift 这门新语言的发布，我在之前已经写了一些关于这么语言的第一印象和一些初步的探索。在写这篇文章的时候，Swift 随着 beta 3 得到了重大的更新，而这门语言现在也还在剧烈的变化之中。对于 Swift，现在大家的探索才刚刚上路，很多背后的机制还并不是非常清楚，或者有可能发生巨大的变化，因此在这里和之后的几篇文章，直到稳定的 1.0 版本出现，我不再打算继续深入针对 Swift 写什么文章。这基本出于对未来可能的变化会容易...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2014-07-15 21:27:05 +0800" class="post-list__meta--date date">2014-07-15</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2014/07/developer-should-know-about-ios8/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2014/06/my-opinion-about-swift/" title="link to 关于 Swift 的一点初步看法">关于 Swift 的一点初步看法</a></h2>
+       <p class="excerpt">虽然四点半就起床去排队等入场，结果还是只能坐在了蛮后面的位置看着大屏幕参加了今年的 Keynote。其实今年 OS X 和 iOS 的更新亮点都不少，但是显然风头和光芒都让横空出世的 Swift 给抢走了。这部分内容因为不是 NDA，所以可以提前说一说。Swift 是 Apple 自创的一门专门为 Cocoa 和 CocoaTouch 设计的语言，意在用来替代 objc。早上发布的时候有很多朋友说其实他们已经写了很久的 Swift，而且还给了一个网站，在这里首先需要说明的是，这个网站的 S...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2014-06-03 11:05:44 +0800" class="post-list__meta--date date">2014-06-03</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2014/06/my-opinion-about-swift/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2014/06/walk-in-swift/";
+        this.page.identifier = "/2014/06/walk-in-swift/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>

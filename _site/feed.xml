@@ -1,0 +1,2193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Asunquan</title>
+    <description>嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</description>
+    <link>http://onevcat.com/</link>
+    <atom:link href="http://onevcat.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Tue, 08 Nov 2016 16:45:16 +0800</pubDate>
+    <lastBuildDate>Tue, 08 Nov 2016 16:45:16 +0800</lastBuildDate>
+    <generator>Jekyll v3.1.2</generator>
+    
+      <item>
+        <title>活久见的重构 - iOS 10 UserNotifications 框架解析</title>
+        <description>&lt;h2&gt;TL;DR&lt;/h2&gt;
+
+&lt;p&gt;iOS 10 中以前杂乱的和通知相关的 API 都被统一了，现在开发者可以使用独立的 UserNotifications.framework 来集中管理和使用 iOS 系统中通知的功能。在此基础上，Apple 还增加了撤回单条通知，更新已展示通知，中途修改通知内容，在通知中展示图片视频，自定义通知 UI 等一系列新功能，非常强大。&lt;/p&gt;
+
+&lt;p&gt;对于开发者来说，相较于之前版本，iOS 10 提供了一套非常易用的通知处理接口，是 SDK 的一次重大重构。而之前的绝大部分通知相关 API 都已经被标为弃用 (deprecated)。&lt;/p&gt;
+
+&lt;p&gt;这篇文章将首先回顾一下 Notification 的发展历史和现状，然后通过一些例子来展示 iOS 10 SDK 中相应的使用方式，来说明新 SDK 中通知可以做的事情以及它们的使用方式。&lt;/p&gt;
+
+&lt;p&gt;您可以在 WWDC 16 的 &lt;a href=&quot;https://developer.apple.com/videos/play/wwdc2016/707/&quot;&gt;Introduction to Notifications&lt;/a&gt; 和 &lt;a href=&quot;https://developer.apple.com/videos/play/wwdc2016/708/&quot;&gt;Advanced Notifications&lt;/a&gt; 这两个 Session 中找到详细信息；另外也不要忘了参照 &lt;a href=&quot;https://developer.apple.com/reference/usernotifications&quot;&gt;UserNotifications 的官方文档&lt;/a&gt;以及本文的&lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo&quot;&gt;实例项目 UserNotificationDemo&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h2&gt;Notification 历史和现状&lt;/h2&gt;
+
+&lt;p&gt;碎片化时间是移动设备用户在使用应用时的一大特点，用户希望随时拿起手机就能查看资讯，处理事务，而通知可以在重要的事件和信息发生时提醒用户。完美的通知展示可以很好地帮助用户使用应用，体现出应用的价值，进而有很大可能将用户带回应用，提高活跃度。正因如此，不论是 Apple 还是第三方开发者们，都很重视通知相关的开发工作，而通知也成为了很多应用的必备功能，开发者们都希望通知能带来更好地体验和更多的用户。&lt;/p&gt;
+
+&lt;p&gt;但是理想的丰满并不能弥补现实的骨感。自从在 iOS 3 引入 Push Notification 后，之后几乎每个版本 Apple 都在加强这方面的功能。我们可以回顾一下整个历程和相关的主要 API：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;iOS 3 - 引入推送通知
+&lt;code&gt;UIApplication&lt;/code&gt; 的 &lt;code&gt;registerForRemoteNotificationTypes&lt;/code&gt; 与 &lt;code&gt;UIApplicationDelegate&lt;/code&gt; 的 &lt;code&gt;application(_:didRegisterForRemoteNotificationsWithDeviceToken:)&lt;/code&gt;，&lt;code&gt;application(_:didReceiveRemoteNotification:)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;iOS 4 - 引入本地通知
+&lt;code&gt;scheduleLocalNotification&lt;/code&gt;，&lt;code&gt;presentLocalNotificationNow:&lt;/code&gt;，&lt;code&gt;
+application(_:didReceive:)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;iOS 5 - 加入通知中心页面&lt;/li&gt;
+&lt;li&gt;iOS 6 - 通知中心页面与 iCloud 同步&lt;/li&gt;
+&lt;li&gt;iOS 7 - 后台静默推送
+&lt;code&gt;application(_:didReceiveRemoteNotification:fetchCompletionHandle:)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;iOS 8 - 重新设计 notification 权限请求，Actionable 通知
+&lt;code&gt;registerUserNotificationSettings(_:)&lt;/code&gt;，&lt;code&gt;UIUserNotificationAction&lt;/code&gt; 与 &lt;code&gt;UIUserNotificationCategory&lt;/code&gt;，&lt;code&gt;application(_:handleActionWithIdentifier:forRemoteNotification:completionHandler:)&lt;/code&gt; 等&lt;/li&gt;
+&lt;li&gt;iOS 9 - Text Input action，基于 HTTP/2 的推送请求
+&lt;code&gt;UIUserNotificationActionBehavior&lt;/code&gt;，全新的 Provider API 等&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;有点晕，不是么？一个开发者很难在不借助于文档的帮助下区分 &lt;code&gt;application(_:didReceiveRemoteNotification:)&lt;/code&gt; 和 &lt;code&gt;application(_:didReceiveRemoteNotification:fetchCompletionHandle:)&lt;/code&gt;，新入行的开发者也不可能明白 &lt;code&gt;registerForRemoteNotificationTypes&lt;/code&gt; 和 &lt;code&gt;registerUserNotificationSettings(_:)&lt;/code&gt; 之间是不是有什么关系，Remote 和 Local Notification 除了在初始化方式之外那些细微的区别也让人抓狂，而很多 API 都被随意地放在了 &lt;code&gt;UIApplication&lt;/code&gt; 或者 &lt;code&gt;UIApplicationDelegate&lt;/code&gt; 中。除此之外，应用已经在前台时，远程推送是无法直接显示的，要先捕获到远程来的通知，然后再发起一个本地通知才能完成显示。更让人郁闷的是，应用在运行时和非运行时捕获通知的路径还不一致。虽然这些种种问题都是由一定历史原因造成的，但不可否认，正是混乱的组织方式和之前版本的考虑不周，使得 iOS 通知方面的开发一直称不上“让人愉悦”，甚至有不少“坏代码”的味道。&lt;/p&gt;
+
+&lt;p&gt;另一方面，现在的通知功能相对还是简单，我们能做的只是本地或者远程发起通知，然后显示给用户。虽然 iOS 8 和 9 中添加了按钮和文本来进行交互，但是已发出的通知不能更新，通知的内容也只是在发起时唯一确定，而这些内容也只能是简单的文本。 想要在现有基础上扩展通知的功能，势必会让原本就盘根错节的 API 更加难以理解。&lt;/p&gt;
+
+&lt;p&gt;在 iOS 10 中新加入 UserNotifications 框架，可以说是 iOS SDK 发展到现在的最大规模的一次重构。新版本里通知的相关功能被提取到了单独的框架，通知也不再区分类型，而有了更统一的行为。我们接下来就将由浅入深地解析这个重构后的框架的使用方式。&lt;/p&gt;
+
+&lt;h2&gt;UserNotifications 框架解析&lt;/h2&gt;
+
+&lt;h3&gt;基本流程&lt;/h3&gt;
+
+&lt;p&gt;iOS 10 中通知相关的操作遵循下面的流程：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-flow.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;首先你需要向用户请求推送权限，然后发送通知。对于发送出的通知，如果你的应用位于后台或者没有运行的话，系统将通过用户允许的方式 (弹窗，横幅，或者是在通知中心) 进行显示。如果你的应用已经位于前台正在运行，你可以自行决定要不要显示这个通知。最后，如果你希望用户点击通知能有打开应用以外的额外功能的话，你也需要进行处理。&lt;/p&gt;
+
+&lt;h3&gt;权限申请&lt;/h3&gt;
+
+&lt;h4&gt;通用权限&lt;/h4&gt;
+
+&lt;p&gt;iOS 8 之前，本地推送 (&lt;code&gt;UILocalNotification&lt;/code&gt;) 和远程推送 (Remote Notification) 是区分对待的，应用只需要在进行远程推送时获取用户同意。iOS 8 对这一行为进行了规范，因为无论是本地推送还是远程推送，其实在用户看来表现是一致的，都是打断用户的行为。因此从 iOS 8 开始，这两种通知都需要申请权限。iOS 10 里进一步消除了本地通知和推送通知的区别。向用户申请通知权限非常简单：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
+    granted, error in
+    if granted {
+        // 用户允许进行通知
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;当然，在使用 UN 开头的 API 的时候，不要忘记导入 UserNotifications 框架：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;import UserNotifications
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;第一次调用这个方法时，会弹出一个系统弹窗。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-auth-alert.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;要注意的是，一旦用户拒绝了这个请求，再次调用该方法也不会再进行弹窗，想要应用有机会接收到通知的话，用户必须自行前往系统的设置中为你的应用打开通知，如果不是杀手级应用，想让用户主动去在茫茫多 app 中找到你的那个并专门为你开启通知，往往是不可能的。因此，在合适的时候弹出请求窗，在请求权限前预先进行说明，以此增加通过的概率应该是开发者和策划人员的必修课。相比与直接简单粗暴地在启动的时候就进行弹窗，耐心诱导会是更明智的选择。&lt;/p&gt;
+
+&lt;h4&gt;远程推送&lt;/h4&gt;
+
+&lt;p&gt;一旦用户同意后，你就可以在应用中发送本地通知了。不过如果你通过服务器发送远程通知的话，还需要多一个获取用户 token 的操作。你的服务器可以使用这个 token 将用向 Apple Push Notification 的服务器提交请求，然后 APNs 通过 token 识别设备和应用，将通知推给用户。&lt;/p&gt;
+
+&lt;p&gt;提交 token 请求和获得 token 的回调是现在“唯二”不在新框架中的 API。我们使用 &lt;code&gt;UIApplication&lt;/code&gt; 的 &lt;code&gt;registerForRemoteNotifications&lt;/code&gt; 来注册远程通知，在 &lt;code&gt;AppDelegate&lt;/code&gt; 的 &lt;code&gt;application(_:didRegisterForRemoteNotificationsWithDeviceToken)&lt;/code&gt; 中获取用户 token：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// 向 APNs 请求 token：
+UIApplication.shared.registerForRemoteNotifications()
+
+// AppDelegate.swift
+ func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    let tokenString = deviceToken.hexString
+    print(&amp;quot;Get Push token: \(tokenString)&amp;quot;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;获取得到的 &lt;code&gt;deviceToken&lt;/code&gt; 是一个 &lt;code&gt;Data&lt;/code&gt; 类型，为了方便使用和传递，我们一般会选择将它转换为一个字符串。Swift 3 中可以使用下面的 &lt;code&gt;Data&lt;/code&gt; 扩展来构造出适合传递给 Apple 的字符串：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;extension Data {
+    var hexString: String {
+        return withUnsafeBytes {(bytes: UnsafePointer&amp;lt;UInt8&amp;gt;) -&amp;gt; String in
+            let buffer = UnsafeBufferPointer(start: bytes, count: count)
+            return buffer.map {String(format: &amp;quot;%02hhx&amp;quot;, $0)}.reduce(&amp;quot;&amp;quot;, { $0 + $1 })
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;权限设置&lt;/h4&gt;
+
+&lt;p&gt;用户可以在系统设置中修改你的应用的通知权限，除了打开和关闭全部通知权限外，用户也可以限制你的应用只能进行某种形式的通知显示，比如只允许横幅而不允许弹窗及通知中心显示等。一般来说你不应该对用户的选择进行干涉，但是如果你的应用确实需要某种特定场景的推送的话，你可以对当前用户进行的设置进行检查：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;UNUserNotificationCenter.current().getNotificationSettings {
+    settings in 
+    print(settings.authorizationStatus) // .authorized | .denied | .notDetermined
+    print(settings.badgeSetting) // .enabled | .disabled | .notSupported
+    // etc...
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关于权限方面的使用，可以参考 Demo 中 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/UserNotificationDemo/AuthorizationViewController.swift&quot;&gt;&lt;code&gt;AuthorizationViewController&lt;/code&gt;&lt;/a&gt; 的内容。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3&gt;发送通知&lt;/h3&gt;
+
+&lt;p&gt;UserNotifications 中对通知进行了统一。我们通过通知的内容 (&lt;code&gt;UNNotificationContent&lt;/code&gt;)，发送的时机 (&lt;code&gt;UNNotificationTrigger&lt;/code&gt;) 以及一个发送通知的 &lt;code&gt;String&lt;/code&gt; 类型的标识符，来生成一个 &lt;code&gt;UNNotificationRequest&lt;/code&gt;  类型的发送请求。最后，我们将这个请求添加到 &lt;code&gt;UNUserNotificationCenter.current()&lt;/code&gt; 中，就可以等待通知到达了：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// 1. 创建通知内容
+let content = UNMutableNotificationContent()
+content.title = &amp;quot;Time Interval Notification&amp;quot;
+content.body = &amp;quot;My first notification&amp;quot;
+
+// 2. 创建发送触发
+let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+
+// 3. 发送请求标识符
+let requestIdentifier = &amp;quot;com.onevcat.usernotification.myFirstNotification&amp;quot;
+
+// 4. 创建一个发送请求
+let request = UNNotificationRequest(identifier: requestIdentifier, content: content, trigger: trigger)
+
+// 将请求添加到发送中心
+UNUserNotificationCenter.current().add(request) { error in
+    if error == nil {
+        print(&amp;quot;Time Interval Notification scheduled: \(requestIdentifier)&amp;quot;)
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;iOS 10 中通知不仅支持简单的一行文字，你还可以添加 &lt;code&gt;title&lt;/code&gt; 和 &lt;code&gt;subtitle&lt;/code&gt;，来用粗体字的形式强调通知的目的。对于远程推送，iOS 10 之前一般只含有消息的推送 payload 是这样的：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &amp;quot;aps&amp;quot;:{
+    &amp;quot;alert&amp;quot;:&amp;quot;Test&amp;quot;,
+    &amp;quot;sound&amp;quot;:&amp;quot;default&amp;quot;,
+    &amp;quot;badge&amp;quot;:1
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;如果我们想要加入 &lt;code&gt;title&lt;/code&gt; 和 &lt;code&gt;subtitle&lt;/code&gt; 的话，则需要将 &lt;code&gt;alert&lt;/code&gt; 从字符串换为字典，新的 payload 是：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &amp;quot;aps&amp;quot;:{
+    &amp;quot;alert&amp;quot;:{
+      &amp;quot;title&amp;quot;:&amp;quot;I am title&amp;quot;,
+      &amp;quot;subtitle&amp;quot;:&amp;quot;I am subtitle&amp;quot;,
+      &amp;quot;body&amp;quot;:&amp;quot;I am body&amp;quot;
+    },
+    &amp;quot;sound&amp;quot;:&amp;quot;default&amp;quot;,
+    &amp;quot;badge&amp;quot;:1
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;好消息是，后一种字典的方法其实在 iOS 8.2 的时候就已经存在了。虽然当时 &lt;code&gt;title&lt;/code&gt; 只是用在 Apple Watch 上的，但是设置好 &lt;code&gt;body&lt;/code&gt; 的话在 iOS 上还是可以显示的，所以针对 iOS 10 添加标题时是可以保证前向兼容的。&lt;/p&gt;
+
+&lt;p&gt;另外，如果要进行本地化对应，在设置这些内容文本时，本地可以使用 &lt;code&gt;String.localizedUserNotificationString(forKey: &amp;quot;your_key&amp;quot;, arguments: [])&lt;/code&gt; 的方式来从 Localizable.strings 文件中取出本地化字符串，而远程推送的话，也可以在 payload 的 alert 中使用 &lt;code&gt;loc-key&lt;/code&gt; 或者 &lt;code&gt;title-loc-key&lt;/code&gt; 来进行指定。关于 payload 中的 key，可以参考&lt;a href=&quot;https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/TheNotificationPayload.html&quot;&gt;这篇文档&lt;/a&gt;。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;触发器是只对本地通知而言的，远程推送的通知的话默认会在收到后立即显示。现在 UserNotifications 框架中提供了三种触发器，分别是：在一定时间后触发 &lt;code&gt;UNTimeIntervalNotificationTrigger&lt;/code&gt;，在某月某日某时触发 &lt;code&gt;UNCalendarNotificationTrigger&lt;/code&gt; 以及在用户进入或是离开某个区域时触发 &lt;code&gt;UNLocationNotificationTrigger&lt;/code&gt;。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;请求标识符可以用来区分不同的通知请求，在将一个通知请求提交后，通过特定 API 我们能够使用这个标识符来取消或者更新这个通知。我们将在稍后再提到具体用法。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;在新版本的通知框架中，Apple 借用了一部分网络请求的概念。我们组织并发送一个通知请求，然后将这个请求提交给 &lt;code&gt;UNUserNotificationCenter&lt;/code&gt; 进行处理。我们会在 delegate 中接收到这个通知请求对应的 response，另外我们也有机会在应用的 extension 中对 request 进行处理。我们在接下来的章节会看到更多这方面的内容。&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;在提交通知请求后，我们锁屏或者将应用切到后台，并等待设定的时间后，就能看到我们的通知出现在通知中心或者屏幕横幅了：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-alert.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;关于最基础的通知发送，可以参考 Demo 中 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/UserNotificationDemo/TimeIntervalViewController.swift&quot;&gt;&lt;code&gt;TimeIntervalViewController&lt;/code&gt;&lt;/a&gt; 的内容。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3&gt;取消和更新&lt;/h3&gt;
+
+&lt;p&gt;在创建通知请求时，我们已经指定了标识符。这个标识符可以用来管理通知。在 iOS 10 之前，我们很难取消掉某一个特定的通知，也不能主动移除或者更新已经展示的通知。想象一下你需要推送用户账户内的余额变化情况，多次的余额增减或者变化很容易让用户十分困惑 - 到底哪条通知才是最正确的？又或者在推送一场比赛的比分时，频繁的通知必然导致用户通知中心数量爆炸，而大部分中途的比分对于用户来说只是噪音。&lt;/p&gt;
+
+&lt;p&gt;iOS 10 中，UserNotifications 框架提供了一系列管理通知的 API，你可以做到：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;取消还未展示的通知&lt;/li&gt;
+&lt;li&gt;更新还未展示的通知&lt;/li&gt;
+&lt;li&gt;移除已经展示过的通知&lt;/li&gt;
+&lt;li&gt;更新已经展示过的通知&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;其中关键就在于在创建请求时使用同样的标识符。&lt;/p&gt;
+
+&lt;p&gt;比如，从通知中心中移除一个展示过的通知：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+let identifier = &amp;quot;com.onevcat.usernotification.notificationWillBeRemovedAfterDisplayed&amp;quot;
+let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+UNUserNotificationCenter.current().add(request) { error in
+    if error != nil {
+        print(&amp;quot;Notification request added: \(identifier)&amp;quot;)
+    }
+}
+
+delay(4) {
+    print(&amp;quot;Notification request removed: \(identifier)&amp;quot;)
+    UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;类似地，我们可以使用 &lt;code&gt;removePendingNotificationRequests&lt;/code&gt;，来取消还未展示的通知请求。对于更新通知，不论是否已经展示，都和一开始添加请求时一样，再次将请求提交给 &lt;code&gt;UNUserNotificationCenter&lt;/code&gt; 即可：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// let request: UNNotificationRequest = ...
+UNUserNotificationCenter.current().add(request) { error in
+    if error != nil {
+        print(&amp;quot;Notification request added: \(identifier)&amp;quot;)
+    }
+}
+
+delay(2) {
+    let newTrigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+    // Add new request with the same identifier to update a notification.
+    let newRequest = UNNotificationRequest(identifier: identifier, content:newContent, trigger: newTrigger)
+    UNUserNotificationCenter.current().add(newRequest) { error in
+        if error != nil {
+            print(&amp;quot;Notification request updated: \(identifier)&amp;quot;)
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;远程推送可以进行通知的更新，在使用 Provider API 向 APNs 提交请求时，在 HTTP/2 的 header 中 &lt;code&gt;apns-collapse-id&lt;/code&gt; key 的内容将被作为该推送的标识符进行使用。多次推送同一标识符的通知即可进行更新。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;对应本地的 &lt;code&gt;removeDeliveredNotifications&lt;/code&gt;，现在还不能通过类似的方式，向 APNs 发送一个包含 collapse id 的 DELETE 请求来删除已经展示的推送，APNs 服务器并不接受一个 DELETE 请求。不过从技术上来说 Apple 方面应该不存在什么问题，我们可以拭目以待。现在如果想要消除一个远程推送，可以选择使用后台静默推送的方式来从本地发起一个删除通知的调用。关于后台推送的部分，可以参考我之前的一篇关于 &lt;a href=&quot;https://onevcat.com/2013/08/ios7-background-multitask/&quot;&gt;iOS7 中的多任务&lt;/a&gt;的文章。&lt;/p&gt;
+
+&lt;p&gt;关于通知管理，可以参考 Demo 中 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/UserNotificationDemo/ManagementViewController.swift&quot;&gt;&lt;code&gt;ManagementViewController&lt;/code&gt;&lt;/a&gt; 的内容。为了能够简单地测试远程推送，一般我们都会用一些方便发送通知的工具，&lt;a href=&quot;https://github.com/KnuffApp/Knuff&quot;&gt;Knuff&lt;/a&gt; 就是其中之一。我也为 Knuff 添加了 &lt;code&gt;apns-collapse-id&lt;/code&gt; 的支持，你可以在这个 &lt;a href=&quot;https://github.com/onevcat/Knuff&quot;&gt;fork 的 repo&lt;/a&gt; 或者是原 repo 的 &lt;a href=&quot;https://github.com/KnuffApp/Knuff/pull/52&quot;&gt;pull request&lt;/a&gt; 中找到相关信息。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3&gt;处理通知&lt;/h3&gt;
+
+&lt;h4&gt;应用内展示通知&lt;/h4&gt;
+
+&lt;p&gt;现在系统可以在应用处于后台或者退出的时候向用户展示通知了。不过，当应用处于前台时，收到的通知是无法进行展示的。如果我们希望在应用内也能显示通知的话，需要额外的工作。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;UNUserNotificationCenterDelegate&lt;/code&gt; 提供了两个方法，分别对应如何在应用内展示通知，和收到通知响应时要如何处理的工作。我们可以实现这个接口中的对应方法来在应用内展示通知：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, 
+                       willPresent notification: UNNotification, 
+                       withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -&amp;gt; Void) 
+    {
+        completionHandler([.alert, .sound])
+
+        // 如果不想显示某个通知，可以直接用空 options 调用 completionHandler:
+        // completionHandler([])
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;实现后，将 &lt;code&gt;NotificationHandler&lt;/code&gt; 的实例赋值给 &lt;code&gt;UNUserNotificationCenter&lt;/code&gt; 的 &lt;code&gt;delegate&lt;/code&gt; 属性就可以了。没有特殊理由的话，AppDelegate 的 &lt;code&gt;application(_:didFinishLaunchingWithOptions:)&lt;/code&gt; 就是一个不错的选择：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;class AppDelegate: UIResponder, UIApplicationDelegate {
+    let notificationHandler = NotificationHandler()
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -&amp;gt; Bool {
+        UNUserNotificationCenter.current().delegate = notificationHandler
+        return true
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;对通知进行响应&lt;/h4&gt;
+
+&lt;p&gt;&lt;code&gt;UNUserNotificationCenterDelegate&lt;/code&gt; 中还有一个方法，&lt;code&gt;userNotificationCenter(_:didReceive:withCompletionHandler:)&lt;/code&gt;。这个代理方法会在用户与你推送的通知进行交互时被调用，包括用户通过通知打开了你的应用，或者点击或者触发了某个 action (我们之后会提到 actionable 的通知)。因为涉及到打开应用的行为，所以实现了这个方法的 delegate 必须在 &lt;code&gt;applicationDidFinishLaunching:&lt;/code&gt; 返回前就完成设置，这也是我们之前推荐将 &lt;code&gt;NotificationHandler&lt;/code&gt; 尽早进行赋值的理由。&lt;/p&gt;
+
+&lt;p&gt;一个最简单的实现自然是什么也不错，直接告诉系统你已经完成了所有工作。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -&amp;gt; Void) {
+    completionHandler()
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;想让这个方法变得有趣一点的话，在创建通知的内容时，我们可以在请求中附带一些信息：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let content = UNMutableNotificationContent()
+content.title = &amp;quot;Time Interval Notification&amp;quot;
+content.body = &amp;quot;My first notification&amp;quot;
+
+content.userInfo = [&amp;quot;name&amp;quot;: &amp;quot;onevcat&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在该方法里，我们将获取到这个推送请求对应的 response，&lt;code&gt;UNNotificationResponse&lt;/code&gt; 是一个几乎包括了通知的所有信息的对象，从中我们可以再次获取到 &lt;code&gt;userInfo&lt;/code&gt; 中的信息：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -&amp;gt; Void) {
+    if let name = response.notification.request.content.userInfo[&amp;quot;name&amp;quot;] as? String {
+        print(&amp;quot;I know it&amp;#39;s you! \(name)&amp;quot;)
+    }
+    completionHandler()
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;更好的消息是，远程推送的 payload 内的内容也会出现在这个 &lt;code&gt;userInfo&lt;/code&gt; 中，这样一来，不论是本地推送还是远程推送，处理的路径得到了统一。通过 &lt;code&gt;userInfo&lt;/code&gt; 的内容来决定页面跳转或者是进行其他操作，都会有很大空间。&lt;/p&gt;
+
+&lt;h3&gt;Actionable 通知发送和处理&lt;/h3&gt;
+
+&lt;h4&gt;注册 Category&lt;/h4&gt;
+
+&lt;p&gt;iOS 8 和 9 中 Apple 引入了可以交互的通知，这是通过将一簇 action 放到一个 category 中，将这个 category 进行注册，最后在发送通知时将通知的 category 设置为要使用的 category 来实现的。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-category.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;注册一个 category 非常容易：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;private func registerNotificationCategory() {
+    let saySomethingCategory: UNNotificationCategory = {
+        // 1
+        let inputAction = UNTextInputNotificationAction(
+            identifier: &amp;quot;action.input&amp;quot;,
+            title: &amp;quot;Input&amp;quot;,
+            options: [.foreground],
+            textInputButtonTitle: &amp;quot;Send&amp;quot;,
+            textInputPlaceholder: &amp;quot;What do you want to say...&amp;quot;)
+
+        // 2
+        let goodbyeAction = UNNotificationAction(
+            identifier: &amp;quot;action.goodbye&amp;quot;,
+            title: &amp;quot;Goodbye&amp;quot;,
+            options: [.foreground])
+
+        let cancelAction = UNNotificationAction(
+            identifier: &amp;quot;action.cancel&amp;quot;,
+            title: &amp;quot;Cancel&amp;quot;,
+            options: [.destructive])
+
+        // 3
+        return UNNotificationCategory(identifier:&amp;quot;saySomethingCategory&amp;quot;, actions: [inputAction, goodbyeAction, cancelAction], intentIdentifiers: [], options: [.customDismissAction])
+    }()
+
+    UNUserNotificationCenter.current().setNotificationCategories([saySomethingCategory])
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;UNTextInputNotificationAction&lt;/code&gt; 代表一个输入文本的 action，你可以自定义框的按钮 title 和 placeholder。你稍后会使用 &lt;code&gt;identifier&lt;/code&gt; 来对 action 进行区分。&lt;/li&gt;
+&lt;li&gt;普通的 &lt;code&gt;UNNotificationAction&lt;/code&gt; 对应标准的按钮。&lt;/li&gt;
+&lt;li&gt;为 category 指定一个 &lt;code&gt;identifier&lt;/code&gt;，我们将在实际发送通知的时候用这个标识符进行设置，这样系统就知道这个通知对应哪个 category 了。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;当然，不要忘了在程序启动时调用这个方法进行注册：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -&amp;gt; Bool {
+    registerNotificationCategory()
+    UNUserNotificationCenter.current().delegate = notificationHandler
+    return true
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;发送一个带有 action 的通知&lt;/h4&gt;
+
+&lt;p&gt;在完成 category 注册后，发送一个 actionable 通知就非常简单了，只需要在创建 &lt;code&gt;UNNotificationContent&lt;/code&gt; 时把 &lt;code&gt;categoryIdentifier&lt;/code&gt; 设置为需要的 category id 即可：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;content.categoryIdentifier = &amp;quot;saySomethingCategory&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;尝试展示这个通知，在下拉或者使用 3D touch 展开通知后，就可以看到对应的 action 了：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-actions.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;远程推送也可以使用 category，只需要在 payload 中添加 &lt;code&gt;category&lt;/code&gt; 字段，并指定预先定义的 category id 就可以了：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &amp;quot;aps&amp;quot;:{
+    &amp;quot;alert&amp;quot;:&amp;quot;Please say something&amp;quot;,
+    &amp;quot;category&amp;quot;:&amp;quot;saySomething&amp;quot;
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;处理 actionable 通知&lt;/h4&gt;
+
+&lt;p&gt;和普通的通知并无二致，actionable 通知也会走到 &lt;code&gt;didReceive&lt;/code&gt; 的 delegate 方法，我们通过 request 中包含的 &lt;code&gt;categoryIdentifier&lt;/code&gt; 和 response 里的 &lt;code&gt;actionIdentifier&lt;/code&gt; 就可以轻易判定是哪个通知的哪个操作被执行了。对于 &lt;code&gt;UNTextInputNotificationAction&lt;/code&gt; 触发的 response，直接将它转换为一个 &lt;code&gt;UNTextInputNotificationResponse&lt;/code&gt;，就可以拿到其中的用户输入了：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -&amp;gt; Void) {
+
+    if let category = UserNotificationCategoryType(rawValue: response.notification.request.content.categoryIdentifier) {
+        switch category {
+        case .saySomething:
+            handleSaySomthing(response: response)
+        }
+    }
+    completionHandler()
+}
+
+private func handleSaySomthing(response: UNNotificationResponse) {
+    let text: String
+
+    if let actionType = SaySomethingCategoryAction(rawValue: response.actionIdentifier) {
+        switch actionType {
+        case .input: text = (response as! UNTextInputNotificationResponse).userText
+        case .goodbye: text = &amp;quot;Goodbye&amp;quot;
+        case .none: text = &amp;quot;&amp;quot;
+        }
+    } else {
+        // Only tap or clear. (You will not receive this callback when user clear your notification unless you set .customDismissAction as the option of category)
+        text = &amp;quot;&amp;quot;
+    }
+
+    if !text.isEmpty {
+        UIAlertController.showConfirmAlertFromTopViewController(message: &amp;quot;You just said \(text)&amp;quot;)
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;上面的代码先判断通知响应是否属于 &amp;quot;saySomething&amp;quot;，然后从用户输入或者是选择中提取字符串，并且弹出一个 alert 作为响应结果。当然，更多的情况下我们会发送一个网络请求，或者是根据用户操作更新一些 UI 等。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;关于 Actionable 的通知，可以参考 Demo 中 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/UserNotificationDemo/ActionableViewController.swift&quot;&gt;&lt;code&gt;ActionableViewController&lt;/code&gt;&lt;/a&gt; 的内容。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3&gt;Notification Extension&lt;/h3&gt;
+
+&lt;p&gt;iOS 10 中添加了很多 extension，作为应用与系统整合的入口。与通知相关的 extension 有两个：Service Extension 和 Content Extension。前者可以让我们有机会在收到远程推送的通知后，展示之前对通知内容进行修改；后者可以用来自定义通知视图的样式。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-extensions.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;h4&gt;截取并修改通知内容&lt;/h4&gt;
+
+&lt;p&gt;&lt;code&gt;NotificationService&lt;/code&gt; 的模板已经为我们进行了基本的实现：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;class NotificationService: UNNotificationServiceExtension {
+
+    var contentHandler: ((UNNotificationContent) -&amp;gt; Void)?
+    var bestAttemptContent: UNMutableNotificationContent?
+
+    // 1
+    override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -&amp;gt; Void) {
+        self.contentHandler = contentHandler
+        bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+
+        if let bestAttemptContent = bestAttemptContent {
+            if request.identifier == &amp;quot;mutableContent&amp;quot; {
+                bestAttemptContent.body = &amp;quot;\(bestAttemptContent.body), onevcat&amp;quot;
+            }
+            contentHandler(bestAttemptContent)
+        }
+    }
+
+    // 2
+    override func serviceExtensionTimeWillExpire() {
+        // Called just before the extension will be terminated by the system.
+        // Use this as an opportunity to deliver your &amp;quot;best attempt&amp;quot; at modified content, otherwise the original push payload will be used.
+        if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
+            contentHandler(bestAttemptContent)
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;didReceive:&lt;/code&gt; 方法中有一个等待发送的通知请求，我们通过修改这个请求中的 content 内容，然后在限制的时间内将修改后的内容调用通过 &lt;code&gt;contentHandler&lt;/code&gt; 返还给系统，就可以显示这个修改过的通知了。&lt;/li&gt;
+&lt;li&gt;在一定时间内没有调用 &lt;code&gt;contentHandler&lt;/code&gt; 的话，系统会调用这个方法，来告诉你大限已到。你可以选择什么都不做，这样的话系统将当作什么都没发生，简单地显示原来的通知。可能你其实已经设置好了绝大部分内容，只是有很少一部分没有完成，这时你也可以像例子中这样调用 &lt;code&gt;contentHandler&lt;/code&gt; 来显示一个变更“中途”的通知。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Service Extension 现在只对远程推送的通知起效，你可以在推送 payload 中增加一个 &lt;code&gt;mutable-content&lt;/code&gt; 值为 1 的项来启用内容修改：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &amp;quot;aps&amp;quot;:{
+    &amp;quot;alert&amp;quot;:{
+      &amp;quot;title&amp;quot;:&amp;quot;Greetings&amp;quot;,
+      &amp;quot;body&amp;quot;:&amp;quot;Long time no see&amp;quot;
+    },
+    &amp;quot;mutable-content&amp;quot;:1
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这个 payload 的推送得到的结果，注意 body 后面附上了名字。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-mutable-content.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;使用在本机截取推送并替换内容的方式，可以完成端到端 (end-to-end) 的推送加密。你在服务器推送 payload 中加入加密过的文本，在客户端接到通知后使用预先定义或者获取过的密钥进行解密，然后立即显示。这样一来，即使推送信道被第三方截取，其中所传递的内容也还是安全的。使用这种方式来发送密码或者敏感信息，对于一些金融业务应用和聊天应用来说，应该是必备的特性。&lt;/p&gt;
+
+&lt;h4&gt;在通知中展示图片/视频&lt;/h4&gt;
+
+&lt;p&gt;相比于旧版本的通知，iOS 10 中另一个亮眼功能是多媒体的推送。开发者现在可以在通知中嵌入图片或者视频，这极大丰富了推送内容的可读性和趣味性。&lt;/p&gt;
+
+&lt;p&gt;为本地通知添加多媒体内容十分简单，只需要通过本地磁盘上的文件 URL 创建一个 &lt;code&gt;UNNotificationAttachment&lt;/code&gt; 对象，然后将这个对象放到数组中赋值给 content 的 &lt;code&gt;attachments&lt;/code&gt; 属性就行了：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let content = UNMutableNotificationContent()
+content.title = &amp;quot;Image Notification&amp;quot;
+content.body = &amp;quot;Show me an image!&amp;quot;
+
+if let imageURL = Bundle.main.url(forResource: &amp;quot;image&amp;quot;, withExtension: &amp;quot;jpg&amp;quot;),
+   let attachment = try? UNNotificationAttachment(identifier: &amp;quot;imageAttachment&amp;quot;, url: imageURL, options: nil)
+{
+    content.attachments = [attachment]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在显示时，横幅或者弹窗将附带设置的图片，使用 3D Touch pop 通知或者下拉通知显示详细内容时，图片也会被放大展示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-thumbnail.png&quot; alt=&quot;&quot;&gt; &lt;img src=&quot;/assets/images/2016/notification-image.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;除了图片以外，通知还支持音频以及视频。你可以将 MP3 或者 MP4 这样的文件提供给系统来在通知中进行展示和播放。不过，这些文件都有尺寸的限制，比如图片不能超过 5MB，视频不能超过 50MB 等，不过对于一般的能在通知中展示的内容来说，这个尺寸应该是绰绰有余了。关于支持的文件格式和尺寸，可以在&lt;a href=&quot;https://developer.apple.com/reference/usernotifications/unnotificationattachment&quot;&gt;文档&lt;/a&gt;中进行确认。在创建 &lt;code&gt;UNNotificationAttachment&lt;/code&gt; 时，如果遇到了不支持的格式，SDK 也会抛出错误。&lt;/p&gt;
+
+&lt;p&gt;通过远程推送的方式，你也可以显示图片等多媒体内容。这要借助于上一节所提到的通过 Notification Service Extension 来修改推送通知内容的技术。一般做法是，我们在推送的 payload 中指定需要加载的图片资源地址，这个地址可以是应用 bundle 内已经存在的资源，也可以是网络的资源。不过因为在创建 &lt;code&gt;UNNotificationAttachment&lt;/code&gt; 时我们只能使用本地资源，所以如果多媒体还不在本地的话，我们需要先将其下载到本地。在完成 &lt;code&gt;UNNotificationAttachment&lt;/code&gt; 创建后，我们就可以和本地通知一样，将它设置给 &lt;code&gt;attachments&lt;/code&gt; 属性，然后调用 &lt;code&gt;contentHandler&lt;/code&gt; 了。&lt;/p&gt;
+
+&lt;p&gt;简单的示例 payload 如下：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &amp;quot;aps&amp;quot;:{
+    &amp;quot;alert&amp;quot;:{
+      &amp;quot;title&amp;quot;:&amp;quot;Image Notification&amp;quot;,
+      &amp;quot;body&amp;quot;:&amp;quot;Show me an image from web!&amp;quot;
+    },
+    &amp;quot;mutable-content&amp;quot;:1
+  },
+  &amp;quot;image&amp;quot;: &amp;quot;https://onevcat.com/assets/images/background-cover.jpg&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;code&gt;mutable-content&lt;/code&gt; 表示我们会在接收到通知时对内容进行更改，&lt;code&gt;image&lt;/code&gt; 指明了目标图片的地址。&lt;/p&gt;
+
+&lt;p&gt;在 &lt;code&gt;NotificationService&lt;/code&gt; 里，加入如下代码来下载图片，并将其保存到磁盘缓存中：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;private func downloadAndSave(url: URL, handler: @escaping (_ localURL: URL?) -&amp;gt; Void) {
+    let task = URLSession.shared.dataTask(with: url, completionHandler: {
+        data, res, error in
+
+        var localURL: URL? = nil
+
+        if let data = data {
+            let ext = (url.absoluteString as NSString).pathExtension
+            let cacheURL = URL(fileURLWithPath: FileManager.default.cachesDirectory)
+            let url = cacheURL.appendingPathComponent(url.absoluteString.md5).appendingPathExtension(ext)
+
+            if let _ = try? data.write(to: url) {
+                localURL = url
+            }
+        }
+
+        handler(localURL)
+    })
+
+    task.resume()
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;然后在 &lt;code&gt;didReceive:&lt;/code&gt; 中，接收到这类通知时提取图片地址，下载，并生成 attachment，进行通知展示：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;if let imageURLString = bestAttemptContent.userInfo[&amp;quot;image&amp;quot;] as? String,
+   let URL = URL(string: imageURLString)
+{
+    downloadAndSave(url: URL) { localURL in
+        if let localURL = localURL {
+            do {
+                let attachment = try UNNotificationAttachment(identifier: &amp;quot;image_downloaded&amp;quot;, url: localURL, options: nil)
+                bestAttemptContent.attachments = [attachment]
+            } catch {
+                print(error)
+            }
+        }
+        contentHandler(bestAttemptContent)
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;关于在通知中展示图片或者视频，有几点想补充说明：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;UNNotificationContent&lt;/code&gt; 的 &lt;code&gt;attachments&lt;/code&gt; 虽然是一个数组，但是系统只会展示第一个 attachment 对象的内容。不过你依然可以发送多个 attachments，然后在要展示的时候再重新安排它们的顺序，以显示最符合情景的图片或者视频。另外，你也可能会在自定义通知展示 UI 时用到多个 attachment。我们接下来一节中会看到一个相关的例子。&lt;/li&gt;
+&lt;li&gt;在当前 beta (iOS 10 beta 4) 中，&lt;code&gt;serviceExtensionTimeWillExpire&lt;/code&gt; 被调用之前，你有 30 秒时间来处理和更改通知内容。对于一般的图片来说，这个时间是足够的。但是如果你推送的是体积较大的视频内容，用户又恰巧处在糟糕的网络环境的话，很有可能无法及时下载完成。&lt;/li&gt;
+&lt;li&gt;如果你想在远程推送来的通知中显示应用 bundle 内的资源的话，要注意 extension 的 bundle 和 app main bundle 并不是一回事儿。你可以选择将图片资源放到 extension bundle 中，也可以选择放在 main bundle 里。总之，你需要保证能够获取到正确的，并且你具有读取权限的 url。关于从 extension 中访问 main bundle，可以参看&lt;a href=&quot;http://stackoverflow.com/questions/26189060/get-the-main-app-bundle-from-within-extension&quot;&gt;这篇回答&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;系统在创建 attachement 时会根据提供的 url 后缀确定文件类型，如果没有后缀，或者后缀无法不正确的话，你可以在创建时通过 &lt;code&gt;UNNotificationAttachmentOptionsTypeHintKey&lt;/code&gt; 来&lt;a href=&quot;https://developer.apple.com/reference/usernotifications/unnotificationattachmentoptionstypehintkey&quot;&gt;指定资源类型&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;如果使用的图片和视频文件不在你的 bundle 内部，它们将被移动到系统的负责通知的文件夹下，然后在当通知被移除后删除。如果媒体文件在 bundle 内部，它们将被复制到通知文件夹下。每个应用能使用的媒体文件的文件大小总和是有限制，超过限制后创建 attachment 时将抛出异常。可能的所有错误可以在 &lt;code&gt;UNError&lt;/code&gt; 中找到。&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;你可以访问一个已经创建的 attachment 的内容，但是要注意权限问题。可以使用 &lt;code&gt;startAccessingSecurityScopedResource&lt;/code&gt; 来暂时获取以创建的 attachment 的访问权限。比如：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let content = notification.request.content
+if let attachment = content.attachments.first {  
+    if attachment.url.startAccessingSecurityScopedResource() {  
+        eventImage.image = UIImage(contentsOfFile: attachment.url.path!)  
+        attachment.url.stopAccessingSecurityScopedResource()  
+    }  
+}  
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;关于 Service Extension 和多媒体通知的使用，可以参考 Demo 中 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/NotificationService/NotificationService.swift&quot;&gt;&lt;code&gt;NotificationService&lt;/code&gt;&lt;/a&gt; 和 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/UserNotificationDemo/MediaViewController.swift&quot;&gt;&lt;code&gt;MediaViewController&lt;/code&gt;&lt;/a&gt; 的内容。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4&gt;自定义通知视图样式&lt;/h4&gt;
+
+&lt;p&gt;iOS 10 SDK 新加的另一个 Content Extension 可以用来自定义通知的详细页面的视图。新建一个 Notification Content Extension，Xcode 为我们准备的模板中包含了一个实现了 &lt;code&gt;UNNotificationContentExtension&lt;/code&gt; 的 &lt;code&gt;UIViewController&lt;/code&gt; 子类。这个 extension 中有一个必须实现的方法 &lt;code&gt;didReceive(_:)&lt;/code&gt;，在系统需要显示自定义样式的通知详情视图时，这个方法将被调用，你需要在其中配置你的 UI。而 UI 本身可以通过这个 extension 中的 MainInterface.storyboard 来进行定义。自定义 UI 的通知是和通知 category 绑定的，我们需要在 extension 的 Info.plist 里指定这个通知样式所对应的 category 标识符：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/notification-content-info.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;系统在接收到通知后会先查找有没有能够处理这类通知的 content extension，如果存在，那么就交给 extension 来进行处理。另外，在构建 UI 时，我们可以通过 Info.plist 控制通知详细视图的尺寸，以及是否显示原始的通知。关于 Content Extension 中的 Info.plist 的 key，可以在&lt;a href=&quot;https://developer.apple.com/reference/usernotificationsui/unnotificationcontentextension&quot;&gt;这个文档&lt;/a&gt;中找到详细信息。&lt;/p&gt;
+
+&lt;p&gt;虽然我们可以使用包括按钮在内的各种 UI，但是系统不允许我们对这些 UI 进行交互。点击通知视图 UI 本身会将我们导航到应用中，不过我们可以通过 action 的方式来对自定义 UI 进行更新。&lt;code&gt;UNNotificationContentExtension&lt;/code&gt; 为我们提供了一个可选方法 &lt;code&gt;didReceive(_:completionHandler:)&lt;/code&gt;，它会在用户选择了某个 action 时被调用，你有机会在这里更新通知的 UI。如果有 UI 更新，那么在方法的 &lt;code&gt;completionHandler&lt;/code&gt; 中，开发者可以选择传递 &lt;code&gt;.doNotDismiss&lt;/code&gt; 来保持通知继续被显示。如果没有继续显示的必要，可以选择 &lt;code&gt;.dismissAndForwardAction&lt;/code&gt; 或者 &lt;code&gt;.dismiss&lt;/code&gt;，前者将把通知的 action 继续传递给应用的 &lt;code&gt;UNUserNotificationCenterDelegate&lt;/code&gt; 中的 &lt;code&gt;userNotificationCenter(:didReceive:withCompletionHandler)&lt;/code&gt;，而后者将直接解散这个通知。&lt;/p&gt;
+
+&lt;p&gt;如果你的自定义 UI 包含视频等，你还可以实现 &lt;code&gt;UNNotificationContentExtension&lt;/code&gt; 里的 &lt;code&gt;media&lt;/code&gt; 开头的一系列属性，它将为你提供一些视频播放的控件和相关方法。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;关于 Content Extension 和自定义通知样式，可以参考 Demo 中 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/NotificationContent/NotificationViewController.swift&quot;&gt;&lt;code&gt;NotificationViewController&lt;/code&gt;&lt;/a&gt; 和 &lt;a href=&quot;https://github.com/onevcat/UserNotificationDemo/blob/master/UserNotificationDemo/CustomizeUIViewController.swift&quot;&gt;&lt;code&gt;CustomizeUIViewController&lt;/code&gt;&lt;/a&gt; 的内容。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2&gt;总结&lt;/h2&gt;
+
+&lt;p&gt;iOS 10 SDK 中对通知这块进行了 iOS 系统发布以来最大的一次重构，很多“老朋友”都被标记为了 deprecated：&lt;/p&gt;
+
+&lt;h3&gt;iOS 10 中被标为弃用的 API&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;UILocalNotification&lt;/li&gt;
+&lt;li&gt;UIMutableUserNotificationAction&lt;/li&gt;
+&lt;li&gt;UIMutableUserNotificationCategory&lt;/li&gt;
+&lt;li&gt;UIUserNotificationAction&lt;/li&gt;
+&lt;li&gt;UIUserNotificationCategory&lt;/li&gt;
+&lt;li&gt;UIUserNotificationSettings&lt;/li&gt;
+&lt;li&gt;handleActionWithIdentifier:forLocalNotification:&lt;/li&gt;
+&lt;li&gt;handleActionWithIdentifier:forRemoteNotification:&lt;/li&gt;
+&lt;li&gt;didReceiveLocalNotification:withCompletion:&lt;/li&gt;
+&lt;li&gt;didReceiveRemoteNotification:withCompletion:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;等一系列在 &lt;code&gt;UIKit&lt;/code&gt; 中的发送和处理通知的类型及方法。&lt;/p&gt;
+
+&lt;h3&gt;现状以及尽快使用新的 API&lt;/h3&gt;
+
+&lt;p&gt;相比于 iOS 早期时代的 API，新的 API 展现出了高度的模块化和统一特性，易用性也非常好，是一套更加先进的 API。如果有可能，特别是如果你的应用是重度依赖通知特性的话，直接从 iOS 10 开始可以让你充分使用在新通知体系的各种特性。&lt;/p&gt;
+
+&lt;p&gt;虽然原来的 API 都被标为弃用了，但是如果你需要支持 iOS 10 之前的系统的话，你还是需要使用原来的 API。我们可以使用&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;if #available(iOS 10.0, *) {
+    // Use UserNotification
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;的方式来指针对 iOS 10 进行新通知的适配，并让 iOS 10 的用户享受到新通知带来的便利特性，然后在将来版本升级到只支持 iOS 10 以上时再移除掉所有被弃用的代码。对于优化和梳理通知相关代码来说，新 API 对代码设计和组织上带来的好处足以弥补适配上的麻烦，而且它还能为你的应用提供更好的通知特性和体验，何乐不为呢？&lt;/p&gt;
+</description>
+        <pubDate>Mon, 08 Aug 2016 09:22:11 +0800</pubDate>
+        <link>http://onevcat.com/2016/08/notification/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/08/notification/</guid>
+        
+        <category>能工巧匠集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>关于 iOS 10 中 ATS 的问题</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/assets/images/2016/https-lock.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;WWDC 15 提出的 ATS (App Transport Security) 是 Apple 在推进网络通讯安全的一个重要方式。在 iOS 9 和 OS X 10.11 中，默认情况下非 HTTPS 的网络访问是被禁止的。当然，因为这样的推进影响面非常广，作为缓冲，我们可以在 Info.plist 中添加 &lt;code&gt;NSAppTransportSecurity&lt;/code&gt; 字典并且将 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt; 设置为 &lt;code&gt;YES&lt;/code&gt; 来禁用 ATS。相信大家都已经对这个非常熟悉了，因为我自己也维护了一些网络相关的框架，所以我还自己准备了一个&lt;a href=&quot;https://gist.github.com/onevcat/b4604aecb4ce55651a4a&quot;&gt;小脚本&lt;/a&gt;来快速关闭 ATS。&lt;/p&gt;
+
+&lt;p&gt;不过，WWDC 16 中，Apple 表示将继续在 iOS 10 和 macOS 10.12 里收紧对普通 HTTP 的访问限制。从 2017 年 1 月 1 日起，所有的新提交 app 默认是不允许使用 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt; 来绕过 ATS 限制的，也就是说，我们最好保证 app 的所有网络请求都是 HTTPS 加密的，否则可能会在应用审核时遇到麻烦。&lt;/p&gt;
+
+&lt;p&gt;本文写作的时间点 (2016 年 6 月 17 日)，这方面的相关规定和几个事实如下。但是似乎 Apple 安全部门对现在的情况也有些内部冲突，所以不排除在正式版中发生改变的可能性。我也会对此继续关注，并在需要的时候对本文进行更新。如果您发现了下面所述和事实不符的话，也欢迎留言提出，我会进行修正。&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;默认情况下你的 app 可以访问加密足够强 (&lt;a href=&quot;https://en.wikipedia.org/wiki/Transport_Layer_Security&quot;&gt;TLS&lt;/a&gt; v1.2 以上，AES-128 和 SHA-2 以及 ECDHC 等) 的 HTTPS 内容。这对所有的网络请求都有效，包括 &lt;code&gt;NSURLSession&lt;/code&gt;，&lt;code&gt;UIWebView&lt;/code&gt; 以及 &lt;code&gt;WKWebView&lt;/code&gt; 等。&lt;/li&gt;
+&lt;li&gt;你依然可以添加 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt; 为 &lt;code&gt;YES&lt;/code&gt; 来禁用 ATS，不过如果你这么做的话，需要在提交 app 时进行说明，为什么需要访问非 HTTPS 内容。一般来说，可能类似浏览器类的 app 比较容易能通过。&lt;/li&gt;
+&lt;li&gt;相比于使用 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt; 将全部 HTTP 内容开放，选择使用 &lt;code&gt;NSExceptionDomains&lt;/code&gt; 来针对特定的域名开放 HTTP 应该要相对容易过审核。“需要访问的域名是第三方服务器，他们没有进行 HTTPS 对应”会是审核时的一个可选理由，但是这应该只需要针对特定域名，而非全面开放。如果访问的是自己的服务器的话，可能这个理由会无法通过。&lt;/li&gt;
+&lt;li&gt;对于网页浏览和视频播放的行为，iOS 10 中新加入了 &lt;code&gt;NSAllowsArbitraryLoadsInWebContent&lt;/code&gt; 键。通过将它设置为 &lt;code&gt;YES&lt;/code&gt;，可以让你的 app 中的 &lt;code&gt;WKWebView&lt;/code&gt; 和使用 &lt;code&gt;AVFoundation&lt;/code&gt; 播放的在线视频不受 ATS 的限制。这也应该是绝大多数使用了相关特性的 app 的选择。但是坏消息是这个键在 iOS 9 中并不会起作用。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;总结一下就是，对于 API 请求，基本上是必须使用 HTTPS 的，特别是如果你们自己可以管理服务器的话。可能需要后端的同学尽快升级到 HTTPS (不过话说虽然是用 Let&amp;#39;s Encrypt 的，我一个个人博客都启用 HTTPS 了，作为 API 的用户服务器，还不开 HTTPS 真有点说不过去)。如果你的 app 只支持 iOS 10，并且有用户可以自由输入网址进行浏览的功能，或者是在线视频音频播放功能的话，简单地加入 &lt;code&gt;NSAllowsArbitraryLoadsInWebContent&lt;/code&gt;，并且将组件换成 &lt;code&gt;WKWebKit&lt;/code&gt; 或者 &lt;code&gt;AVFoundation&lt;/code&gt; 就可以了。如果你还需要支持 iOS 9，并且需要访问网页和视频的话，可能只能去开启 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt; 然后提交时进行说明，并且看 Apple 审核员的脸色决定让不让通过了。除了 &lt;code&gt;WKWebKit&lt;/code&gt; 以外，另外一个访问网页的选择是使用 &lt;code&gt;SFSafariViewController&lt;/code&gt;。因为其实 &lt;code&gt;SFSafariViewController&lt;/code&gt; 就是一个独立于 app 的 Safari 进程，所以它完全不受 ATS 的限制。&lt;/p&gt;
+
+&lt;p&gt;另外，当 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt; 和 &lt;code&gt;NSAllowsArbitraryLoadsInWebContent&lt;/code&gt; 同时存在时，根据系统不同，表现的行为也会不一样。简单说，iOS 9 只看 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt;，而 iOS 10 会先看 &lt;code&gt;NSAllowsArbitraryLoadsInWebContent&lt;/code&gt;。在 iOS 10 中，要是 &lt;code&gt;NSAllowsArbitraryLoadsInWebContent&lt;/code&gt; 存在的话，就忽略掉 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt;，如果它不存在，则遵循 &lt;code&gt;NSAllowsArbitraryLoads&lt;/code&gt; 的设定。说起来可能有点复杂，我在这里总结了一下根据 &lt;code&gt;NSAppTransportSecurity&lt;/code&gt; 中设定条件不同，所对应的系统版本和请求组件的行为的不同，可以作为你设置这个字典时的参考。&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;ATS 设定&lt;/th&gt;
+&lt;th&gt;使用的组件&lt;/th&gt;
+&lt;th style=&quot;text-align: center&quot;&gt;iOS 9 HTTP&lt;/th&gt;
+&lt;th style=&quot;text-align: center&quot;&gt;iOS 10 HTTP&lt;/th&gt;
+&lt;th&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;NSAllowsArbitraryLoads: NO&lt;/td&gt;
+&lt;td&gt;UIWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;WKWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;默认行为&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;URLSession&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;NSAllowsArbitraryLoads: YES&lt;/td&gt;
+&lt;td&gt;UIWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td&gt;禁用 ATS&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;WKWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td&gt;审核时需要说明理由&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;URLSession&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;NSAllowsArbitraryLoads: NO &amp;amp; NSAllowsArbitraryLoadsInWebContent: YES&lt;/td&gt;
+&lt;td&gt;UIWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;只对网页内容禁用 ATS&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;WKWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td&gt;对于大多数 app 的推荐做法，&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;URLSession&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;保证安全性&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;NSAllowsArbitraryLoads: NO &amp;amp; NSAllowsArbitraryLoadsInWebContent: NO&lt;/td&gt;
+&lt;td&gt;UIWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;WKWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;URLSession&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;NSAllowsArbitraryLoads: YES &amp;amp; NSAllowsArbitraryLoadsInWebContent: NO&lt;/td&gt;
+&lt;td&gt;UIWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;对于 iOS 10，&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;WKWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;NSAllowsArbitraryLoadsInWebContent 存在时忽略 NSAllowsArbitraryLoads 的设置&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;URLSession&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;iOS 9 将继续使用 NSAllowsArbitraryLoads&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;NSAllowsArbitraryLoads: YES &amp;amp; NSAllowsArbitraryLoadsInWebContent: YES&lt;/td&gt;
+&lt;td&gt;UIWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;对于 iOS 10，&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;WKWebView&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td&gt;NSAllowsArbitraryLoadsInWebContent 存在时忽略 NSAllowsArbitraryLoads 的设置&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;URLSession&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;✅&lt;/td&gt;
+&lt;td style=&quot;text-align: center&quot;&gt;❌&lt;/td&gt;
+&lt;td&gt;iOS 9 将继续使用 NSAllowsArbitraryLoads&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;该列表是根据 Apple prerelease 的&lt;a href=&quot;https://developer.apple.com/library/prerelease/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html&quot;&gt;文档&lt;/a&gt;中关于 &lt;code&gt;NSAppTransportSecurity&lt;/code&gt; 和 &lt;code&gt;NSAllowsArbitraryLoadsInWebContent&lt;/code&gt; 部分的描述作出的。如果您发现这个行为发生了变化，或者上面的列表存在问题，欢迎留言，我会进行更正。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;关于 &lt;code&gt;UIWebView&lt;/code&gt; 是否也可以在 &lt;code&gt;NSAllowsArbitraryLoadsInWebContent&lt;/code&gt; 为 &lt;code&gt;YES&lt;/code&gt; 时访问 HTTP，Apple 内部似乎也在争论，但是个人认为是时候淘汰 &lt;code&gt;UIWebView&lt;/code&gt; 了。如果没有特殊的什么需求的话，尽早将 &lt;code&gt;UIWebView&lt;/code&gt; 全部换为 &lt;code&gt;WkWebView&lt;/code&gt; 会是明智的选择。&lt;/p&gt;
+
+&lt;p&gt;不得不说，Apple 使用自己现在的强势地位，在推动技术进步上的做的努力是有目共睹的。不论是前几天强制支持 IPv6，还是现在的 HTTPS，其实都不是很容易就能作出的决定。而为用户构建一个更安全的使用环境，可能不仅是 Apple 单方面可以做的，也是需要开发者来配合的一件事情。尽快适配更进步和安全的使用方式，会是一件双赢的事情。&lt;/p&gt;
+</description>
+        <pubDate>Fri, 17 Jun 2016 12:34:11 +0800</pubDate>
+        <link>http://onevcat.com/2016/06/ios-10-ats/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/06/ios-10-ats/</guid>
+        
+        <category>能工巧匠集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>开发者所需要知道的 iOS 10 SDK 新特性</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/assets/images/2016/ios-10-title.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;h3&gt;总览&lt;/h3&gt;
+
+&lt;p&gt;距离 iPhone 横空出世已经过去了 9 个年头，iOS 的版本号也跨入了两位数。在我们回顾过去四五年 iOS 系统的发展的时候，不免感叹变化速度之快，迭代周期之短。&lt;a href=&quot;https://onevcat.com/2013/06/developer-should-know-about-ios7/&quot;&gt;iOS 7&lt;/a&gt; 翻天覆地的全新设计，&lt;a href=&quot;https://onevcat.com/2014/07/developer-should-know-about-ios8/&quot;&gt;iOS 8&lt;/a&gt; 中 Size Classes 的出现，应用扩展，以及 Cloud Kit 的加入，&lt;a href=&quot;https://onevcat.com/2015/06/ios9-sdk/&quot;&gt;iOS 9&lt;/a&gt; 里的分屏多任务特性等等。Apple 近年都是在 WWDC 发布新的系统和软件，然后在秋季和冬季 (或者来年春季) 召开硬件产品的发布会。WWDC 上每一项软件的更新其实都预示了相应的硬件的方向，相信今年也不会例外。&lt;/p&gt;
+
+&lt;p&gt;对于开发者来说，好消息是 iOS 10 中并没有加入太多内容。按照适配的需求，来年的 iOS 开发至少应该可以从 iOS 8 甚至 iOS 9 开始，我们将有时间对之前的版本特性进行更好的梳理，消化和实践。相比于开疆扩土，iOS 10 更专注的是对现有内容的改进，以弥补之前迅速发展所留下的一些问题，这其实正是 Apple 当下所亟需做的事情。&lt;/p&gt;
+
+&lt;h3&gt;生态整合与 Extension 开发&lt;/h3&gt;
+
+&lt;p&gt;在 iOS 10 里 Apple 延续了前几年的策略，那就是进行平台整合。全世界现在没有另外一家厂商在掌握了包括桌面，移动到穿戴的一系列硬件设备的同时，还掌控了相应的从操作系统，到应用软件，再到软件商店这样一套完整的布局。Apple 显然也非常明白这个优势意味着什么。所以近年来 Apple 一直强调平台整合，如果你的应用能够同时在 iOS，watchOS 以及 macOS 上工作的话，毫无疑问将会更容易吸引用户以及 Apple 的喜爱。&lt;/p&gt;
+
+&lt;p&gt;另外一点则是各个应用之间的整合和交互。不难发现，随着近年来 extension 开发的兴起，Apple 逐渐在从 app 是“用户体验的核心”这个理念中转移，变为用户应该也可以在通知中心，桌面挂件或者手表这样的地方完成必要交互。而应用之间的交互在以前可以说是 iOS 系统的禁区，但是去年随着 &lt;a href=&quot;https://workflow.is&quot;&gt;Workflow&lt;/a&gt; 的成功，Apple 对于应用之间的交互有助于用户生产力的提升有了清晰的认识。今年 SDK 中几个重大更新其实都是围绕这个主题来进行的。&lt;/p&gt;
+
+&lt;p&gt;iOS 10 中，Apple 为我们添加了茫茫多 extension 的新模板，以至于在同事之间开玩笑都是我们马上就要丢掉 iOS app 开发者的工作，而转变为 iOS extension 开发者这样了。新加入的扩展的种类和数量都足以说明使用应用扩展以及进行扩展开发在今后 iOS 开发中的重要地位。如果你对扩展开发还一无所知，可以先看看这篇&lt;a href=&quot;https://onevcat.com/2014/08/notification-today-widget/&quot;&gt;入门文章&lt;/a&gt;，里面简单介绍了关于扩展的基本概念，不同开发 target 之间代码共享的方式，以及通用的扩展开发方法等。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/extentions-ios-10.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;h4&gt;SiriKit&lt;/h4&gt;
+
+&lt;p&gt;Siri API 的开放自然是 iOS 10 SDK 中最激动人心也是亮眼的特性。SiriKit 为我们提供一全套从语音识别到代码处理，最后向用户展示结果的流程。Apple 加入了一套全新的框架 Intents.framework 来表示 Siri 获取并解析的结果。你的应用需要提供一些关键字表明可以接受相关输入，而 Siri 扩展只需要监听系统识别的用户意图 (intent)，作出合适的响应，修改以及实际操作，最后通过 IntentsUI.framework 提供反馈。整个过程非常清晰明了，但是这也意味着开发者所能拥有的自由度有限。&lt;/p&gt;
+
+&lt;p&gt;在 iOS 10 中，我们只能用 SiriKit 来做六类事情，分别是：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;语音和视频通话&lt;/li&gt;
+&lt;li&gt;发送消息&lt;/li&gt;
+&lt;li&gt;发送或接收付款&lt;/li&gt;
+&lt;li&gt;搜索照片&lt;/li&gt;
+&lt;li&gt;约车&lt;/li&gt;
+&lt;li&gt;管理健身&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如果你的应用恰好正在处理这些领域的问题的话，添加 Intents Extension 的支持会是很棒的选择。它将提高用户使用你的应用的可能性，也能让用户在其他像是地图这样的系统级应用中使用你的服务。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;SiriKit 笔记 (待填坑)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4&gt;User Notifications&lt;/h4&gt;
+
+&lt;p&gt;通知中心向来是 iOS 上的兵家必争之地。如何提供适时有效的通知，往往决定了用户活跃和留存的可能性。在 iOS 10 上，Apple 对通知进行了加强和革新。现在，为了更好地处理和管理通知，和本地及推送通知相关的 API 被封装到了全新的框架 UserNotifications.framework 中。在 iOS 10 中，开发者的服务器有机会在本地或者远程通知发送给用户之前再进行修改。&lt;/p&gt;
+
+&lt;p&gt;另外，在之前加入了 notification action 以及 text input 的基础上，iOS 10 又新增了为通知添加音频，图片，甚至视频的功能。现在，你的通知不仅仅是提醒用户回到应用的入口，更成为了一个展示应用内容，向用户传递多媒体信息的窗口。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;User Notifications 笔记 - &lt;a href=&quot;https://onevcat.com/2016/08/notification/&quot;&gt;活久见的重构 - iOS 10 UserNotifications 框架解析&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4&gt;iMessage Apps&lt;/h4&gt;
+
+&lt;p&gt;Message 应用大概是 Apple 在宣传 iOS 10 时着力最多的部分了。虽然新的贴纸包，自动转换颜文字，发送全屏效果等功能都很酷炫，但是对于程序开发者来说，可能还是对 iMessage Apps 更感兴趣。Xcode 8 中，Apple 在 iOS Application 模板中添加了一类新的项目类型，Messages Application。同时，模拟器甚至还开发了新的双人对话模式，以供开发者调试这类 app。&lt;/p&gt;
+
+&lt;p&gt;虽然名义上是独立 app，但实际上工作的依然是一个 extension。在该扩展中，Messages.framework 将承担与系统的 message 界面交互的主要职责。你通过提供一个自定义的 View Controller，来获取用户在使用你的 message app 时进行对话的上下文，以及发送接收等操作，并做出合适的响应。这个扩展在用来进行直接在 Message 应用中一些自定义共享会很好玩。但是鉴于 Apple 暂时没有打算将 Message.app 跨平台的原因，可能也注定了这只会是一种补充，而无法成为主流。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;iMessage Apps 笔记 (待填坑)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3&gt;IDE 和工具改进&lt;/h3&gt;
+
+&lt;p&gt;除了整合平台战略思想下的一些 SDK 改变，今年和 iOS 开发者相关的更多的是开发工具的进步和革新了。&lt;/p&gt;
+
+&lt;h4&gt;Xcode 8&lt;/h4&gt;
+
+&lt;p&gt;Xcode 8 展现出了很多有意思的新特性，比如更强大的 View Debugging，可以帮助我们追查内存引用问题的 Memory Debugging 等。这些工具十分强大，也将帮助我们在开发过程中及早发现问题，而不要将它们带入在最终产品中去。&lt;/p&gt;
+
+&lt;p&gt;在 app 签名方面，Apple 终于意识到了他们在 Xcode 7 中所犯得错误。我想可能不止一个人被证书和描述文件出问题时的 &amp;quot;Fix Issue&amp;quot; 按钮坑过。这个按钮不仅不会修正问题，反而会直接注销现有的开发者证书，然后“自作主张”地重新申请。大多数情况下，这让事情变得更加糟糕。特别是对于新加入的开发者，他们并不理解 Apple 的证书系统，错误的操作和处置，往往让开发环境变得不可挽回。Xcode 8 中，同一个开发者帐号现在允许多个开发证书，而完全重做的 app 签名系统也足够好用，并且避免了误操作的可能性。在兼顾自动配置的基础上，也为大型项目和复杂的 CI 环境提供了足够灵活的配置空间，这绝对值得点赞。&lt;/p&gt;
+
+&lt;p&gt;另外 Xcode 终于提供了进行代码编辑器扩展的能力。现在开发者可以创建 &lt;code&gt;XCSourceEditorExtension&lt;/code&gt; 来对 Xcode 的功能进行扩展了，在没有文档帮助和官方支持的情况下摸索着为 Xcode 制作插件的历史也即将结束。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Xcode 8 笔记 (待填坑)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4&gt;Swift 3&lt;/h4&gt;
+
+&lt;p&gt;Swift 开源已经过去半年时间。在 Swift 2.2 中我们已经看到了开源的社区力量对语言产生的深刻影响，而在 Swift 3 中这一影响的效果将更加明显。&lt;/p&gt;
+
+&lt;p&gt;最大的变化在于 Foundation 框架的重新导入，可能过一段时间再回头看的话，这将标志着 Swift 与 Objective-C 彻底分家。Foundation 框架中的 API 现在以更符合 Swift 的方式被导入到语言中。大体来说，这些变化包括去除 &lt;code&gt;NS&lt;/code&gt; 前缀，将绝大部分 class 转换为 struct (虽然底层还是 copy-on-write 的引用实现，可以参看 &lt;code&gt;ReferenceConvertible&lt;/code&gt; 协议的内容)，去掉 API 中重复的语义等。如果在当前你还能看出 Swift 和 Objective-C 在使用 Foundation 或者说开发 app 时同根同源的话，Swift 3 正式发布后可能情况会大不相同。&lt;/p&gt;
+
+&lt;p&gt;由于引用类型向值类型的转换，也将导致我们在使用 Swift 开发时的思考方式发生变化。以往的 Foundation 框架中类型的可变性是由不可变类型和它的可变类型版本 (比如 &lt;code&gt;NSData&lt;/code&gt; 和 &lt;code&gt;NSMutableData&lt;/code&gt;) 来进行区分的。而在 Swift 3 中，一般来说将只有作为结构体的不可变类型 (比如 &lt;code&gt;Data&lt;/code&gt;)，对于这类结构体的改变，将会是更安全的基于写时复制的行为，而不再是原来可变对象那样的危险的内存操作。这在很多时候除了保证数据共享时的安全性以外，内部的引用特性也保证了调用速度。实际上，因为减少了不必要的复制 (比如根据一个不可变对象创建相应的可变对象)，实际上通过 Swift 3 的 API 使用 Foundation 的速度将比原来更快！&lt;/p&gt;
+
+&lt;p&gt;关于 Swift 3 的更多内容，我会在我的《Swifter - 100 个 Swift 必备 tips》一书中通过补充章节的方式进行说明。同时，该书现有的 Swift 2 相关的描述和示例也会按照 Swift 3 的语法规范和特性进行更新，以适应最新版本。您可以访问 &lt;a href=&quot;http://swifter.tips/buy&quot;&gt;swifter.tips&lt;/a&gt; 获取这本书的更多相关内容。&lt;/p&gt;
+
+&lt;h3&gt;Apple 生态和其他&lt;/h3&gt;
+
+&lt;p&gt;另外影响比较重大消息是，在 iOS 9 引入的 ATS 将在来年更加严格。2017 年起，新提交的 app 将不再被允许进行 http 的访问，所有的 app 内的网络请求必须加密，通过 https 完成。所以如果你家 app 的服务器或者某些访问页面还是 http 的话，需要尽早过度到 https。&lt;/p&gt;
+
+&lt;p&gt;另外，watchOS 3 和 tvOS 也有一些新的内容。其中最重要的当属 watchOS 中可以使用 SceneKit 和 SpriteKit。虽然这两个框架本意是做游戏，但是 watch 的小屏幕和低性能可能并不足以支撑我们在这样一个受限平台很好的作品。但是这两个框架可以为交互乏味的 watchOS 提供很好的动画效果的补充，可能会是它们在 watchOS 上更合适的用途。&lt;/p&gt;
+
+&lt;p&gt;最后，OS X 改名为 macOS，有些媒体和开发者将其解读为去乔布斯化，其实我更倾向于这是一种强迫症和完美主义的基本需求。不管名字如何改变，Apple 在 iOS，macOS，watchOS 和 tvOS 这四个产品线上的布局已经完成，整个生态现在看来也还十分健康。Apple 在用户权益和隐私上的重视，以及像是在 https 上的推动，无疑都是这个时代前进的动力。&lt;/p&gt;
+
+&lt;h3&gt;总结&lt;/h3&gt;
+
+&lt;p&gt;像往年一样，我会在之后逐渐补充 session 笔记，通过一些简单的例子说明相关的新增框架的使用方式。届时你也可以在这篇文章中找到相关链接，或者通过&lt;a href=&quot;https://store.objccn.io/subscribe/&quot;&gt;订阅&lt;/a&gt;的方式来确保在第一时间获取相关内容 (订阅时请不要使用 QQ 邮箱，会无法收到邮件)。不过直接访问 Apple 开发者网站 &lt;a href=&quot;https://developer.apple.com/wwdc/&quot;&gt;WWDC 相关的内容&lt;/a&gt;会是获取这些知识更快的方式。&lt;/p&gt;
+
+&lt;p&gt;Happy WWDC. Happy Coding!&lt;/p&gt;
+</description>
+        <pubDate>Wed, 15 Jun 2016 14:10:11 +0800</pubDate>
+        <link>http://onevcat.com/2016/06/ios-10-sdk/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/06/ios-10-sdk/</guid>
+        
+        <category>能工巧匠集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>写给初次参加 WWDC 的开发者的简明攻略</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/assets/images/2016/wwdc-2016-logo.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;今天 Apple 宣布了 WWDC 16 的抽选开始，而 4 月 22 日周五将出抽选结果并开始购票。随着我们国内开发者收入水平的逐步提升，以及日益增长的与全球开发者接触和自我提高的需求，最近参与 WWDC 的中国开发者明显比以前要多，而抽选机制也正给了我们很好的参加机会，至少我们不需要熬夜和一群“疯子”在十几秒内抢票了。&lt;/p&gt;
+
+&lt;p&gt;如果您看到这篇文章的时候已经抽中了门票，并且付款成功并计划在 6 月的时候前往三藩的话，先大声说“恭喜恭喜恭喜你”！鉴于很多的参会者可能是第一次参加 WWDC，甚至可能是第一次到美国或者说出国进行访问，我准备了这篇简单的攻略，希望能够在你前往 WWDC 的旅途中有所帮助。这篇文章里的内容是我自己参加 WWDC 时的一些经验，可能会有过时或者比较主观的地方，还请见谅。&lt;/p&gt;
+
+&lt;h2&gt;入手门票后要做什么&lt;/h2&gt;
+
+&lt;p&gt;如果你没有抽到门票的话，可以先把这篇帖子放到收藏夹里，明年再来看。所谓君子报仇，哦不..参加 WWDC，来年不晚！&lt;/p&gt;
+
+&lt;p&gt;要是你还没有护照，现在第一要务就是赶快去照相办护照，然后再回来看这篇文章。因为一般要七个工作日才能拿到护照，再加上办理签证等一系列手续，所以如果再拖几天的话你的行程基本就可以告吹了。&lt;/p&gt;
+
+&lt;p&gt;如果护照在手，那抽到门票以后需要考虑的第一件事情自然就是确定行程，办理签证了。WWDC 16 的举办日期是从 6 月 13 日周一到 17 日周五的一周，但是因为在会议开始前一天的周日白天，就需要去会场报道拿 T-shirt 和参会牌，所以你应该至少在 12 号早上到达三藩。考虑到如果你可能会想要拜访一下 Infinite Loop 的 Apple 总部或者是体验下当地民风民俗 &lt;del&gt;(黑人叔叔教做人)&lt;/del&gt;，顺便倒一倒时差的话，那么你可能周六甚至是周五就到达会比较好。&lt;/p&gt;
+
+&lt;p&gt;确定大概行程之后，可以先预定酒店。Apple 会在会议期间提供一些指定的宾馆，以折扣价的方式提供给参会者，在你收到门票的时候应该能够获得相关的预定信息。按照信息联系 Apple 或者酒店就可以预定了。一般来说，这些宾馆都在会场附近，你可以步行十分钟左右达到会场的地方。当然，因为是在城区 (downtown) 里，就算优惠过价格一般也不菲。如果有一同参加的小伙伴，完全可以搭伙住一个标间。这样一来这一周时间至少有人可以一起说话交流，不至于太无聊，二来城区的治安相对硅谷来说还是存在客观差距，所以结伴出行会是更好的选择。向 Apple 预定宾馆的时候最好还是动作快一些，因为 Apple 提供的宾馆其实有可能不能满足全部参会者的需求。另外，因为要提早到达，所以可能开会前的一两天需要另找住处。不过不论是 &lt;a href=&quot;http://www.booking.com/&quot;&gt;Booking.com&lt;/a&gt; 还是 &lt;a href=&quot;https://www.airbnb.com&quot;&gt;Airbnb&lt;/a&gt; 在三藩找一个住处都还是很简单。&lt;/p&gt;
+
+&lt;p&gt;在等待酒店预订结果的同时，就可以准备办理签证了。你可以在&lt;a href=&quot;http://www.ustraveldocs.com/cn_zh/cn-niv-visaapply.asp&quot;&gt;美领馆的网站&lt;/a&gt;上找到相关信息。简单说就是填写并提交 &lt;a href=&quot;https://ceac.state.gov/genniv/&quot;&gt;DS-160&lt;/a&gt; 表，支付签证费用，预约面谈时间等等。在填表的时候签证类型可以选择 B-1 商务或者 B-2 旅游，应该区别不大，而且现在美国签证要求也比较低，只要有稳定工作收入的话，应该难度都不大。如果没有自信的话，也可以&lt;a href=&quot;https://developer.apple.com/contact/submit/?subject=wwdc&quot;&gt;联系 Apple&lt;/a&gt; 让他们给你发一个 WWDC 的参会证明，这可以提高出签的几率。不过根据我个人的经验，Apple 的这个证明发到你手上的速度会比较慢。因为从约签到面试可能会要等一两周才有空位 (根据地方不同会有所区别)，然后面试到出签又要三四天，最后再快递到家。所以说你至少应该准备三周时间来准备签证。有可能你并来不及等到 Apple 的证明发到你手上你就需要去面试了，不过好在这个证明一般来说只是聊胜于无的东西。面试时自然是资料越全越容易过，如果你已经准备好了来回机票，以及在美住宿的订单证明等等一系列东西的话，可能想不过签都很难。&lt;/p&gt;
+
+&lt;p&gt;关于签证，网上有很多其他信息了，就不再多补充了。&lt;/p&gt;
+
+&lt;h2&gt;关于交通&lt;/h2&gt;
+
+&lt;p&gt;一般应该会买到 &lt;a href=&quot;http://www.flysfo.com&quot;&gt;San Francisco International Airport (SFO)&lt;/a&gt; 的机票吧，从机场可以直接坐 &lt;a href=&quot;https://zh.wikipedia.org/wiki/%E8%88%8A%E9%87%91%E5%B1%B1%E7%81%A3%E5%8D%80%E6%8D%B7%E9%81%8B%E7%B3%BB%E7%B5%B1&quot;&gt;BART (Bay Area Rapid Transit)&lt;/a&gt; 一路往北到达 downtown (如果你预定的酒店在三藩市区的话)。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/0/04/BARTMapDay.svg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;美国其实是一个有车就很方便没车很痛苦的国家，三藩市也毫不例外。公共交通相比日本是比较可怜，基本上想去哪儿都不是很容易找到很好的路线。如果想要去 Apple 总部的话基本就是先 BART 或者 LOCAL train 到 Sunnyvale 之类的地方，再看是找 Uber 还是转公交之类的。这里还是推荐先装好 Uber 并且绑上可以美元结算的信用卡，在硅谷一片游历的时候会方便不少。&lt;/p&gt;
+
+&lt;p&gt;Palo Alto 和 Mountain View 一片有很多值得一去或者感受一下的地方，比如 Apple 啊 Google 啊 Facebook 啊之类的，作为 IT 从业者的话去参拜 + 照相留念都很好。不过因为一般来说都是不让随便进的，所以如果想参观公司内部的话可能需要提前寻找和预约在相应公司里工作的小伙伴。&lt;/p&gt;
+
+&lt;p&gt;Apple 估计很快就会搬到新总部去，所以今年可能是 Inifinite Loop 最后一次接待 WWDC 的开发者了。一般 Apple 总部的 Apple Store 会在 WWDC 开始前一天延长营业。和世界上其他的 Apple Store 不同，你在这里可以买到很多像是马克杯、衬衫、笔记本 (不是电脑) 或者钥匙链这样的周边。因为开起会来你肯定是没什么时间过来的了，因此如果要去逛逛逛或者买买买，请一定提前做好计划。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/wwdc-infinite-loop.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;另外，如果时间充裕的话还也可以顺路去逛逛斯坦福感受下这个地球上最好的大学 (之一) 的氛围，就在 Palo Alto 站下来走一下就到。在斯坦福的对外书店里你也可以找到很多纪念品。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/wwdc-stanford.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;关于天气&lt;/h2&gt;
+
+&lt;p&gt;三藩六月份并不热，并不是可以短袖短裤的时节。一般来说一个普通的长袖衬衫，或者再加一件外套都是可以的。另外早晚和中午温差会比较大，如果早晚出门的话可能最好加件厚一点的外衣。&lt;/p&gt;
+
+&lt;p&gt;穿衣基本可以参照往年 WWDC 演讲者和观众来，就不会有什么错。&lt;/p&gt;
+
+&lt;h2&gt;关于注册和 Keynote&lt;/h2&gt;
+
+&lt;p&gt;值得注意的是，今年的注册地点和周一 Keynote 的场所从原来的 Moscone West 搬到了 Bill Graham Civic Auditorium。离 Bill Graham Civic Auditorium 最近的车站是 Civic Center，而离 Moscone West 最近的车站是 Powell Street，注意确认好目的地，不要走错地方。&lt;/p&gt;
+
+&lt;p&gt;注册一定要在周日完成，建议一早就过去拿会牌和 T-shirt，然后就可以到处乱逛了。会牌非常重要，请一定保管好，之后进出会场只看有没有挂好会牌。因为会牌丢失不补，所以要是不小心弄丢的话，就只好安心享受三藩一周的美好度假时光了。&lt;/p&gt;
+
+&lt;p&gt;Keynote 以前会出现去晚了排队排不到进不了大厅，只能在外面看转播的悲剧。不过今年换了地方场地够大应该没问题了。不过如果想要坐一个好位置的话还是需要提前去排队。Keynote 开始的时间是周一上午十点，从以往几届的经验来看，前一天晚上八九点就开始排队的也大有人在。如果想要前排正中的位置，可能最迟晚上十一点就得去排，记得带上帐篷或者折叠床或者至少一把椅子。要是位置无所谓的话，还是建议多养养精神再去，毕竟 WWDC 是一周的持久战，体力相当重要。个人建议早上四五点左右开始排队会比较好，不至于坐到太后面，前一天也可以好好休息。排队过程中会有工作人员给大家发水，进会场以后肯定是又累又饿，不过好消息是会一路提供一些点心充饥。&lt;/p&gt;
+
+&lt;p&gt;接下来就享受真正的第一手资讯的 Keynote 吧！你能比世界上其他人早好几秒知道 Keynote 的内容，想想都有点小激动呢！&lt;/p&gt;
+
+&lt;h2&gt;关于 Session&lt;/h2&gt;
+
+&lt;p&gt;第一天没有技术 Session，早上 Keynote 然后下午的话按照惯例是 Platforms State of the Union 以及 Apple Design Awards。前者会统一介绍新 SDK 中的亮点，是所有 session 的总览，后者会介绍上一年里最优秀的几个 app，也代表了 Apple 所鼓励和看好的开发方向。虽然不会介绍具体技术相关内容，但是这两部分可以说也是 WWDC 的精华和浓缩，请千万不要错过。&lt;/p&gt;
+
+&lt;p&gt;技术 Session 从第二天开始，并且会回到 Moscone West 进行。Moscone West 有三层楼，不同的 Session 在各个会议厅同时进行，所以你必须做出取舍，选择你最感兴趣的内容去听。WWDC 的 app 会在 Keynote 之后更新各个 Session 的标题和简介，第一天晚上你就可以用 app 为接下来四天进行规划，排好“课程表”。三层楼中顶层的 Presidio 是最大的一个会议厅，所以 Apple 一般会把最重要的 session 放在这里。如果你不确定你想听什么 session 的话，直接进 Presidio 可能会是不错的选择。&lt;/p&gt;
+
+&lt;p&gt;有时候 session 的内容和你想像得会差得比较远，如果你发现对某个刚开始的 session 其实不感兴趣，要是位置比较靠后或者比较偏，就完全可以溜出去，找另外的会场和 session。不过如果起身不方便或者需要太多人让你的话，还是老老实实坐着听完比较好。&lt;/p&gt;
+
+&lt;p&gt;关于 session 内容则是仁者见仁智者见智了。因为在场的开发者水平也参差不齐，所以有些地方可能会讲得比较含糊 (真想彻底说明白太花费时间)。不过现场所能收获的气氛和第一时间的思考还是很赞的。&lt;/p&gt;
+
+&lt;p&gt;当然所有 session 都是英文的，现场也没有像是字幕啊同传啊之类的东西。虽然一般来说不会用什么太深奥的词，而且有投影和 demo 帮助理解，但是如果英文听力不太好的话可能还是会比较吃力。一般当天晚上晚上就会放出 session 的视频，最慢第二天也会放出前一天的视频，所以当场内容就算不懂，也还有视频进行补救，而且光听 session 肯定是不能全部理解的，看文档和动手写 demo 是必要的。所以就算一时没听太明白也不必特别在意，做好笔记标记提醒自己稍后再来回顾就好。&lt;/p&gt;
+
+&lt;h2&gt;关于 Labs&lt;/h2&gt;
+
+&lt;p&gt;大家都知道，session 是公开的，所有注册的开发者都可以在会后看到全部 session 的视频。而 labs 才是参会者独享的资源。&lt;/p&gt;
+
+&lt;p&gt;所谓 Labs，就是 Apple 的工程师提供的一对一甚至多对一的解答和交流。Lab 按照 framework 或者部门职能进行分组。如果你在开发中遇到某些百思不得其解的问题，或者是有什么建议，或者某些需求无法实现，你都可以在 Lab 中找对应的小组去寻求帮助。另外，每年也会有很多开发者带着他们的 app 或者 demo 到 UI Design 或者 CocoaTouch 的 Lab 去询问如何改进 app 的设计或者交互。往往你能从这些工程师或者设计师口中套出一些现在比较吃香的设计理念，甚至如果你的设计非常符合他们的胃口的话，他们还会考虑在 App Store 上推荐你的 app。&lt;/p&gt;
+
+&lt;p&gt;App Store 团队的 lab 的话会有一些 App Store 的编辑参加。如果你的 app 能打动这些编辑，或者是要到他们的邮箱或者电话的话，之后你上架 app 前都可以先和他们联系让他们试用你的 app。因为 App Store 的推荐基本还是人为进行的，所以主动联系的话往往可以增加被推荐的几率。建立一些人脉关系也是参加 WWDC 的一大目的。&lt;/p&gt;
+
+&lt;p&gt;Moscone West 的一楼注册台后面就是铺开的 Lab 大厅。一般 session 的时间和 lab 开放的时间是冲突的。不过每个 lab 会有好几个时间段，所以你可以挑好时间过来。不过 lab 也是讲先来后到的，所以还是在开门之后尽早去会比较好。&lt;/p&gt;
+
+&lt;h2&gt;关于 Bash&lt;/h2&gt;
+
+&lt;p&gt;这个 Bash 不是我们用的命令行的 bash，而是在周四下午 session 结束后的一个聚会，聚会上会提供食物，还将邀请一个知名乐队来为大家演奏。其实 Bash 就是 Apple 提供的一个和其他开发者轻松交流的机会 (前提是你能找得到对方在哪儿)。&lt;/p&gt;
+
+&lt;p&gt;今年的 Bash 预计在 Keynote 的 Bill Graham Civic Auditorium 进行，所以有可能一反以前户外的常态，变成一个户内的聚会。在周四上午 session 入场的时候，一般会发 Bash 的入场凭证 (纸做的手环什么的)，你可以选择要或者不要。如果不要的话就是说你不打算参加，也就没有资格入场了。建议不要白不要，除非你有其他更重要的安排。因为周五的 session 相对来说会比较水一些，所以有些开发者会考虑不参加周五的会议，这样的话 Bash 对他们来说就是本次 WWDC 的结束了。如果你选择继续听周五的 session 的话 (毕竟钱都交了)，要注意一下周五 Moscone 的闭馆时间会比之前几天早一些，小心不要因为滞留被关在里面过夜。&lt;/p&gt;
+
+&lt;h2&gt;关于吃的&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/wwdc-lunch.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;周一到周五是有午餐提供的，但是虽说是午饭，对于我们天朝大吃货国出来的人来说可以用难以下咽来形容。每天选择很少，而且很固定，基本就是在烤牛肉三明治，烤鸡三明治以及猪肉三明治 (差点忘了，还有为素食主义者提供的蔬菜三明治) 之间进行选择。一般第一天 Keynote 以后大家都还是会选择在会场吃个饭，顺便可以下载 beta 版的 Xcode 和 iOS。但是之后几天的话，会有一些开发者选择出去吃饭。Moscone West 出门 4th Street 对面就有很多吃饭的地方，顺着 Howard St 往下稍微走个五分钟也有不少餐馆，如果你对吃的比较追求的话可以去试试。&lt;/p&gt;
+
+&lt;p&gt;周四因为有 Bash，所以会额外提供一些吃的东西，我个人觉得也是整个 WWDC 里 Apple 提供的唯一还算能吃的东西。主要会有像是披萨，烤肉，炒面以及各种啤酒或者软饮料之类的东西。如果你喜欢的话，可以敞开不断去拿，直到 Live 的演唱会开始。&lt;/p&gt;
+
+&lt;p&gt;会议中其他天的晚饭是不提供的，你可以自由选择，比如像是约上几个好朋友一起去吃牛排之类的。当然一个人的话也有像是麦当劳或者汉堡王这样的绝对安全的选择。和国内不同的是，如果是点菜类的餐馆，一般是会需要给小费的。基本上最后结账的时候给一点整钱然后说不用找了这样就行。或者刷卡的时候直接把小费和卡塞一起交给服务员就好，大家也不必再多说什么。&lt;/p&gt;
+
+&lt;p&gt;另外，Session 之间是提供免费的茶点和饮料的。不过因为 session 之间间隔都比较短，而且下一个 session 如果去晚了就没有好的位置了，所以很多时候要是饿了渴了的话可以提前一点出来找吃的。&lt;/p&gt;
+
+&lt;h2&gt;关于其他活动&lt;/h2&gt;
+
+&lt;p&gt;如果你认为去 WWDC 只是去参加 Apple 的 Session 的话，你就大错特错了。WWDC 是一个和全球其他 Apple 开发者认识和结交的绝好机会。平时你有没有在 GitHub 上和某个国外小伙伴一起贡献代码？你有没有倾心于某个开源库并想见一见他的作者？平时读书的时候有个问题萦绕在你心中，一直想要请教原书作者？在 WWDC 上你会发现你有这样的机会。&lt;/p&gt;
+
+&lt;p&gt;相比于一次纯粹的技术交流和新 SDK 展示，WWDC 现在显然带有有更多的社交属性，可以帮助你结识很多其他开发者。当然，这是有前提的，那就是你积极联络和热心参与。&lt;a href=&quot;http://altconf.com&quot;&gt;AltConf&lt;/a&gt; 是一个最有名的活动，而现在已经演变成了另一场和 WWDC 同时召开的会议。很多有名的第三方开发者会在 AltConf 上分享他们过去一年的经验，以及对本次 WWDC 新公布的内容的一些看法。另外，你也可以关注 &lt;a href=&quot;https://2016.wwdcparties.com&quot;&gt;WWDC Parties&lt;/a&gt; 的内容以及他们的 &lt;a href=&quot;https://twitter.com/wwdcparties&quot;&gt;Twitter&lt;/a&gt; 帐号，上面会对一些 WWDC 期间举行的 meetup 进行汇总，这些 meetup 基本上时间来说都安排在晚上，和 session 并不冲突，如果有你感兴趣的内容的话，也千万不要错过。&lt;/p&gt;
+
+&lt;p&gt;另外，每年都会有开发者整理一些像是 WWDC Attendee List 的名单，比如&lt;a href=&quot;http://swinden.com/wwdc-2014-attendee-list/&quot;&gt;前年&lt;/a&gt;和&lt;a href=&quot;http://swinden.com/wwdc-2015-attendee-list/&quot;&gt;去年&lt;/a&gt;都有，不出意外的话今年应该也会继续。你可以关注一下并填写表单加入这个 list，而这个 list 也会维护一个 Slack 群，为开发者们互相认识提供良好的平台。&lt;/p&gt;
+
+&lt;h2&gt;关于其他&lt;/h2&gt;
+
+&lt;p&gt;在 Moscone West 的会场会有 Company Store，出售一些 WWDC 相关的纪念品，比如 Polo 衫或者是带 WWDC logo 的帽子之类的。虽然价格不算便宜，但也还是合理，而且是切切实实的限量发行版本，所以很受欢迎。一般要是等到最后一天的话基本就是卖光光的节奏，所以如果想要的话最好早一点去买。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/wwdc-restroom.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;虽然有不少报道说会场的厕所会变成这个样子，但是实际上来看其实还好，并没有那么夸张。第一天的 Keynote 因为从排队，到开场，再到结束，会花费很长时间，Keynote 结束以后可能会比较悲惨一些。所以建议尽量在 Keynote 之前找机会解决一下，或者就少喝一点水，这样能减小到时候尴尬的可能性。&lt;/p&gt;
+
+&lt;p&gt;另外，如果有计划参加各种 parties 的话，最好注意一下时间不要太晚。要是自己没有车，又住在指定的 downtown 里的宾馆的话，那么在晚上天黑以后步行回宾馆其实并不是很好的选择。建议最好是至少两人结伴出行，并且叫 Uber 直接送回住处。身上尽量不用带太多钱，但最好带一些零钱之类的，毕竟安全比什么都重要。&lt;/p&gt;
+
+&lt;p&gt;其他的话..等我想起来再补充吧。&lt;/p&gt;
+
+&lt;p&gt;希望这篇不太“简明”的简明攻略能够帮到你。祝你 WWDC 参会顺利，旅游愉快。期待你与我们分享你的 WWDC 见闻~&lt;/p&gt;
+</description>
+        <pubDate>Tue, 19 Apr 2016 20:10:11 +0800</pubDate>
+        <link>http://onevcat.com/2016/04/first-wwdc/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/04/first-wwdc/</guid>
+        
+        <category>南箕北斗集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>ObjC 中国的工作回顾和之后的计划</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/assets/images/2016/functional-swift-header.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;小时候因为成绩还算凑合，所以经常会被任命做个班干部什么的。其实这并不是一份很有意思的工作，除了上课要被老师重点“关照”点名起来回答问题以外，最烦人的事情就是开学要写工作计划，期末要写工作总结了。耗时耗力不说，写出来的东西也并不会有什么人看。&lt;/p&gt;
+
+&lt;p&gt;所以我大抵对写计划和写总结这样的事情是抵触的。&lt;/p&gt;
+
+&lt;p&gt;顺便还希望这篇总结加计划的东西能有人有兴趣看。&lt;/p&gt;
+
+&lt;p&gt;时隔十几二十年后，再提笔 (其实是拿键盘) 开始写一份工作回顾和计划的时候，我却是怀着满心欢喜的。从 2014 年 3 月&lt;a href=&quot;https://github.com/objccn/articles/commit/b5ba88afeea0e6c7d0bcbf49145cd72799d8c4ed&quot;&gt;第一个 commit&lt;/a&gt; 开始，&lt;a href=&quot;http://objccn.io&quot;&gt;ObjC 中国&lt;/a&gt;这个由国内 iOS 开发者社区自行发起的翻译项目在两年内不断地发展壮大。到现在为止，这个项目陆续吸引了接近六十名国内优秀的 iOS 开发人员，我们一同完成了对 objc.io 原文期刊的翻译以及不断维护。&lt;/p&gt;
+
+&lt;h3&gt;新书&lt;/h3&gt;
+
+&lt;p&gt;在今天，我可以高兴地向大家宣布，ObjC 中国将迎来一个新的开始。我们与 objc.io 进行了更加深入的合作，计划将他们的三本著作进行翻译，并希望能带给国内读者最好的阅读体验。目前，我们的第一本翻译书籍&lt;strong&gt;《函数式 Swift》(Functional Swift)&lt;/strong&gt; 已经全部完成，并且将于今天开始出售。除了高质量的翻译以外，我们也争取到了更符合国内物价水平的出售价格。objc.io 的另外两本书籍，&lt;strong&gt;《Core Data》&lt;/strong&gt;和&lt;strong&gt;《Swift 进阶》(Advanced Swift)&lt;/strong&gt; 也正在翻译和校审中，我们稍后会给出关于它们的更多的信息。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;您现在就可以访问&lt;a href=&quot;https://store.objccn.io/products/functional-swift/&quot;&gt;这个页面&lt;/a&gt;并以英文原版 1/4 的售价获取《函数式 Swift》的电子版本。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3&gt;ObjC 中国的缘起&lt;/h3&gt;
+
+&lt;p&gt;因为在 Twitter 上关注了不少国外的开发者，所以在 objc.io 的第一期期刊发布之前我就订阅了他们的邮件。而 objc.io 持续地发布高质量的文章，也直接奠定了它在国内外 iOS 开发社区中的地位。国内不少开发者都在很早就开始了对于 objc.io 的文章的翻译，据我所知，像是&lt;a href=&quot;https://github.com/tang3w&quot;&gt;唐天勇&lt;/a&gt;、&lt;a href=&quot;https://github.com/webfrogs&quot;&gt;webfrogs&lt;/a&gt; 等都是先行者。大家的出发点都是对于技术的喜爱和对钻研的热衷，希望在自我挑战的同时惠泽其他开发者。但是这类做法相对来说缺乏组织性，从而导致了大量的重复劳动以及各自迥异的翻译风格。而且当时也并没有一个成型的地方能够找到所有的内容，每篇文章如同闪亮的宝石，但却分散在偌大的互联网海洋之中，难以寻觅。&lt;/p&gt;
+
+&lt;p&gt;2014 年初的时候我经历了很多次的所谓“封闭开发”，因为我个人的开发速度比较快一些，而又不太好 (也不太愿意) 去插手其他同事的工作，所以在完成工作任务之余，就有一些自己的额外时间用来学习和提高。虽然我自己基本能够无障碍阅读 objc.io 的文章，但还是深感如果能有一个集中且高质量的翻译版本的话，必能对国内的 iOS 开发行业起到一些促进作用。于是抱着试一试的想法先向 objc.io 的创始人们发了邮件，询问是否能得到翻译授权。幸运的是他们很快回复了邮件，表示愿意授权由我来组织进行翻译，同时还很热心地提醒了他们注意到还有其他来自中国的开发者正在打算做同样的事情。本来我打算做这件事的目的就是减少重复劳动，提高翻译效率，因此我在第一时间联系了这些正在打算做同样事情的开发者。又很幸运，当时已经组织了一些翻译的&lt;a href=&quot;https://github.com/FangYiXiong&quot;&gt;方一雄&lt;/a&gt;、&lt;a href=&quot;https://github.com/BeyondVincent&quot;&gt;破船&lt;/a&gt;和 &lt;a href=&quot;https://github.com/answer-huang&quot;&gt;Answer Huang&lt;/a&gt; 都表示同意我的想法，因此，我们一同成立了 ObjC 中国，来完整并有序地翻译 objc.io 的内容。&lt;/p&gt;
+
+&lt;p&gt;可以说 ObjC 中国从一开始就得到了国内 iOS 开发者社区的帮助。我们收集并获取了很多已经存在的优秀译文的授权，原译者们也大都十分慷慨并支持我们的行动。而在翻译质量和速度的保证下，ObjC 中国逐渐吸引了更多的优秀开发者。我们采取的是在 objc.io 原文发布后个人认领的方式来分配任务，在项目中后期的时候，经常会出现原文发布两三分钟之内，译文的任务就已经被全部认领完成的盛况。而译者们也都殚精竭虑来保证译文质量，对于一个公益性质的项目来说，这确实难能可贵。&lt;/p&gt;
+
+&lt;p&gt;在 objc.io 的期刊完结后，objc.io 陆续出版了三本优秀的 iOS 开发书籍，内容涵盖了函数式编程，Core Data，以及一些进阶的 Swift 相关话题。在去年七月底 objc.io 的创始人给我们发邮件表示希望能将这三本书也翻译成中文版，这非常符合 ObjC 中国“将高质量的内容以更容易理解的方式带给国内开发者”的初衷，因此在几次探讨后我们共同决定启动对这三本书籍的翻译计划。我们从之前期刊翻译的贡献者中挑选了几位翻译质量优秀并且态度负责的译者，同时也从社区中征集了几名愿意帮助我们翻译的开发者，开始了这三本图书的翻译。&lt;/p&gt;
+
+&lt;h3&gt;收获&lt;/h3&gt;
+
+&lt;p&gt;在两年之后的今天，二十四期涵盖了 iOS 开发方方面面的期刊依然是不少开发者进阶和学习的优秀资料。虽然之前我在国内 iOS 开发者中间可能有一点名气，但是更多的是来自在微博或者博客上吹水，而自己实际上并没有为社区做过什么大的贡献。我想，所谓的为世界做出一点贡献或者说回馈开发者社区，我现在大概是做到了的。这也是一件我自己觉着值得骄傲和自豪的事情。&lt;/p&gt;
+
+&lt;p&gt;当然，组织和维护这样一个体系是需要花费不少精力的，但是所能得到的收获 -- 不论是对自己能力的锻炼还是精神上的满足 -- 是完全值得这些付出的。我非常享受和其他大牛一起进步的过程，在翻译过程中，因为每一篇文章都需要进行审核和校对，因此我精读了所有这些文章，这对我自己在 iOS 开发上的进步起到了至关重要的作用。另外，我需要做不少其他的工作，像是架设网站，设计 logo，研究文字排版等等，这都是在日常工作里难以接触到的。&lt;/p&gt;
+
+&lt;p&gt;最重要的收获是获得了和其他开发者们一同工作的机会。因为我身处国外，所以很难有条件与国内的 iOS 开发者们见面，更别说一同工作。而 ObjC 中国恰好为我自己提供了一个非常优秀的平台，在这里我能有机会和热心认领文章的朋友交流思想，一同探讨技术细节。通过这个项目，我结识了很多优秀的 iOS 开发者，我从中也受益颇丰。&lt;/p&gt;
+
+&lt;p&gt;另外值得一提的是，这项工作给了我不少接触国外开发者的机会。与 objc.io 三名创始人来回的邮件沟通，和 &lt;a href=&quot;https://github.com/chriseidhof&quot;&gt;Chris&lt;/a&gt; 在北京和东京见了两面讨论翻译细节，机缘巧合加入了一个国外的 iOS Slack 频道等等。如果没有组织 ObjC 中国项目的话，我应该是不会得到这些机会的。&lt;/p&gt;
+
+&lt;h3&gt;计划&lt;/h3&gt;
+
+&lt;p&gt;我们刚刚完成了《函数式 Swift》这本书的翻译和校对工作，我们由衷地希望您能够喜欢这本书的风格和内容。接下来，我们会将精力集中于翻译剩下的两本图书：《Core Data》和《Swift 进阶》。这两本书不论从内容和深度上来说，都会比《函数式 Swift》要广阔和深入，因此对我们也会是前所未有的挑战。不过，我们有之前期刊翻译时所积累的宝贵经验，我们有热心负责的译者和校对人员，我们有原版图书作者的耐心解答和解释，在这些条件的保障下，我们有足够的信心为大家带来一系列优秀的图书。&lt;/p&gt;
+
+&lt;p&gt;ObjC 中国的网站正在重新设计中，我们在之后将会把之前期刊的内容也迁移到&lt;a href=&quot;https://store.objccn.io/&quot;&gt;新的站点&lt;/a&gt;上来，以提供和书籍一样的统一的和更好的阅读体验。&lt;/p&gt;
+
+&lt;p&gt;另外，因为和 Chris 也算有些私交，所以我可以透露一下 objc.io 之后的计划。在晚些时候 objc.io 网站可能会重新启动并开始更新，不过这次它们会以新的形式给我们带来新的内容。不出意外的话，ObjC 中国也将继续与 objc.io 进行合作，为国内开发者带来高质量翻译。另一方面，我们也有计划进行一些原创的内容，或者直接在 objc.io 上发表内容，将中国 iOS 开发者的声音带给这个美好的世界。&lt;/p&gt;
+
+&lt;h3&gt;最后&lt;/h3&gt;
+
+&lt;p&gt;服务器和域名和 GitHub 私有 repo 的钱都是我垫着的，我在想能不能找 Chris 给报销...&lt;/p&gt;
+</description>
+        <pubDate>Thu, 07 Apr 2016 09:51:24 +0800</pubDate>
+        <link>http://onevcat.com/2016/04/objccn-plan/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/04/objccn-plan/</guid>
+        
+        <category>南箕北斗集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Swift 2 throws 全解析 - 从原理到实践</title>
+        <description>&lt;p&gt;本文最初于 2015 年 12 月发布在 IBM developerWorks 中国网站发表，其网址是 &lt;a href=&quot;http://www.ibm.com/developerworks/cn/mobile/mo-cn-swift/index.html&quot;&gt;http://www.ibm.com/developerworks/cn/mobile/mo-cn-swift/index.html&lt;/a&gt;。如需转载请保留此行声明。&lt;/p&gt;
+
+&lt;h2&gt;Swift 2 错误处理简介&lt;/h2&gt;
+
+&lt;p&gt;throws 关键字和异常处理机制是 Swift 2 中新加入的重要特性。Apple 希望通过在语言层面对异常处理的流程进行规范和统一，来让代码更加安全，同时让开发者可以更加及时可靠地处理这些错误。Swift 2 中所有的同步 Cocoa API 的 &lt;code&gt;NSError&lt;/code&gt; 都已经被 throw 关键字取代，举个例子，在文件操作中复制文件的 API 在 Swift 1 中使用的是和 Objective-C 类似的 &lt;code&gt;NSError&lt;/code&gt; 指针方式：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func copyItemAtPath(_ srcPath: String, toPath dstPath: String, error: NSErrorPointer)
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;而在 Swift 2 中，变为了 throws：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func copyItemAtPath(_ srcPath: String, toPath dstPath: String) throws
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;使用时，Swift 1.x 中我们需要创建并传入 &lt;code&gt;NSError&lt;/code&gt; 的指针，在方法调用后检查指针的内容，来判断是否成功：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let fileManager = NSFileManager.defaultManager()
+var error: NSError?
+fileManager.copyItemAtPath(srcPath, toPath: dstPath, error: &amp;amp;error)
+if error != nil {
+    // 发生了错误
+} else {
+    // 复制成功
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在实践中，因为这个 API 仅会在极其特定的条件下 (比如磁盘空间不足) 会出错，所以开发者为了方便，有时会直接传入 nil 来忽视掉这个错误：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let fileManager = NSFileManager.defaultManager()
+// 不关心是否发生错误
+fileManager.copyItemAtPath(srcPath, toPath: dstPath, error: nil)
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这种做法无形中降低了应用的可靠性以及从错误中恢复的能力。为了解决这个问题，Swift 2 中在编译器层级就对 throws 进行了限定。被标记为 throws 的 API，我们需要完整的 &lt;code&gt;try catch&lt;/code&gt; 来捕获可能的异常，否则无法编译通过：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let fileManager = NSFileManager.defaultManager()
+do {
+    try fileManager.copyItemAtPath(srcPath, toPath: dstPath)
+} catch let error as NSError {
+    // 发生了错误
+    print(error.localizedDescription)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;对于非 Cocoa 框架的 API，我们也可以通过声明 &lt;code&gt;ErrorType&lt;/code&gt; 并在出错时进行 throw 操作。这为错误处理提供了统一的处理出口，有益于提高应用质量。&lt;/p&gt;
+
+&lt;h2&gt;throws 技术内幕&lt;/h2&gt;
+
+&lt;p&gt;throws 关键字究竟做了些什么，我们可以用稍微底层一点的手法来进行一些探索。&lt;/p&gt;
+
+&lt;h3&gt;Swift 编译器，SIL 及汇编&lt;/h3&gt;
+
+&lt;p&gt;所有的 Swift 源文件都要经过 Swift 编译器编译后才能执行。Swift 编译过程遵循非常经典的 LLVM 编译架构：编译器前端首先对 Swift 源码进行词法分析和语法分析，生成 Swift 抽象语法树 (AST)，然后从 AST 生成 Swift 中间语言 (Swift Intermediate Language，SIL)，接下来 SIL 被翻译成通用的 LLVM 中间表述 (LLVM Intermediate Representation, LLVM IR)，最后通过编译器后端的优化，得到汇编语言。整个过程可以用下面的框图来表示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/compiler-flow.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Swift 编译器提供了非常灵活的命令行工具：swiftc，这个命令行工具可以运行在不同模式下，我们通过控制命令行参数能获取到 Swift 源码编译到各个阶段的结果。使用 &lt;code&gt;swiftc --help&lt;/code&gt; 我们能得知各个模式的使用方法，这篇文章会用到下面几个模式，它们分别将 Swift 源代码编译为 SIL，LLVM IR 和汇编语言。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&amp;gt; swiftc --help
+...
+MODES:
+  -emit-sil        Emit canonical SIL file(s)
+  -emit-ir         Emit LLVM IR file(s)
+  -emit-assembly   Emit assembly file(s) (-S)
+ ...
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在 Swift 开源之前，将源码编译到各个阶段是探索 Swift 原理和实现方式的重要方式。即使是在 Swift 开源后的今天，在面对一段代码时，想要知道编译结果和底层的行为，最快的方式还是查看编译后的语句。我们接下来将会分析一段简单的 throw 代码，来看看 Swift 的异常机制到底是如何运作的。&lt;/p&gt;
+
+&lt;h3&gt;throw，try，catch 深层解析&lt;/h3&gt;
+
+&lt;p&gt;为了保持问题的简单，我们定义一个最简单的 &lt;code&gt;ErrorType&lt;/code&gt; 并用一个方法来将其抛出，源代码如下：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// throw.swift
+
+enum MyError: ErrorType {
+    case SampleError
+}
+
+func throwMe(shouldThrow: Bool) throws -&amp;gt; Bool {
+    if shouldThrow {
+        throw MyError.SampleError    
+    }
+    return true
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;使用 swiftc 将其编译为 SIL：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;swiftc -emit-sil -O -o ./throw.sil ./throw.swift
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在输出文件中，可以找到 &lt;code&gt;throwMe&lt;/code&gt; 的对应 Swift 中间语言表述：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;// throw.throwMe (Swift.Bool) throws -&amp;gt; Swift.Bool
+sil hidden @_TF5throw7throwMeFzSbSb :
+                    $@convention(thin) (Bool) -&amp;gt; (Bool, @error ErrorType) {
+bb0(%0 : $Bool):
+  debug_value %0 : $Bool  // let shouldThrow      // id: %1
+  %2 = struct_extract %0 : $Bool, #Bool.value     // user: %3
+  cond_br %2, bb1, bb2                            // id: %3
+
+bb1:                                              // Preds: bb0
+  ...
+  throw %4#0 : $ErrorType                         // id: %7
+
+bb2:                                              // Preds: bb0
+  ...
+  return %9 : $Bool                               // id: %10
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;code&gt;_TF5throw7throwMeFzSbSb&lt;/code&gt; 是 &lt;code&gt;throwMe&lt;/code&gt; 方法 &lt;a href=&quot;https://mikeash.com/pyblog/friday-qa-2014-08-15-swift-name-mangling.html&quot;&gt;Mangling&lt;/a&gt; 以后的名字。在去掉一些噪音后，我们可以将这个方法的签名等效看做：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;throwMe(shouldThrow: Bool) -&amp;gt; (Bool, ErrorType)
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;它其实是返回的是一个 &lt;code&gt;(Bool, ErrorType)&lt;/code&gt; 的多元组。和一般的多元组不同的是，第二个元素 &lt;code&gt;ErrorType&lt;/code&gt; 被一个 &lt;code&gt;@error&lt;/code&gt; 修饰了。这个修饰让多元组具有了“排他性”，也就是只要多元组的第一个元素被返回即可：在条件分支 &lt;code&gt;bb2&lt;/code&gt; (也即没有抛出异常的正常分支) 中，仅只有 Bool 值被返回了。而对于发生错误需要抛出的处理，SIL 层面还并没有具体实现，只是生成了对应的错误枚举对象，然后对其调用了 throw 命令。&lt;/p&gt;
+
+&lt;p&gt;这就是说，我们想要探索 throw 的话，还需要更深入一层。用 swiftc 将源代码编译为 LLVM IR：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;swiftc -emit-ir -O -o ./throw.ir ./throw.swift
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;结果中 &lt;code&gt;throwMe&lt;/code&gt; 的关键部分为：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;define hidden i1 @_TF5throw7throwMeFzSbSb(i1,
+    %swift.refcounted* nocapture readnone, %swift.error** nocapture) #0 {
+
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这是我们非常熟悉的形式，参数中的 &lt;code&gt;swift.error**&lt;/code&gt; 和 Swift 1 以及 Objective-C 中使用 &lt;code&gt;NSError&lt;/code&gt; 指针来获取和存储错误的做法是一致的。在示例的这种情况下，LLVM 后端针对 swift.error 进行了额外处理，最终得到的汇编码的伪码是这样的 (在未启用 -O 优化的条件下)：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;int __TF5throw7throwMeFzSbSb(int arg0) {
+    rax = arg0;
+    var_8 = rdx;
+    if ((rax &amp;amp; 0x1) == 0x0) {
+            rax = 0x1;
+    }
+    else {
+            rax = swift_allocError(0x1000011c8, __TWPO5throw7MyErrorSs9ErrorTypeS_);
+            var_18 = rax;
+            swift_willThrow(rax);
+            rax = var_8;
+            *rax = var_18;
+    }
+    return rax;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;函数最终的返回是一个 int，它有可能是一个实际的整数值，也有可能是一个指向错误地址的指针。这和 Swift 1 中传入 &lt;code&gt;NSErrorPointer&lt;/code&gt; 来存储错误指针地址有明显不同：首先直接使用返回值我们就可以判断调用是否出现错误，而不必使用额外的空间进行存储；其次整个过程中没有使用到 &lt;code&gt;NSError&lt;/code&gt; 或者 Objective-C Runtime 的任何内容，在性能上要优于传统的错误处理方式。&lt;/p&gt;
+
+&lt;p&gt;我们在了解了 throw 的底层机理后，对于 &lt;code&gt;try catch&lt;/code&gt; 代码块的理解自然也就水到渠成了。加入一个 &lt;code&gt;try catch&lt;/code&gt; 后的 SIL 相关部分是：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;try_apply %15(%16) : $@convention(thin) (Bool) -&amp;gt; (Bool, @error ErrorType), normal bb1, error bb9 // id: %17
+
+bb1(%18 : $Bool):
+...
+bb9(%80 : $ErrorType):
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;其他层级的实现也与此类似，都是对返回值进行类型判断，然后进入不同的条件分支进行处理。&lt;/p&gt;
+
+&lt;h2&gt;ErrorType 和 NSError&lt;/h2&gt;
+
+&lt;p&gt;throw 语句的作用对象是一个实现了 &lt;code&gt;ErrorType&lt;/code&gt; 接口的值，本节将探讨 &lt;code&gt;ErrorType&lt;/code&gt; 背后的内容，以及 &lt;code&gt;NSError&lt;/code&gt; 与它的关系。在 Swift 公开的标准库中，&lt;code&gt;ErrorType&lt;/code&gt; 接口并没有公开的方法：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;public protocol ErrorType {
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这个接口有一个 extension，但是也没有公开的内容：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;extension ErrorType {
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;我们可以通过使用 LLDB 的类型检索来获取关于这个接口的更多信息。在调试器中运行 &lt;code&gt;type lookup ErrorType&lt;/code&gt;：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;(lldb) type lookup ErrorType
+protocol ErrorType {
+  var _domain: Swift.String { get }
+  var _code: Swift.Int { get }
+}
+extension ErrorType {
+  var _domain: Swift.String {
+    get {}
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;可以看到这个接口实际上需要实现两个属性：domain 描述错误的所属域，code 标记具体的错误号，这和传统的 &lt;code&gt;NSError&lt;/code&gt; 中定义一个错误所需要的内容是一致的。事实上 &lt;code&gt;NSError&lt;/code&gt; 在 Swift 2 中也实现了 &lt;code&gt;ErrorType&lt;/code&gt; 接口，它简单地返回错误的域和错误代码信息，这是 Swift 1 到 2 的错误处理相关 API 转换的兼容性的保证。&lt;/p&gt;
+
+&lt;p&gt;虽然 Cocoa/CocoaTouch 框架中的 throw API 抛出的都是 &lt;code&gt;NSError&lt;/code&gt;，但是应用开发者更为常用的表述错误的类型应该是 enum，这也是 Apple 对于 throw 的推荐用法。对于实现了 &lt;code&gt;ErrorType&lt;/code&gt; 的 enum 类型，其错误代码将根据 enum 中 case 声明的顺序从 0 开始编号，而错误域的名字就是它的类型全名 (Module 名 + 类型名)：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;MyError.InvalidUser._code: 0
+MyError.InvalidUser._domain: ModuleName.MyError
+
+MyError.InvalidPassword._code: 1
+MyError.InvalidPassword._domain: ModuleName.MyError
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这虽然为按照错误号来处理错误提供了可能性，但是我们在实践中应当尽量依赖 enum case 而非错误号来对错误进行辨别，这可以提高稳定性，同时降低维护的压力。除了 enum 以外，struct 和 class 也是可以实现 &lt;code&gt;ErrorType&lt;/code&gt; 接口，并作为被 throw 的对象的。在使用非 enum 值来表示错误的时候，我们可能需要显式地指定 &lt;code&gt;_code&lt;/code&gt; 和 &lt;code&gt;_domain&lt;/code&gt;，以区分不同的错误。&lt;/p&gt;
+
+&lt;h2&gt;throws 的一些实践&lt;/h2&gt;
+
+&lt;h3&gt;异步操作中的异常处理&lt;/h3&gt;
+
+&lt;p&gt;带有 throw 的方法现在只能工作在同步 API 中，这受限于异常抛出方法的基本思想。一个可以抛出的方法实际上做的事情是执行一个闭包，接着选择返回一个值或者是抛出一个异常。直接使用一个 throw 方法，我们无法在返回或抛出之前异步地执行操作并根据操作的结果来决定方法行为。要改变这一点，理论上我们可以通过将闭包的执行和对结果的操作进行分离，来达到“异步抛出”的效果。假设有一个同步方法可以抛出异常：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func syncFunc&amp;lt;A, R&amp;gt;(arg: A) throws -&amp;gt; R
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;通过为其添加一次调用，可以将闭包执行部分和结果判断及返回部分分离：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func syncFunc&amp;lt;A, R&amp;gt;(arg: A)() throws -&amp;gt; R
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这相当于将原来的方法改写为了：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func syncFunc&amp;lt;A, R&amp;gt;(arg: A) -&amp;gt; (Void throws -&amp;gt; R)
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这样，单次对 &lt;code&gt;syncFunc&lt;/code&gt; 的调用将返回一个 &lt;code&gt;Void throws -&amp;gt; R&lt;/code&gt; 类型的方法，这使我们有机会执行代码而不是直接返回或抛出。在执行 &lt;code&gt;syncFunc&lt;/code&gt; 返回后，我们还需要对其结果用 &lt;code&gt;try&lt;/code&gt; 来进行判断是否抛出异常。利用这个特点，我们就可以将这个同步的抛出方法改写为异步形式：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func asyncFunc&amp;lt;A, R&amp;gt;(arg: A, callback: (Void throws -&amp;gt; R) -&amp;gt; Void) {
+    // 处理操作
+    let result: () throws -&amp;gt; R = {
+        // 根据结果抛出异常或者正常返回
+    }
+    return callback(result)
+}
+
+// 调用
+asyncFunc(arg: someArg) { (result) -&amp;gt; Void in
+    do {
+        let r = try result()
+        // 正常返回
+    } catch _ {
+        // 出现异常
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;绕了一大个圈子，我们最后发现这么做本质上其实和简单地使用 &lt;code&gt;Result&amp;lt;T, E&amp;gt;&lt;/code&gt; 来表示异步方法的结果并没有本质区别，反而增加了代码阅读和理解的难度，也破坏了 Swift 异常机制原本的设计意图，其实并不是可取的选项。除开某些非常特殊的用例外，对于异步 API 现在并不适合使用 throw 来进行错误判断。&lt;/p&gt;
+
+&lt;h3&gt;异常处理的测试&lt;/h3&gt;
+
+&lt;p&gt;在 XCTest 中暂时还没有直接对 Swift 2 异常处理进行测试的方法，如果想要测试某个调用应当/不应当抛出某个异常的话，我们可以对 XCTest 框架的方法进行一些额外但很简单包装，传入 block 并运行，然后在 try 块或是 catch 块内进行 XCTAssert 的断言检测。在 Apple 开发者论坛有关于这个问题的更&lt;a href=&quot;https://forums.developer.apple.com/thread/5824&quot;&gt;详细的讨论&lt;/a&gt;，完整的示例代码和使用例子可以在&lt;a href=&quot;https://gist.github.com/onevcat/128ab20a4a9177ca3c82&quot;&gt;这里&lt;/a&gt;找到。&lt;/p&gt;
+
+&lt;h3&gt;类型安全的异常抛出&lt;/h3&gt;
+
+&lt;p&gt;Swift 2 中异常另一个严重的不足是类型不安全。throw 语句可以作用于任意满足 &lt;code&gt;ErrorType&lt;/code&gt; 的类型，你可以 throw 任意域的错误。而在 catch 块中我们也同样可以匹配任意的错误类型，这一切都没有编译器保证。由于这个原因，现在的异常处理机制并不好用，需要处理异常的开发者往往需要通读文档才能知道可能会有哪些异常，而文档的维护又是额外的工作。缺少强制机制来保证异常抛出和捕获的类型的正确性，这为程序中 bug 的出现埋下了隐患。&lt;/p&gt;
+
+&lt;p&gt;事实上从我们之前对 throw 底层实现的分析来看，在语言层面上实现只抛出某一特定类型的错误并不是很困难的事情。但是考虑到与 &lt;code&gt;NSError&lt;/code&gt; 和传统错误处理 API 兼容问题，Swift 2 中并没有这样实现，也许我们在之后的 Swift 版本中能看到限定类型的异常机制。&lt;/p&gt;
+
+&lt;h3&gt;异常的调试和断点&lt;/h3&gt;
+
+&lt;p&gt;Swift 的异常抛出并不是传统意义的 exception，在调试时抛出异常并不会触发 Exception 断点。另外，throw 本身是语言的关键字，而不是一个 symbol，它也不能触发 Symbolic 类型的断点。如果我们希望在所有 throw 语句执行的时候让程序停住的话，需要一些额外的技巧。在之前 throw 的汇编实现中，可以看到所有 throw 语句在返回前都会进行一次 &lt;code&gt;swift_willThrow&lt;/code&gt; 的调用，这就是一个有效的 Symbolic 语句，我们设置一个 &lt;code&gt;swift_willThrow&lt;/code&gt; 的 Symbolic 断点，就可以让程序在 throw 的时候停住，并使用调用栈信息来获知程序在哪里抛出了异常。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;补充，在最新版本的 Xcode 中，Apple 直接为我们在断点类型中加上了 “Swift Error Breakpoint” 的选项，它背后做的就是在 &lt;code&gt;swift_willThrow&lt;/code&gt; 上添加一个断点。不过因为有了更直接的方法，我们现在不再需要手动去添加这个符号断点了。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/swift-error-breakpoint.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;参考资料&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;MikeAsh Friday Q&amp;amp;A，Swift 中 Name Mangling 的定义和使用：&lt;a href=&quot;https://mikeash.com/pyblog/friday-qa-2014-08-15-swift-name-mangling.html&quot;&gt;Friday Q&amp;amp;A: Swift Name Mangling&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Apple 开发者论坛，关于 Swift 中 throw 的测试方法：&lt;a href=&quot;https://forums.developer.apple.com/thread/5824&quot;&gt;How to write a unit test which passes if a function throws?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Tue, 29 Mar 2016 14:37:24 +0800</pubDate>
+        <link>http://onevcat.com/2016/03/swift-throws/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/03/swift-throws/</guid>
+        
+        <category>能工巧匠集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Swift 性能探索和优化分析</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/assets/images/2016/taylor-swift.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;本文首发在 CSDN《程序员》杂志，订阅地址 &lt;a href=&quot;http://dingyue.programmer.com.cn/&quot;&gt;http://dingyue.programmer.com.cn/&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;Apple 在推出 Swift 时就将其冠以先进，安全和高效的新一代编程语言之名。前两点在 Swift 的语法和语言特性中已经表现得淋漓尽致：像是尾随闭包，枚举关联值，可选值和强制的类型安全等都是 Swift 显而易见的优点。但是对于高效一点，就没有那么明显了。在 2014 年 WWDC 大会上 Apple 宣称 Swift 具有超越 Objective-C 的性能，甚至某些情况下可以媲美和超过 C。但是在 Swift 正式发布后，很多开发者发现似乎 Swift 性能并没有像宣传的那样优秀。甚至在 Swift 经过了一年半的演进的今天，稍有不慎就容易掉进语言性能的陷阱中。本文将分析一些使用 Swift 进行 iOS/OS X 开发时性能上的考量和做法，同时，笔者结合自己这一年多来使用 Swift 进行开发的经验，也给出了一些对应办法。&lt;/p&gt;
+
+&lt;h2&gt;为什么 Swift 的性能值得期待&lt;/h2&gt;
+
+&lt;p&gt;Swift 具有一门高效语言所需要具备的绝大部分特点。与 Ruby 或者 Python 这样的解释型语言不需要再做什么对比了，相较于其前辈的 Objective-C，Swift 在编译期间就完成了方法的绑定，因此方法调用上不再是类似于 Smalltalk 的消息发送，而是直接获取方法地址并进行调用。虽然 Objective-C 对运行时查找方法的过程进行了缓存和大量的优化，但是不可否认 Swift 的调用方式会更加迅速和高效。&lt;/p&gt;
+
+&lt;p&gt;另外，与 Objective-C 不同，Swift 是一门强类型的语言，这意味 Swift 的运行时和代码编译期间的类型是一致的，这样编译器可以得到足够的信息来在生成中间码和机器码时进行优化。虽然都使用 LLVM 工具链进行编译，但是 Swift 的编译过程相比于 Objective-C 要多一个环节 -- 生成 Swift 中间代码 (Swift Intermediate Language，SIL)。SIL 中包含有很多根据类型假定的转换，这为之后进一步在更低层级优化提供了良好的基础，分析 SIL 也是我们探索 Swift 性能的有效方法。&lt;/p&gt;
+
+&lt;p&gt;最后，Swift 具有良好的内存使用的策略和结构。Swift 标准库中绝大部分类型都是 &lt;code&gt;struct&lt;/code&gt;，对值类型的使用范围之广，在近期的编程语言中可谓首屈一指。原本值类型不可变性的特点，往往导致对于值的使用和修改意味着创建新的对象，但是 Swift 巧妙地规避了不必要的值类型复制，而仅只在必要时进行内存分配。这使得 Swift 在享受不可变性带来的便利以及避免不必要的共享状态的同时，还能够保持性能上的优秀。&lt;/p&gt;
+
+&lt;h2&gt;对性能进行测试&lt;/h2&gt;
+
+&lt;p&gt;《计算机程序设计艺术》和 TeX 的作者&lt;a href=&quot;https://zh.wikipedia.org/wiki/%E9%AB%98%E5%BE%B7%E7%BA%B3&quot;&gt;高德纳&lt;/a&gt;曾经在论文中说过：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;过早的优化是万恶之源。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;和很多人理解的不同，这并不是说我们不应该在项目的早期就开始进行优化，而是指我们需要弄清代码中性能真正的问题和希望达到的目标后再开始进行优化。因此，我们需要知道性能问题到底出在哪儿。对程序性能的测试一定是优化的第一步。&lt;/p&gt;
+
+&lt;p&gt;在 Cocoa 开发中，对于性能的测试有几种常见的方式。其中最简单是直接通过输出 log 来监测某一段程序运行所消耗的时间。在 Cocoa 中我们可以使用 &lt;a href=&quot;https://developer.apple.com/library/mac/documentation/Cocoa/Reference/CoreAnimation_functions/index.html#//apple_ref/c/func/CACurrentMediaTime&quot;&gt;&lt;code&gt;CACurrentMediaTime&lt;/code&gt;&lt;/a&gt; 来获取精确的时间。这个方法将会调用 mach 底层的 &lt;code&gt;mach_absolute_time()&lt;/code&gt;，它的返回是一个基于 &lt;a href=&quot;https://developer.apple.com/library/mac/qa/qa1398/_index.html&quot;&gt;Mach absolute time unit&lt;/a&gt; 的数字，我们通过在方法调用前后分别获取两次时刻，并计算它们的间隔，就可以了解方法的执行时间：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let start = CACurrentMediaTime()
+
+// ...
+
+let end = CACurrentMediaTime()
+
+print(&amp;quot;测量时间：\(end - start)&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;为了方便使用，我们还可以将这段代码封装到一个方法中，这样我们就能在项目中需要测试性能的地方方便地使用它了：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func measure(f: ()-&amp;gt;()) {
+    let start = CACurrentMediaTime()
+    f()
+    let end = CACurrentMediaTime()
+    print(&amp;quot;测量时间：\(end - start)&amp;quot;)
+}
+
+measure {
+    doSomeHeavyWork()
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;code&gt;CACurrentMediaTime&lt;/code&gt; 和 log 的方法适合于我们对既有代码进行探索，另一种有效的方法是使用 Instruments 的 Time Profiler 来在更高层面寻找代码的性能弱点。将程序挂载到 Time Profiler 后，每一个方法调用的耗时都将被记录。&lt;/p&gt;
+
+&lt;p&gt;当我们寻找到需要进行优化的代码路径后，为其建立一个单元测试来持续地检测代码的性能是很好的做法。在 Xcode 中默认的测试框架 XCTest 提供了检测并汇报性能的方法：&lt;code&gt;measureBlock&lt;/code&gt;。通过将测试的代码块放到 &lt;code&gt;measureBlock&lt;/code&gt; 中，Xcode 在测试时就会多次运行这段代码，并统计平均耗时。更方便的是，你可以设定一个基准，Xcode 会记录每次的耗时并在性能没有达到预期时进行提醒。这保证了随着项目开发，关键的代码路径不会发生性能上的退化。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func testPerformance() {
+    measureBlock() {
+        // 需要性能测试的代码
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/test-measure.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;h2&gt;优化手段，常见误用及对策&lt;/h2&gt;
+
+&lt;h3&gt;多线程、算法及数据结构优化&lt;/h3&gt;
+
+&lt;p&gt;在确定了需要进行性能改善的代码后，一个最根本的优化方式是在程序设计层面进行改良。在移动客户端，对于影响了 UI 流畅度的代码，我们可以将其放到后台线程进行运行。Grand Central Dispatch (GCD) 或者 &lt;code&gt;NSOperation&lt;/code&gt; 可以让我们方便地在不同线程中切换，而不太需要去担心线程调度的问题。一个使用 GCD 将繁重工作放到后台线程，然后在完成后回到主线程操作 UI 的典型例子是这样的：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
+    dispatch_async(queue) {
+
+        // 运行时间较长的代码，放到后台线程运行
+
+        dispatch_async(dispatch_get_main_queue()) {
+            // 结束后返回主线程操作 UI
+        }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;将工作放到其他线程虽然可以避免主线程阻塞，但它并不能减少这些代码实际的执行时间。进一步地，我们可以考虑改进算法和使用的数据结构来提高效率。根据实际项目中遇到的问题的不同，我们会有不同的解决方式，在这篇文章中，我们难以覆盖和深入去分析各种情况，所以这里我们只会提及一些共通的原则。&lt;/p&gt;
+
+&lt;p&gt;对于重复的工作，合理地利用缓存的方式可以极大提高效率，这是在优化时可以优先考虑的方式。Cocoa 开发中 &lt;code&gt;NSCache&lt;/code&gt; 是专门用来管理缓存的一个类，合理地使用和配置 &lt;code&gt;NSCache&lt;/code&gt; 把开发者中从管理缓存存储和失效的工作中解放出来。关于 &lt;code&gt;NSCache&lt;/code&gt; 的详细使用方法，可以参看 NSHipster 关于这方面的&lt;a href=&quot;http://nshipster.com/nscache/&quot;&gt;文章&lt;/a&gt;以及 Apple 的&lt;a href=&quot;https://developer.apple.com/library/ios/documentation/Cocoa/Reference/NSCache_Class/&quot;&gt;相关文档&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;在程序开发时，数据结构使用上的选择也是重要的一环。Swift 标准库提供了一些很基本的数据结构，比如 &lt;code&gt;Array&lt;/code&gt;、&lt;code&gt;Dictionary&lt;/code&gt; 和 &lt;code&gt;Set&lt;/code&gt; 等。这些数据结构都是配合泛型的，在保证数据类型安全的同时，一般来说也能为我们提供足够的性能。关于这些数据的容器类型方法所对应的复杂度，Apple 都在标准库的文档或者注释中进行了标记。如果标准库所提供的类型和方法无法满足性能上的要求，或者没有符合业务需求的数据结构的话，那么考虑使用自己实现的数据结构也是可选项。&lt;/p&gt;
+
+&lt;p&gt;如果项目中有很多数学计算方面的工作导致了效率问题的话，考虑并行计算能极大改善程序性能。iOS 和 OS X 都有针对数学或者图形计算等数字信号处理方面进行了专门优化的框架：&lt;a href=&quot;https://developer.apple.com/library/tvos/documentation/Accelerate/Reference/AccelerateFWRef/index.html&quot;&gt;Accelerate.framework&lt;/a&gt;，利用相关的 API，我们可以轻松快速地完成很多经典的数字或者图像处理问题。因为这个框架只提供一组 C API，所以在 Swift 中直接使用会有一定困难。如果你的项目中要处理的计算相对简单的话，也可以使用 &lt;a href=&quot;https://github.com/mattt/Surge&quot;&gt;Surge&lt;/a&gt;，它是一个基于 Accelerate 框架的 Swift 项目，让我们能在代码里从并行计算中获得难以置信的性能提升。&lt;/p&gt;
+
+&lt;h3&gt;编译器优化&lt;/h3&gt;
+
+&lt;p&gt;Swift 编译器十分智能，它能在编译期间帮助我们移除不需要的代码，或者将某些方法进行内联 (inline) 处理。编译器优化的强度可以在编译时通过参数进行控制，Xcode 工程默认情况下有 Debug 和 Release 两种编译配置，在 Debug 模式下，LLVM Code Generation 和 Swift Code Generation 都不开启优化，这能保证编译速度。而在 Release 模式下，LLVM 默认使用 &amp;quot;Fastest, Smallest [-Os]&amp;quot;，Swift Compiler 默认使用 &amp;quot;Fast [-O]&amp;quot;，作为优化级别。我们另外还有几个额外的优化级别可以选择，优化级别越高，编译器对于源码的改动幅度和开启的优化力度也就越大，同时编译期间消耗的时间也就越多。虽然绝大部分情况下没有问题，但是仍然需要当心的是，一些优化等级采用的是激进的优化策略，而禁用了一些检查。这可能在源码很复杂的情况下导致潜在的错误。如果你使用了很高的优化级别，请再三测试 Release 和 Debug 条件下程序运行的逻辑，以防止编译器优化所带来的问题。&lt;/p&gt;
+
+&lt;p&gt;值得一提的是，Swift 编译器有一个很有用的优化等级：&amp;quot;Fast, Whole Module Optimization&amp;quot;，也即 &lt;code&gt;-O -whole-module-optimization&lt;/code&gt;。在这个优化等级下，Swift 编译器将会同时考虑整个 module 中所有源码的情况，并将那些没有被继承和重载的类型和方法标记为 &lt;code&gt;final&lt;/code&gt;，这将尽可能地避免动态派发的调用，或者甚至将方法进行内联处理以加速运行。开启这个额外的优化将会大幅增加编译时间，所以应该只在应用要发布的时候打开这个选项。&lt;/p&gt;
+
+&lt;p&gt;虽然现在编译器在进行优化的时候已经足够智能了，但是在面对编写得非常复杂的情况时，很多本应实施的优化可能失效。因此保持代码的整洁、干净和简单，可以让编译器优化良好工作，以得到高效的机器码。&lt;/p&gt;
+
+&lt;h3&gt;尽量使用 Swift 类型&lt;/h3&gt;
+
+&lt;p&gt;为了和 Objective-C 协同工作，很多 Swift 标准库类型和对应的 Cocoa 类型是可以隐式的类型转换的，比如 &lt;code&gt;Swift.Array&lt;/code&gt; 与 &lt;code&gt;NSArray&lt;/code&gt;，&lt;code&gt;Swift.String&lt;/code&gt; 和 &lt;code&gt;NSString&lt;/code&gt; 等。虽然我们不需要在语言层面做类型转换，但是这个过程却不是免费的。在转换次数很多的时候，这往往会成为性能的瓶颈。一个常见的 Swift 和 Objective-C 混用的例子是 JSON 解析。考虑以下代码：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let jsonData: NSData = //...
+let jsonObject = try? NSJSONSerialization
+        .JSONObjectWithData(jsonData, options: []) as? [String: AnyObject]
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这是我们日常开发中很常见的代码，使用 &lt;code&gt;NSJSONSerialization&lt;/code&gt; 将数据转换为 JSON 对象后，我们得到的是一个 NSObject 对象。在 Swift 中使用时，我们一般会先将其转换为 &lt;code&gt;[String: AnyObject]&lt;/code&gt;，这个转换在一次性处理成千上万条 JSON 数据时会带来严重的性能退化。Swift 3 中我们可能可以基于 Swift 的 Foundation 框架来解决这个问题，但是现在，如果存在这样的情况，一种处理方式是避免使用 Swift 的字典类型，而使用 &lt;code&gt;NSDictionary&lt;/code&gt;。另外，适当地使用 lazy 加载的方法，也是避免一次性进行过多的类型转换的好思路。&lt;/p&gt;
+
+&lt;p&gt;尽可能避免混合地使用 Swift 类型和 &lt;code&gt;NSObject&lt;/code&gt; 子类，会对性能的提高有所帮助。&lt;/p&gt;
+
+&lt;h3&gt;避免无意义的 log，保持好的编码习惯&lt;/h3&gt;
+
+&lt;p&gt;在调试程序时，很多开发者喜欢用输出 log 的方式对代码的运行进行追踪，帮助理解。Swift 编译器并不会帮我们将 &lt;code&gt;print&lt;/code&gt; 或者 &lt;code&gt;debugPrint&lt;/code&gt; 删去，在最终 app 中它们会把内容输出到终端，造成性能的损失。我们当然可以在发布时用查找的方式将所有这些 log 输出语句删除或者注释掉，但是更好的方法是通过添加条件编译来将这些语句排除在 Release 版本外。在 Xcode 的 Build Setting 中，在 &lt;strong&gt;Other Swift flags&lt;/strong&gt; 的 Debug 栏中加入 &lt;code&gt;-D DEBUG&lt;/code&gt; 即可加入一个编译标识。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/debug-flag.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;之后我们就可以通过将 &lt;code&gt;print&lt;/code&gt; 或者 &lt;code&gt;debugPrint&lt;/code&gt; 包装一下：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func dPrint(item: Any) {
+    #if DEBUG
+    print(item)
+    #endif
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;这样，在 Release 版本中，&lt;code&gt;dPrint&lt;/code&gt; 将会是一个空方法，所有对这个方法的调用都会被编译器剔除掉。需要注意的是，在这种封装下，如果你传入的 &lt;code&gt;items&lt;/code&gt; 是一个表达式而不是直接的变量的话，这个表达式还是会被先执行求值的。如果这对性能也产生了可测的影响的话，我们最好用 &lt;code&gt;@autoclosure&lt;/code&gt; 修饰参数来重新包装 &lt;code&gt;print&lt;/code&gt;。这可以将求值运行推迟到方法内部，这样在 Release 时这个求值也会被一并去掉：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;func dPrint(@autoclosure item: () -&amp;gt; Any) {
+    #if DEBUG
+    print(item())
+    #endif
+}
+
+dPrint(resultFromHeavyWork())
+// Release 版本中 resultFromHeavyWork() 不会被执行
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h2&gt;小结&lt;/h2&gt;
+
+&lt;p&gt;Swift 还是一门很新的语言，并且处于高速发展中。因为现在 Swift 只用于 Cocoa 开发，因此它和 Cocoa 框架还有着千丝万缕的联系。很多时候由于这些原因，我们对于 Swift 性能的评估并不公正。这门语言本身设计就是以高性能为考量的，而随着 Swift 的开源和进一步的进化，以及配套框架的全面重写，相信在语言层面上我们能获得更好的性能和编译器的支持。&lt;/p&gt;
+
+&lt;p&gt;最好的优化就是不用优化。在软件开发中，保证书写正确简洁的代码，在项目开始阶段就注意可能存在的性能缺陷，将可扩展性的考虑纳入软件构建中，按照实际需求进行优化，不要陷入为了优化而优化的怪圈，这些往往都可以让我们避免额外的优化时间，让我们的工作得更加愉快。&lt;/p&gt;
+
+&lt;h3&gt;参考&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://llvm.org/devmtg/2015-10/slides/GroffLattner-SILHighLevelIR.pdf&quot;&gt;Swift Intermediate Language&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://nshipster.com/nscache/&quot;&gt;NSCache - NSHipster&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://developer.apple.com/library/ios/documentation/Cocoa/Reference/NSCache_Class/&quot;&gt;NSCache 文档&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/mattt/Surge&quot;&gt;Surge&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Thu, 25 Feb 2016 10:32:24 +0800</pubDate>
+        <link>http://onevcat.com/2016/02/swift-performance/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/02/swift-performance/</guid>
+        
+        <category>能工巧匠集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>如何打造一个让人愉快的框架</title>
+        <description>&lt;blockquote&gt;
+&lt;p&gt;这是我在今年 1 月 10 日 &lt;a href=&quot;http://atswift.io&quot;&gt;@Swift 开发者大会&lt;/a&gt; 上演讲的文字稿。相关的视频还在制作中，没有到现场的朋友可以通过这个文字稿了解到这个 session 的内容。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;script async class=&quot;speakerdeck-embed&quot; data-id=&quot;809c2dfa8e5f46cf98e92898079c943a&quot; data-ratio=&quot;1.33333333333333&quot; src=&quot;//speakerdeck.com/assets/embed.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;br\&gt;&lt;/p&gt;
+
+&lt;p&gt;虽然我的工作是程序员，但是最近半年其实我的主要干的事儿是养了一个小孩。
+所以这半年来可以说没有积累到什么技术，反而是积累了不少养小孩的心得。
+当知道了有这么次会议可以分享这半年来的心得的时候，我毫不犹豫地选定了主题。那就是&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;如何打造一个让人愉快的&lt;strong&gt;小孩&lt;/strong&gt;  &lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;但考虑到这是一次开发者会议...当我把这个想法和题目提交给大会的时候，被残酷地拒绝了。考虑到我们是一次开发者大会，所以我需要找一些更合适的主题。其实如果你对自己的代码有感情的话，我们开发和维护的项目或者框架就如同自己的孩子一般这也是我所能找到的两者的共同点。所以，我将原来拟定的主题换了两个字：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;如何打造一个让人愉快的&lt;strong&gt;框架&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;在正式开始前，我想先给大家分享一个故事。我们那儿的 iOS 开发小组里有一个叫做武田君的人，他的代码写得不错，做事也非常严谨，可以说是楷模般的员工。但是他有一个致命的弱点 -- 喜欢自己发明轮子。他出于本能地抗拒在代码中使用第三方框架，所以接到开发任务以后他一般都要花比其他小伙伴更多的时间才能完成。&lt;/p&gt;
+
+&lt;p&gt;武田君其实在各个方面都有建树...比如&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;网络请求&lt;/li&gt;
+&lt;li&gt;模型解析&lt;/li&gt;
+&lt;li&gt;导航效果&lt;/li&gt;
+&lt;li&gt;视图动画
+...&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;不过虽然造了很多轮子，但是代码的重用比较糟糕，耦合严重。在新项目中使用的话，只能复制粘贴，然后针对项目修修补补。因为承担的任务总是没有办法完成，他一直是项目deadline的决定者，在日本这种社会，压力可想而知。就在我这次回国之前，武田君来向我借了一本我本科时候最喜欢的书。就是这本：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2016/book-cover.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;我有时候就想，到底是什么让一个开发者面临如此大的精神压力，我们有什么办法来缓解这种压力。在我们有限的开发生涯中，应该如何有效利用时间来做一些更有价值的事情。&lt;/p&gt;
+
+&lt;p&gt;显然，我们不可能一天建成罗马，也不可能一个人建成罗马。我们需要一些方法把自己和别人写的代码组织起来，高效地利用，并以此为基础构建软件。这就涉及到使用和维护框架。如何利用框架迅速构建应用，以及在开发和发布一个框架的时候应该注意一些什么，这是我今天想讲的主题。当然，为了让大家安心和专注于今天的内容，而不是挂念武田君的命运，特此声明：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;以上故事纯属虚构，如有雷同实属巧合&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2&gt;使用框架&lt;/h2&gt;
+
+&lt;p&gt;在了解如何制作框架之前，先让我们看看如何使用框架。可以说，如果你想成为一个框架的提供者，首先你必须是一个优秀的使用者。&lt;/p&gt;
+
+&lt;p&gt;在 iOS 开发的早期，使用框架其实并不是一件让人愉悦的事情。可能有几年经验的开发者都有这样的体会，那就是：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;忘不了 那些年，被手动引用和 &lt;code&gt;.a&lt;/code&gt; 文件所支配的恐惧&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;其实恐惧源于未知，回想一下，当我们刚接触软件开发的时候，懵懵懂懂地引用了一个静态库，然后面对一排排编译器报错时候手足无措的绝望。但是当我们了解了静态库的话，我们就能克服这种恐惧了。&lt;/p&gt;
+
+&lt;h3&gt;什么是静态库 (Static Library)&lt;/h3&gt;
+
+&lt;p&gt;所谓静态库，或者说 .a 文件，就是一系列从源码编译的目标文件的集合。它是你的源码的实现所对应的二进制。配合上公共的 .h 文件，我们可以获取到 .a 中暴露的方法或者成员等。在最后编译 app 的时候.a 将被链接到最终的可执行文件中，之后每次都随着app的可执行二进制文件一同加载，你不能控制加载的方式和时机，所以称为静态库。&lt;/p&gt;
+
+&lt;p&gt;在 iOS 8 之前，iOS 只支持以静态库的方式来使用第三方的代码。&lt;/p&gt;
+
+&lt;h3&gt;什么是动态框架 (Dynamic Framework)&lt;/h3&gt;
+
+&lt;p&gt;与静态相对应的当然是动态。我们每天使用的 iOS 系统的框架是以 .framework 结尾的，它们就是动态框架。&lt;/p&gt;
+
+&lt;p&gt;Framework 其实是一个 bundle，或者说是一个特殊的文件夹。系统的 framework 是存在于系统内部，而不会打包进 app 中。app 的启动的时候会检查所需要的动态框架是否已经加载。像 UIKit 之类的常用系统框架一般已经在内存中，就不需要再次加载，这可以保证 app 启动速度。相比静态库，framework 是自包含的，你不需要关心头文件位置等，使用起来很方便。&lt;/p&gt;
+
+&lt;h3&gt;Universal Framework&lt;/h3&gt;
+
+&lt;p&gt;iOS 8 之前也有一些第三方库提供 .framework 文件，但是它们实质上都是静态库，只不过通过一些方法进行了包装，相比传统的 .a 要好用一些。像是原来的 Dropbox 和 Facebook 等都使用这种方法来提供 SDK。不过因为已经脱离时代，所以在此略过不说。有兴趣和需要的朋友可以参看一下&lt;a href=&quot;https://github.com/kstenerud/iOS-Universal-Framework&quot;&gt;这里&lt;/a&gt;和&lt;a href=&quot;https://github.com/jverkoey/iOS-Framework&quot;&gt;这里&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h3&gt;Library v.s. Framework&lt;/h3&gt;
+
+&lt;p&gt;对比静态库和动态框架，后者是有不少优势的。&lt;/p&gt;
+
+&lt;p&gt;首先，静态库不能包含像 xib 文件，图片这样的资源文件，其他开发者必须将它们复制到 app 的 main bundle 中才能使用，维护和更新非常困难；而 framework 则可以将资源文件包含在自己的 bundle 中。
+其次，静态库必须打包到二进制文件中，这在以前的 iOS 开发中不是很大的问题。但是随着 iOS 扩展（比如通知中心扩展或者 Action 扩展）开发的出现，你现在可能需要将同一个 .a 包含在 app 本体以及扩展的二进制文件中，这是不必要的重复。&lt;/p&gt;
+
+&lt;p&gt;最后，静态库只能随应用 binary 一起加载，而动态框架加载到内存后就不需要再次加载，二次启动速度加快。另外，使用时也可以控制加载时机。&lt;/p&gt;
+
+&lt;p&gt;动态框架有非常多的优点，但是遗憾的是以前 Apple 不允许第三方框架使用动态方式，而只有系统框架可以通过动态方式加载。&lt;/p&gt;
+
+&lt;p&gt;很多时候我们都想问，Apple，凭什么？&lt;/p&gt;
+
+&lt;p&gt;好吧，这种事也不是一次两次了...不过好消息是：。&lt;/p&gt;
+
+&lt;h3&gt;Cocoa Touch Framework&lt;/h3&gt;
+
+&lt;p&gt;Apple 从 iOS 8 开始允许开发者有条件地创建和使用动态框架，这种框架叫做 Cocoa Touch Framework。&lt;/p&gt;
+
+&lt;p&gt;虽然同样是动态框架，但是和系统 framework 不同，app 中的使用的 Cocoa Touch Framework 在打包和提交 app 时会被放到 app bundle 中，运行在沙盒里，而不是系统中。也就是说，不同的 app 就算使用了同样的 framework，但还是会有多份的框架被分别签名，打包和加载。&lt;/p&gt;
+
+&lt;p&gt;Cocoa Touch Framework 的推出主要是为了解决两个问题：首先是应对刚才提到的从 iOS 8 开始的扩展开发。其次是因为 Swift，在 Swift 开源之前，它是不支持编译为静态库的。虽然在开源后有编译为静态库的可能性，但是因为 Binary Interface 未确定，现在也还无法实用。这些问题会在 Swift 3 中将被解决，但这至少要等到今年下半年了。&lt;/p&gt;
+
+&lt;p&gt;现在，Swift runtime 不在系统中，而是打包在各个 app 里的。所以如果要使用 Swift 静态框架，由于 ABI 不兼容，所以我们将不得不在静态包中再包含一次 runtime，可能导致同一个 app 包中包括多个版本的运行时，暂时是不可取的。&lt;/p&gt;
+
+&lt;h3&gt;包和依赖管理&lt;/h3&gt;
+
+&lt;p&gt;在使用框架的时候，用一些包管理和依赖管理工具可以简化使用流程。其中现在使用最广泛的应该是 [CocoaPods](&lt;a href=&quot;http://cocoapods.org%5D(http://cocoapods.org)%E3%80%82&quot;&gt;http://cocoapods.org](http://cocoapods.org)。&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;CocoaPods 是一个已经有五年历史的 ruby 程序，可以帮助获取和管理依赖框架。&lt;/p&gt;
+
+&lt;p&gt;CocoaPods 的主要原理是框架的提供者通过编写合适的 PodSpec 文件来提供框架的基本信息，包括仓库地址，需要编译的文件，依赖等
+用户使用 Podfile 文件指定想要使用的框架，CocoaPods 会创建一个新的工程来管理这些框架和它们的依赖，并把所有这些框架编译到成一个静态的 libPod.a。然后新建一个 workspace 包含你原来的项目和这个新的框架项目，最后在原来的项目中使用这个 libPods.a&lt;/p&gt;
+
+&lt;p&gt;这是一种“侵入式”的集成方式，它会修改你的项目配置和结构。&lt;/p&gt;
+
+&lt;p&gt;本来 CocoaPods 已经准备在前年发布 1.0 版本，但是 Swift 和动态框架的横空出世打乱了这个计划。因为必须提供对这两者的支持。不过最近 1.0.0 的 beta 已经公布，相信这个历时五年的项目将在最近很快迎来正式发布。&lt;/p&gt;
+
+&lt;p&gt;从 0.36.0 开始，可以通过在 Podfile 中添加 &lt;code&gt;use_frameworks!&lt;/code&gt; 来编译 CocoaTouch Framework，也就是动态框架。&lt;/p&gt;
+
+&lt;p&gt;因为现在 Swift 的代码只能被编译为动态框架，所以如果你使用的依赖中包含 Swift 代码，又想使用 CocoaPods 来管理的话，必须选择开启这个选项。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;use_frameworks!&lt;/code&gt; 会把项目的依赖全部改为 framework。也就是说这是一个 none or all 的更改。你无法指定某几个框架编译为动态，某几个编译为静态。我们可以这么理解：假设 Pod A 是动态框架，Pod B 是静态，Pod A 依赖 Pod B。要是 app 也依赖 Pod B：那么要么 Pod A 在 link 的时候找不到 Pod B 的符号，要么 A 和 app 都包含 B，都是无解的情况。&lt;/p&gt;
+
+&lt;p&gt;使用 CocoaPods 很简单，用 Podfile 来描述你需要使用和依赖哪些框架，然后执行 pod install 就可以了。下面是一个典型的 Podfile 的结构。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;# Podfile
+platform :ios, &amp;#39;8.0&amp;#39;
+use_frameworks!
+
+target &amp;#39;MyApp&amp;#39; do
+  pod &amp;#39;AFNetworking&amp;#39;, &amp;#39;~&amp;gt; 2.6&amp;#39;
+  pod &amp;#39;ORStackView&amp;#39;, &amp;#39;~&amp;gt; 3.0&amp;#39;
+  pod &amp;#39;SwiftyJSON&amp;#39;, &amp;#39;~&amp;gt; 2.3&amp;#39;
+end
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;$ pod install
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/Carthage/Carthage&quot;&gt;Carthage&lt;/a&gt; 是另外的一个选择，它是在 Cocoa Touch Framework 和 Swift 发布后出现的专门针对 Framework 进行的包管理工具。&lt;/p&gt;
+
+&lt;p&gt;Carthage 相比 CocoaPods，采用的是完全不同的一条道路。Carthage 只支持动态框架，它仅负责将项目 clone 到本地并将对应的 Cocoa Framework target 进行构建。之后你需要自行将构建好的 framework 添加到项目中。和 CocoaPods 需要提交和维护框架信息不同，Carthage 是去中心化的
+它直接从 git 仓库获取项目，而不需要依靠 podspec 类似的文件来管理。&lt;/p&gt;
+
+&lt;p&gt;使用上来说，Carthage 和 CocoaPods 类似之处在于也通过一个文件 &lt;code&gt;Cartfile&lt;/code&gt; 来指定依赖关系。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;# Cartfile
+github &amp;quot;ReactiveCocoa/ReactiveCocoa&amp;quot;
+github &amp;quot;onevcat/Kingfisher&amp;quot; ~&amp;gt; 1.8
+github &amp;quot;https://enterprise.local/hello/repo.git&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;$ carthage update
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在使用 Framework 的时候，我们需要将用到的框架 Embedded Binary 的方式链接到希望的 App target 中。&lt;/p&gt;
+
+&lt;p&gt;随着上个月 Swift 开源，有了新的可能的选项，那就是 &lt;a href=&quot;https://swift.org/package-manager/&quot;&gt;Swift Package Manager&lt;/a&gt;。这可能是未来的包管理方式，但是现在暂时不支持 iOS 和 tvOS （也就是说 UIKit 并不支持）。&lt;/p&gt;
+
+&lt;p&gt;Package Manager 实际上做的事情和 Carthage 相似，不过是通过 &lt;code&gt;llbuild&lt;/code&gt; （low level build system）的跨平台编译工具将 Swift 编译为 .a 静态库。&lt;/p&gt;
+
+&lt;p&gt;这个项目很新，从去年 11 月才开始。不过因为是 Apple 官方支持，所以今后很可能会集成到 Xcode 工具链中，成为项目的标配，非常值得期待。但是现在暂时还无法用于应用开发。&lt;/p&gt;
+
+&lt;h2&gt;创建框架&lt;/h2&gt;
+
+&lt;p&gt;作为框架的用户你可能知道这些就能够很好地使用各个框架了。但是如果你想要创建一个框架的话，还远远不够。接下来我们说一说如何创建一个框架。&lt;/p&gt;
+
+&lt;p&gt;Xcode 为我们准备了 framework target 的模板，直接创建这个 target，就可以开始编写框架了。&lt;/p&gt;
+
+&lt;p&gt;添加源文件，编写代码，编译，完成，就是这么简单。&lt;/p&gt;
+
+&lt;p&gt;app 开发所得到产品直接面向最终用户；而框架开发得到的是一个中间产品，它面向的是其他开发者。对于一款 app，我们更注重使用各种手段来保证用户体验，最终目的是解决用户使用的问题。而框架的侧重点与 app 稍有不同，像是集成上的便利程度，使用上是否方便，升级的兼容等都需要考虑。虽然框架的开发和 app 的开发有不少不同，但是也有不少共通的规则和需要遵循的思维方式。&lt;/p&gt;
+
+&lt;h3&gt;API 设计&lt;/h3&gt;
+
+&lt;h4&gt;最小化原则&lt;/h4&gt;
+
+&lt;p&gt;基于框架开发的特点，相较于 app 开发，需要更着重地考虑 API 的设计。你标记为 public 的内容将是框架使用者能看到的内容。提供什么样的 API 在很大程度上决定了其他的开发者会如何使用你的框架。&lt;/p&gt;
+
+&lt;p&gt;在 API 设计的时候，从原则上来说，我们一开始可以提供尽可能少的接口来完成必要的任务，这有助于在框架初期控制框架的复杂程度。
+之后随着逐步的开发和框架使用场景的扩展，我们可以添加公共接口或者将原来的 internal 或者 private 接口标记为 public 供外界使用。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Do this
+public func mustMethod() { ... }
+func onlyUsedInFramework() { ... }
+private func onlyUsedInFile() { ... }
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Don&amp;#39;t do this
+public func mustMethod() { ... }
+public func onlyUsedInFramework() { ... }
+public func onlyUsedInFile() { ... }
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;命名考虑&lt;/h4&gt;
+
+&lt;p&gt;在决定了 public 接口以后，我们很快就会迎来编程界的最难的问题之一，命名。&lt;/p&gt;
+
+&lt;p&gt;在 Objective-C 时代 Cocoa 开发的类型或者方法名称就以一个长字著称，Swift 时代保留了这个光荣传统。Swift 程序的命名应该尽量表意清晰，不用奇怪的缩写。在 Cocoa 的世界里，精确比简短更有吸引力。&lt;/p&gt;
+
+&lt;p&gt;几个例子，相比于简单的 &lt;code&gt;remove&lt;/code&gt;，&lt;code&gt;removeAt&lt;/code&gt; 更能表达出从一个集合类型中移除元素的方式。而 &lt;code&gt;remove&lt;/code&gt; 可能导致误解，是移除特定的 int 还是从某个 index 移除？&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Do this
+public mutating func removeAt(position: Index) -&amp;gt; Element
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Don&amp;#39;t do this
+public mutating func remove(i: Int) -&amp;gt; Element            
+// &amp;lt;- index or element?
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;同样，&lt;code&gt;recursivelyFetch&lt;/code&gt; 表达了递归地获取，而 &lt;code&gt;fetch&lt;/code&gt; 很可能被理解为仅获取当前输入。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Do this
+public func recursivelyFetch(urls: [(String, Range&amp;lt;Version&amp;gt;)]) throws -&amp;gt; [T]
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Don&amp;#39;t do this
+public func fetch(urls: [(String, Range&amp;lt;Version&amp;gt;)]) throws -&amp;gt; [T] // &amp;lt;- how?
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;另外需要注意方法名应该是动词或者动词短语开头，而属性名应该是名词。当遇到冲突时，（比如这里的 displayName，既可以是名字也可以是动词）应该特别注意属性和方法的上下文造成的理解不同。更好的方式是避免名动皆可的词语，比如把 displayName 换为 screenName，就不会产生歧义了。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;public var displayName: String
+public var screenName: String // &amp;lt;- Better
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Don&amp;#39;t do this
+public func displayName() -&amp;gt; String 
+// &amp;lt;- noun or verb? Why returning `String`?
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在命名 API 时一个有用的诀窍是为你的 API 写文档。如果你用一句话无法将一个方法的内容表述清楚的话，这往往就意味着 API 的名字有改进的余地。好的 API 设计可以让有经验的开发者猜得八九不离十，看文档更多地只是为了确认细节。一个 API 如果能做到不需要看文档就能被使用，那么它肯定是成功的。&lt;/p&gt;
+
+&lt;p&gt;关于 API 的命名，Apple 官方给出了一个很详细的&lt;a href=&quot;https://swift.org/documentation/api-design-guidelines/&quot;&gt;指南&lt;/a&gt; (Swift API Design Guidelines)，相信每个开发者的必读内容。遵守这个准则，和其他开发者一道，用约定俗称的方式来进行编程和交流，这对提高框架质量非常，非常，非常重要（重要的事情要说三遍，如果你在我的演讲中只能记住一页的话，我希望是这一页。如果你还没有看过这个指南，建议去看一看，只需要花十分钟时间。）&lt;/p&gt;
+
+&lt;h4&gt;优先测试，测试驱动开发&lt;/h4&gt;
+
+&lt;p&gt;你应该是你自己写的框架的第一个用户，最简单的使用你自己的框架的方式就是编写测试。据我所知，在 app 开发中，很多时候单元测试被忽视了。但是在框架开发中，这是很重要的一个环节。可能没有人会敢使用没有测试的框架。除了保证功能正确以外，通过测试，你可以发现框架中设计不合理的地方，并在第一时间进行改善。&lt;/p&gt;
+
+&lt;p&gt;为框架编写测试的方式和为 app 测试类似，
+Swift 2 开始可以使用 @testable 来把框架引入到测试 module。这样的话可以调用 internal 方法。&lt;/p&gt;
+
+&lt;p&gt;不过对于框架来说，理论上只测试 public 就够了。但是我个人推荐使用 testable，来对一些重要的 internal 的方法也进行测试。这可以提高开发和交付时的信心。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// In Test Target
+import XCTest
+@testable import YourFramework
+class FrameworkTypeTests: XCTestCase {
+   // ...
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;hr&gt;
+
+&lt;h3&gt;开发时的选择&lt;/h3&gt;
+
+&lt;h4&gt;命名冲突&lt;/h4&gt;
+
+&lt;p&gt;在 Objective-C 中的 static library 里一个常见问题是同样的符号在链接时会导致冲突。&lt;/p&gt;
+
+&lt;p&gt;Swift 中我们可以通过 module 来提供类似命名空间隔离，从而避免符号冲突。但是在对系统已有的类添加 extension 的时候还是需要特别注意命名的问题。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;   // F1.framework
+   extension UIImage {
+       public method() { print(&amp;quot;F1&amp;quot;) }
+   }
+
+   // F2.framework
+   extension UIImage {
+       public method() { print(&amp;quot;F2&amp;quot;) }
+   }
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;比如在框架 F1 和 F2 中我们都对 UIImage 定义了 method 方法，分别就输出自己来自哪个框架。&lt;/p&gt;
+
+&lt;p&gt;如果我们需要在同一个文件里的话引入的话：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// app
+import F1
+import F2
+UIImage().method()
+// Ambiguous use of &amp;#39;method()&amp;#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;在 app 中的一个文件里同时 import F1 和 F2，就会产生编译错误，因为 F1 和 F2 都为同一个类型 UIImage 定义了 method，编译器无法确定使用哪个方法。&lt;/p&gt;
+
+&lt;p&gt;当然因为有 import 控制，在使用的时候注意一下源文件的划分，避免同时 import F1 和 F2，似乎就能解决这个问题。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// app
+import F1
+UIImage().method()
+// 输出 F2 （结果不确定）
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;确实，只 import F1 的话，编译错误没有了，但是运行的时候有可能看到虽然 import 的是 F1，但是实际上调用到的是 F2 中的方法。&lt;/p&gt;
+
+&lt;p&gt;这是因为虽然有命名空间隔离，但 NSObject 的 extension 实际上还是依赖于 Objective-C runtime 的，这两个框架都在 app 启动时候被加载，运行时究竟调用了哪个方法是和加载顺序相关的，并不确定。&lt;/p&gt;
+
+&lt;p&gt;这种问题可以实际遇到的话，会非常难调试。&lt;/p&gt;
+
+&lt;p&gt;所以我们开发框架时的选择，对于已存在类型的 &lt;code&gt;extension&lt;/code&gt;，&lt;strong&gt;必须添加前缀&lt;/strong&gt;，
+这和以前我们写 Objective-C 的 Category 的时候的原则是一样的。&lt;/p&gt;
+
+&lt;p&gt;上面的例子里，在开发的时候，不应该写这样的代码，而应该加上合适的前缀，以减少冲突的可能性。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Do this
+// F1.framework
+extension UIImage {
+  public f1_method() { print(&amp;quot;F1&amp;quot;) }
+}
+
+// F2.framework
+extension UIImage {
+  public f2_method() { print(&amp;quot;F2&amp;quot;) }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;资源 bundle&lt;/h4&gt;
+
+&lt;p&gt;刚才提到过，framework 的一大优势是可以在自己的 bundle 中包含资源文件。在使用时，不需要关心框架的用户的环境，直接访问自己的类型的 bundle 就可以获取框架内的资源。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;let bundle =
+    NSBundle(forClass: ClassInFramework.self)
+let path =
+    bundle.pathForResource(&amp;quot;resource&amp;quot;, ofType: &amp;quot;png&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h2&gt;发布框架&lt;/h2&gt;
+
+&lt;p&gt;最后说说发布和维护一个框架。辛苦制作的框架的最终目的其实就是让别人使用，一个没有人用的框架可以说是没有价值的。&lt;/p&gt;
+
+&lt;p&gt;如果你想让更多的人知道你的框架，那抛开各种爱国感情和个人喜好，可以说 iOS 或者 Swift 开发者的发布目的地只有一个，那就是 GitHub。&lt;/p&gt;
+
+&lt;p&gt;当然在像是开源中国或者 CSDN 这样的代码托管服务上发布也是很好的选择，但是不可否认的现状是只有在 GitHub 上你才能很方便地和全世界其他地方的开发者分享和交流你的代码。&lt;/p&gt;
+
+&lt;h3&gt;选择依赖工具&lt;/h3&gt;
+
+&lt;p&gt;关于发布，另外一个重要的问题，一般你需要选择支持一个或多个依赖管理工具。&lt;/p&gt;
+
+&lt;h4&gt;CocoaPods&lt;/h4&gt;
+
+&lt;p&gt;刚才也提到，CocoaPods 用 podspec 文件来描述项目信息，使用 CocoaPods 提供的命令行工具
+可以创建一个 podspec 模板，我们要做的就是按照项目的情况编辑这个文件。
+比如这里列出了一个podspec的基本结构，可以看到包含了很多项目信息。关于更详细的用法，可以参看 CocoaPods 的&lt;a href=&quot;https://guides.cocoapods.org/making/getting-setup-with-trunk.html&quot;&gt;文档&lt;/a&gt;。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;pod spec create MyFramework
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;Pod::Spec.new do |s|
+  s.name         = &amp;quot;MyFramework&amp;quot;
+  s.version      = &amp;quot;1.0.2&amp;quot;
+  s.summary      = &amp;quot;My first framework&amp;quot;
+  s.description  = &amp;lt;&amp;lt;-DESC
+                    It&amp;#39;s my first framework.
+                   DESC
+  s.ios.deployment_target = &amp;quot;8.0&amp;quot;
+  s.source       = { :git =&amp;gt; &amp;quot;https://github.com/onevcat/myframework.git&amp;quot;, 
+                     :tag =&amp;gt; s.version }
+
+  s.source_files  = &amp;quot;Class/*.{h,swift}&amp;quot;
+  s.public_header_files = [&amp;quot;MyFramework/MyFramework.h&amp;quot;]
+end
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;提交到 CocoaPods 也很简单，使用它们的命令行工具来检查 podspec 语法和项目是否正常编译，最后推送 podspec 到 CocoaPods 的主仓库就可以了。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;# 打 tag
+git tag 1.0.2 &amp;amp;&amp;amp; git push origin --tags
+
+# podspec 文法检查
+pod spec lint MyFramework.podspec
+
+# 提交到 CocoaPods 中心仓库
+pod trunk push MyFramework.podspec
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;Carthage&lt;/h4&gt;
+
+&lt;p&gt;另一个应该考虑尽量支持的是 Carthage，因为它的用户数量也不可小觑。
+支持 Carthage 比 CocoaPods 要简单很多，你需要做的只是保证你的框架 target 能正确编译，然后在 Manage Scheme 里把这个 target 标记为 Shared 就行了。&lt;/p&gt;
+
+&lt;h4&gt;Swift Package Manager&lt;/h4&gt;
+
+&lt;p&gt;Swift Package Manager 暂时还不能用于 iOS 项目的依赖管理，但是对于那些并不依赖 iOS 平台的框架来说，现在就可以开始支持 Swift Package Manager 了。&lt;/p&gt;
+
+&lt;p&gt;Swift Package Manager 按照文件夹组织来确定模块，你需要把你的代码放到项目根目录下的 Sources 文件夹里。&lt;/p&gt;
+
+&lt;p&gt;然后在根目录下创建 Package.swift 文件来定义 package 信息。这就是一个普通的 swift 源码文件，你需要做的是在里面定义一个 package 成员，为它指定名字和依赖关系等等。Package Manager 命令将根据这个文件和文件夹的层次来构建你的框架。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;// Package.swift
+import PackageDescription  
+let package = Package(
+    name: &amp;quot;MyKit&amp;quot;,
+    dependencies: [
+        .Package(url: &amp;quot;https://github.com/onevcat/anotherPacakge.git&amp;quot;,
+                 majorVersion: 1)
+    ]
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h3&gt;版本管理&lt;/h3&gt;
+
+&lt;p&gt;在发布时另外一个需要特别注意的是版本。在 Podfile 或者 Cartfile 中指定依赖版本的时候我们可以看到类似这样的小飘箭头的符号，这代表版本兼容。比如兼容 2.6.1 表示高于 2.6.1 的 2.6.x 版本都可以使用，而 2.7 或以上不行；同理，如果兼容 2.6 的话，2.6，2.7，2.8 等等这些版本都是兼容的，而 3.0 不行。当然也可以使用 &amp;gt;= 或者是 = 这些符号。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;# Podfile
+pod &amp;#39;AFNetworking&amp;#39;, &amp;#39;~&amp;gt; 2.6.1&amp;#39;
+# 2.6.x 兼容 (2.6.1, 2.6.2, 2.6.9 等，不包含 2.7)
+
+# Podfile
+pod &amp;#39;AFNetworking&amp;#39;, &amp;#39;~&amp;gt; 2.6&amp;#39;
+# 2.x 兼容 (2.6.1, 2.7, 2.8 等，不包含 3.0)
+
+# Cartfile
+github &amp;quot;Mantle/Mantle&amp;quot; &amp;gt;= 1.1
+# 大于等于 1.1 (1.1，1.1.4, 1.3, 2.1 等)
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h4&gt;Semantic Versioning 和版本兼容&lt;/h4&gt;
+
+&lt;p&gt;那什么叫版本兼容呢？我们看到的这套版本管理的方法叫做 &lt;a href=&quot;http://semver.org&quot;&gt;Semantic Versioning&lt;/a&gt;。它一般通过三个数字来定义版本。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;x(major).y(minor).z(patch)&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+&lt;li&gt;major - 公共 API 改动或者删减&lt;/li&gt;
+&lt;li&gt;minor - 新添加了公共 API&lt;/li&gt;
+&lt;li&gt;patch - bug 修正等&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;0.x.y&lt;/code&gt; 只遵守最后一条&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;major 的更改表示用户必须修改自己的代码才能继续使用框架；minor 表示框架添加了新的 API，但是现有用户不需要修改代码可以保持原有行为不变；而 patch 则代表 API 没有改变，仅只是内部修正。&lt;/p&gt;
+
+&lt;p&gt;在这个约定下，同样的 major 版本号就意味着用户不需要修改现有代码就能继续使用这个框架，所以这是使用最广的一个依赖方式，在这个兼容保证下，用户可以自由升级 minor 版本号。&lt;/p&gt;
+
+&lt;p&gt;但是有一个例外，那就是还没有正式到达 1.0.0 版本号的框架。
+这种框架代表还在早期开发，没有正式发布，API 还在调整中，开发者只需要遵守 patch 的规则，也就是说 0.1.1 和 0.1.2 只有小的修正。但是 0.2 和 0.1 是可以完全不兼容。如果你正在使用一个未正式发布的框架的时候，需要小心这一点。&lt;/p&gt;
+
+&lt;p&gt;框架的版本应该和 git 的 tag 对应，这可以和大多数版本管理工具兼容
+一般来说用户会默认你的框架时遵循 Semantic Versioning 和兼容规则。&lt;/p&gt;
+
+&lt;p&gt;我们在设置版本的时候可能会注意到 Info.plist 中的 Version 和 Build 这两个值。虽然 CocoaPods 或者 Carthage 这样的包管理系统并不是使用 Info.plist 里的内容来确定依赖关系，但是我们最好还是保持这里的版本号和 git tag 的一致性。&lt;/p&gt;
+
+&lt;p&gt;当我们编译框架项目的时候，会在头文件或者 module map 里看到这样的定义。
+框架的用户想要在运行时知道所使用的框架的版本号的话，使用这些属性会十分方便。这在做框架版本迁移的时候可能会有用。所以作为开发者，也应该维护这两个值来帮助我们确定框架版本。&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;// MyFramework.h
+//! Project version string for MyFramework.
+FOUNDATION_EXPORT const unsigned char MyFrameworkVersionString[]; // 1.8.3
+//! Project version number for MyFramework.
+FOUNDATION_EXPORT double MyFrameworkVersionNumber; // 347
+
+// Exported module map
+//! Project version number for MyFramework.
+public var MyFrameworkVersionNumber: Double
+// 并没有导出 MyFrameworkVersionString
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h3&gt;持续集成&lt;/h3&gt;
+
+&lt;p&gt;在框架开发中，一个优秀的持续集成环境是至关重要的。CI 可以保证潜在的贡献者在有保障的情况下对代码进行修改，减小了框架的维护压力。大部分 CI 环境对于开源项目都是免费的，得益于此，我们可以利用这个星球上最优秀的 CI 来确保我们的代码正常工作。&lt;/p&gt;
+
+&lt;p&gt;就 iOS 或者 OSX 开发来说，Travis CI, CircleCI, Coveralls，Codecov 等都是很好的选择。&lt;/p&gt;
+
+&lt;p&gt;开发总是有趣的，但是发布一般都很无聊。因为发布流程每次都一样，非常机械。无非就是跑测试，打 tag，上传代码，写 release log，更新 podspec 等等。虽然简单，但是费时费力，容易出错。对于这种情景，自动化流程显然是最好的选择。而相比于自己写发布脚本，在 Cocoa 社区我们有更好的工具，那就是 &lt;a href=&quot;https://fastlane.tools&quot;&gt;fastlane&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;fastlane 是一系列 Cocoa 开发的工具的集合，包括跑测试，打包 app，自动截图，管理 iTunes Connect 等等。&lt;/p&gt;
+
+&lt;p&gt;不单单是 app 开发，在框架开发中，我们也可以利用到 fastlane 里很多很方便的命令。&lt;/p&gt;
+
+&lt;p&gt;使用 fastlane 做持续发布很简单，建立自己的合适的 Fastfile 文件，然后把你想做什么写进去就好了。比如这里是一个简单的 Fastfile 的例子：&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;# Fastfile
+desc &amp;quot;Release new version&amp;quot;
+lane :release do |options|
+  target_version = options[:version]
+  raise &amp;quot;The version is missed.&amp;quot; if target_version.nil?
+  ensure_git_branch                                             # 确认 master 分支
+  ensure_git_status_clean                                       # 确认没有未提交的文件
+  scan                                                          # 运行测试
+
+  sync_build_number_to_git                                      # 将 build 号设为 git commit 数
+  increment_version_number(version_number: target_version)      # 设置版本号
+
+  version_bump_podspec(path: &amp;quot;Kingfisher.podspec&amp;quot;,
+             version_number: target_version)                    # 更新 podspec
+  git_commit_all(message: &amp;quot;Bump version to #{target_version}&amp;quot;)  # 提交版本号修改
+  add_git_tag tag: target_version                               # 设置 tag
+  push_to_git_remote                                            # 推送到 git 仓库
+  pod_push                                                      # 提交到 CocoaPods
+end
+
+$ fastlane release version:1.8.4
+&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;AFNetworking 在 3.0 版本开始加入了 fastlane 做自动集成和发布，可以说把开源项目的 CI 做到了极致。在这里强烈推荐大家有空可以看一看&lt;a href=&quot;https://github.com/AFNetworking/fastlane&quot;&gt;这个项目&lt;/a&gt;，除了使用 fastlane 简化流程以外，这个项目里还介绍了一些发布框架时的最佳实践。&lt;/p&gt;
+
+&lt;p&gt;我们能不能创造出像 AFNetworking 这样优秀的框架呢？一个优秀的框架包含哪些要求？&lt;/p&gt;
+
+&lt;h3&gt;创建一个优秀的框架&lt;/h3&gt;
+
+&lt;p&gt;一个优秀的框架必定包含这些特性：详尽的文档说明，可以指导后来开发者或者协作者迅速上手的注释，&lt;/p&gt;
+
+&lt;p&gt;完善的测试保证功能正确以及不发生退化，简短易读可维护的代码，可以让使用者了解版本变化的更新日志，对于issue的解答等等。&lt;/p&gt;
+
+&lt;p&gt;我们知道在科技界或者说 IT 界会有很多喜欢跑分的朋友。其实跑分这个事情可以辩证来看，它有其有意义的一面。跑分高的不一定优秀，但是优秀的跑分一般一定都会高。&lt;/p&gt;
+
+&lt;p&gt;不止在硬件类的产品，其实在框架开发中我们其实也可以做类似的跑分来检验我们的框架质量如何。&lt;/p&gt;
+
+&lt;p&gt;那就是 &lt;a href=&quot;https://cocoapods.org/pods/Kingfisher/quality&quot;&gt;CocoaPods Quality&lt;/a&gt;，它是一个给开源框架打分的索引类的项目，会按照项目的受欢迎程度和完整度，并基于我们上面说的这些标准来对项目质量进行评判。&lt;/p&gt;
+
+&lt;p&gt;对于框架使用者来说，这可以成为一个选择框架时的&lt;a href=&quot;https://guides.cocoapods.org/making/quality-indexes&quot;&gt;重要参考&lt;/a&gt;，分数越高基本可以确定可能遇到的坑会越少。&lt;/p&gt;
+
+&lt;p&gt;而对于框架的开发者来说，努力提高这个分数的同时，代码和框架质量肯定也得到了提高，这是一个自我完善的良好途径。在遇到功能类似的框架，我们也可以说“不服？跑个分”&lt;/p&gt;
+
+&lt;h3&gt;可能的问题&lt;/h3&gt;
+
+&lt;p&gt;最后想和大家探讨一下在框架开发中几个比较常见和需要特别注意的问题。&lt;/p&gt;
+
+&lt;p&gt;首先是兼容性的保证这里的兼容性不是 API 的兼容性，而是逻辑上的兼容性。
+最可能出现问题的地方就是在不同版本中对数据持久化部分的处理是否兼容，
+包括数据库和Key-archiving。比如在新版本中添加了一个属性，如何从老版本中进行迁移如果处理不当，很可能就造成严重错误甚至 crash。&lt;/p&gt;
+
+&lt;p&gt;另一个问题是重复的依赖。Swift 运行时还没有包含在设备中，如果对于框架，将 &lt;code&gt;EMBEDDED_CONTENT_CONTAINS_SWIFT&lt;/code&gt; 设为 &lt;code&gt;YES&lt;/code&gt; 的话，Swift 运行库将会被复制到框架中，这不是我们想见到的。在框架开发中这个 flag 一定是 NO，我们应该在 app 的 target 中进行设置。另外，可能你的框架会依赖其他框架，不要在项目中通过 copy file 把依赖的框架 copy 到框架 target 中，而是应该通过 Podfile 和 Cartfile 来解决依赖问题。&lt;/p&gt;
+
+&lt;p&gt;在决定框架依赖的时候，可能遇到的最大的问题就是不同框架的依赖可能&lt;a href=&quot;https://github.com/apple/swift-package-manager/blob/master/Documentation/DependencyHells.md&quot;&gt;无法兼容&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;比如说一个 app 同时依赖了框架 A 和框架 B，而这两个框架又都依赖另一个框架 C。如果 A 中指定了兼容 1.1.2 而 B 中指定的是精确的 1.6.1 的话，app 的依赖关系就无法兼容了。&lt;/p&gt;
+
+&lt;p&gt;在框架开发中，如果我们依赖了别的框架，就必须考虑和其他框架及应用的兼容。
+为了避免这种依赖无法满足的情况，我们最好尽量选择最宽松的依赖关系。&lt;/p&gt;
+
+&lt;p&gt;一般情况下我们没有必要限定依赖的版本，如果被依赖的框架遵守我们上面提到的版本管理的规则的话，我们并没有必要去选择固定某一个版本，而应该尽可能放宽依赖限制以避免无法兼容。&lt;/p&gt;
+
+&lt;p&gt;如果在使用框架中遇到这样的情况的话，去向依赖版本较旧的框架的维护者提 issue 或者发 pull request 会是好选择。&lt;/p&gt;
+
+&lt;p&gt;有一些开发者表示在转向使用 Framework 以后遇到首次应用加载速度变长的问题 (&lt;a href=&quot;https://github.com/artsy/eigen/issues/586&quot;&gt;参考 1&lt;/a&gt;，&lt;a href=&quot;rdar://22948371%5D(http://openradar.appspot.com/radar?id=4867644041723904)&quot;&gt;参考 2&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;社区讨论和探索结果表明可能是 Dynamic linker 在验证证书的时候的问题。
+这个时间和 app 中 dynamic framework 的数量为 n&lt;sup&gt;2&lt;/sup&gt; 时间复杂度。不过现在大家发现这可能是 Apple 在证书管理上的一个 bug，应该是只发生在开发阶段。可能现在比较安全的做法是控制使用的框架数量在合理范围之内，就我们公司的产品来说，并没有在生产环境遇到这个问题。如果你在 app 开发中遇到类似情况，这算是一个小提醒。&lt;/p&gt;
+
+&lt;p&gt;最后，因为现在 Swift 现在 Binary Interface 还没有稳定，不论是框架还是应用项目中所有的 Swift 代码都必须用同样版本的编译器进行编译。就是说，每当 Swift 版本升级，原来 build 过的 framework 需要重新构建否则无法通过编译。对框架开发者来说，保持使用最新 release 版本的编译器来发布框架就不会有大的问题。&lt;/p&gt;
+
+&lt;p&gt;在 Swift 3.0 以后语言的二进制接口将会稳定，届时 Swift 也将被集成到 iOS 系统中。也就是说到今年下半年的话这个问题就将不再存在。&lt;/p&gt;
+
+&lt;h2&gt;从今天开始开发框架&lt;/h2&gt;
+
+&lt;p&gt;做一个小的总结。现在这个时机对于中国的 Cocoa 开发者来说是非常好的时代，GitHub 中国用户很多，国内 iOS 开发圈子大家的分享精神和新东西的传播速度也非常快。可以说，我们中国开发者正在离这个世界的中心舞台越来越近，只要出现好东西的话，应该很快就能得到国内开发者的关注，继而登上 GitHub Trending 页面被世界所知。不要说五年，可能在两年之前，这都是难以想象的。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Write the code, change the world.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Swift 是随着这句口号诞生的，而现在开发者改变这个世界的力度可以说是前所未有的。&lt;/p&gt;
+
+&lt;p&gt;对于国内的开发者来说，我们真的应该希望少一些像 MingGeJS 这样的东西，而多一些能帮助这个世界的项目，以认真的态度多写一些有意义的代码，回馈开源社区，这于人于己都是一件好事。&lt;/p&gt;
+
+&lt;p&gt;希望中国的开发者能够在 Swift 这个新时代创造出更多世界级的框架，让这些框架能帮助全球的开发者一起构建更优秀的软件。&lt;/p&gt;
+</description>
+        <pubDate>Tue, 19 Jan 2016 14:32:24 +0800</pubDate>
+        <link>http://onevcat.com/2016/01/create-framework/</link>
+        <guid isPermaLink="true">http://onevcat.com/2016/01/create-framework/</guid>
+        
+        <category>能工巧匠集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>写在 2015 的尾巴</title>
+        <description>&lt;p&gt;上一次写类似年终总结的东西已经是大概快十年前的事情了，那时候还刚进大学，每天也就喜欢发一些无病呻吟的东西。回望之后，发现那些蹉跎掉的岁月确实无法再重新来过，不过也让我懂得了，幸好我们还能珍惜当下。&lt;/p&gt;
+
+&lt;p&gt;今年于我来说，注定是不平凡的一年。愈到年关，写作的冲动就愈发强烈，它驱使着我去记录下些什么，所以有了这篇写给自己的“阔别已久”的年终总结。&lt;/p&gt;
+
+&lt;h2&gt;无论何时，无论何地，平安就好&lt;/h2&gt;
+
+&lt;p&gt;前几天因为北京雾霾很凶，看到有人在说柴静的雾霾报告，自己之前没看过，所以就找来补了补课。《穹顶之下》确实是一部非常好的新闻调查片子，除了有关雾霾的数据和结论以外，里面有两句话让我印象深刻，一句是“我不是多怕死，我只是不想这么活”，另一句是“一切，平安就好”。&lt;/p&gt;
+
+&lt;p&gt;算下来我明年也会满三十岁，不出意外的话，看起来我是懵懵懂懂走掉了人生的一小半旅途（左思右想，在这里还是不要立什么 flag 了）。十年前，我想过要改变这个世界，但是那时候能力不足，只有空谈和做梦的时候能改变世界，可以说是天资愚钝，不得其所；十年后，遑论多少，我确实是在以自己的力量改变着世界，哪怕仅只有那么一点点。但是现在，已经没有了当年的豪言壮志、慷慨激昂。古人说三十而立，意思是人到三十，应当会有属于自己的不可替代的位置。其实这句话只说对了一半，说对了人对于社会的那一半。但我们还有着对家庭的一半，我们每个人从出生起就已经有自己不可替代的位置了，那就是在父母的眼中。小时候出门玩耍，父母会在阳台上高呼注意安全；长大了上学，父母会在机场叮嘱小心谨慎；现在虽然远游在外，已然好几年没有回家，但是科技的进步让我们随时可以“见面”，每次他们也不忘一句提醒。以前我不懂，觉得啰嗦，无趣，直到去年同学发生的一些意外，加上今年自己也初为人父，方知这一片用心良苦。人的生命实在太脆弱了，而恰恰正是这脆弱得随时可能熄灭的一点点烛光，却牵动了太多人的心绪。&lt;/p&gt;
+
+&lt;p&gt;平安，其实并不仅是运气或者上天的恩赐，而更多的是自我的争取。子曾经曰过：“笃信好学，守死善道。危邦不入，乱邦不居。”虽说原意更偏向仕途前景，但是这何尝不是一种生活的警醒。你可以不喜欢这其中略微消极和中庸的思想，但是避开已知和可能的危险，也正是为了更长久地“守死善道”。&lt;/p&gt;
+
+&lt;p&gt;所以，想对自己的父母，对自己爱的人和爱自己的人们，对看这篇文章的你，说一句，无论何时，无论何地，平安就好。&lt;/p&gt;
+
+&lt;h2&gt;好奇的目光始终是最美的&lt;/h2&gt;
+
+&lt;p&gt;今年最重要的事情当然是女儿满夏的出生。这半年来看着小朋友一天天长大，是一件让人非常开心的事情。她除了每天精力过剩不乖乖睡觉以外，给我的生活带来了很多很美好的时光。现在满夏正在学习如何很好地爬行，这会是她主动来进行探索的重要的一步。而在此之前，她已经学会了用触摸和撕咬的方式来了解这个对她来说还尚处陌生的美好世界。&lt;/p&gt;
+
+&lt;p&gt;真的想要感谢这个美好的世界。我们的父母在带大我们的时候，没有纸尿布，没有婴儿车，也没有如此多彩的玩具和针对婴儿的服务。但是二十多年来一切的变化，使得看护婴儿不再是一件艰难和特别劳心的事情。在满夏成长的每一天，我们都能一起开心度过，她在以她的节奏学习这个世界，而我也能从她的身上学到一些珍贵的品质 -- 对这个世界的好奇。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/manxia.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;无论是装机器人的纸盒，还是爬行垫的边角，再或者是 iPhone，只要是能塞进嘴里的东西，统统都被尝了个遍。因为这个世界对她来说整个都是新的，那些我们这些成年人已经习以为常的东西，在她的眼里都是最新鲜的存在。婴儿这种与生俱来的好奇其实我们每个人都有过，但是在活过三十年后，怎样的好奇才不会倦怠呢？我想大概没有。教主生前说过一句很有名的话，stay hungry stay foolish，而这句话有一个更美好的中文版本：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;求知若饥，虚心若愚&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;虽然这个翻译可以说&lt;a href=&quot;http://www.zhihu.com/question/19557797&quot;&gt;偏离原意很多&lt;/a&gt;，但是并不妨碍这句话表达出求知好奇的重要性。如果一个人对身边的事物不再敏感，不再想去探索，那么可以说这个人生命和精神实际上也就走到了尽头。无论何时，无论何地，都要保持不断的学习，这是这半年来我从满夏那里所学到的东西。&lt;/p&gt;
+
+&lt;p&gt;所以我会同她一起看小画书，一起尝试防滑垫的味道，一起把头磕在柜子的边边角角，当然，也一起观察天上的星星和月亮。陪她玩，陪她笑，陪她哭，陪她闹。我想，如果我和她能一起成长，那这就是我们给彼此最好的礼物。&lt;/p&gt;
+
+&lt;h2&gt;拥抱，敬畏，感恩，回馈&lt;/h2&gt;
+
+&lt;p&gt;今年在开源社区花了不少时间，1144 个开源提交，发布了几个还算有人用的框架，也参与了几个知名项目的开发。在公司里，完成了一个 SDK 的整合维护，作为主力开发参与两个完整项目，算是为今年的开发工作交上了一份满意的答卷。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/github-2015.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://objccn.io&quot;&gt;objc 中国&lt;/a&gt;的连载随着原刊的完结而结束，算是把一个跨越了两年的项目有始有终地做完了。这期间结识了很多国内 iOS 开发领域乐于分享的同行。他们在开发领域的专业和对翻译工作的尽心，让 objc 中国项目可以顺利地进行和完成。在这里有机会想统一地感谢这个项目的所有&lt;a href=&quot;https://github.com/objccn/articles/graphs/contributors&quot;&gt;贡献者&lt;/a&gt;，谢谢他们为中文 objc 社区的繁荣和发展做出的不懈努力。同时，也感谢无数开源项目给予我们的帮助和启迪。正如 objc 中国这个项目的初衷，我们爱这个世界，愿程序让这个世界变得更美好！&lt;/p&gt;
+
+&lt;p&gt;今年是我在 LINE 工作的第一个完整的一年，入职面试的时候就针对 Swift 聊了很多，在公司这一年来也一直在使用 Swift 进行开发，并帮助公司的其他开发者逐渐过渡到 Swift。到目前为止这个进程进行得很顺利，现在 LINE 的新设的 app 已经全面转向使用 Swift，iOS 团队的其他工程师们也十分喜欢并且倾向于使用这门新语言。加上 LINE 比较自由的工作时间和宽松的企业氛围，可以说虽然比起国内 IT 业界来说，我算“收入微薄”，但这一年的工作确实十分开心。&lt;/p&gt;
+
+&lt;p&gt;2015 年间，我也陆陆续续用 Swift 写了一些开源框架，包括图像下载和缓存的 &lt;a href=&quot;https://github.com/onevcat/Kingfisher&quot;&gt;Kingfisher&lt;/a&gt;，APNG 的解码库 &lt;a href=&quot;https://github.com/onevcat/APNGKit&quot;&gt;APNGKit&lt;/a&gt;，以及前两天刚完成的一个小品级工具 &lt;a href=&quot;https://github.com/onevcat/Rainbow&quot;&gt;Rainbow&lt;/a&gt;。侥幸，这些框架也还或多或少受到了欢迎，同时有不少开发者在使用它们。其实不能免俗地说，我最初做开源的目的还是积攒人气，提高声望。在 2013 年的时候开发了一个给代码加注释的 Xcode 插件，获得了像 &lt;a href=&quot;https://iosdevweekly.com&quot;&gt;iOS Dev Weekly&lt;/a&gt; 的 &lt;a href=&quot;https://twitter.com/daveverwer&quot;&gt;Dave Verwer&lt;/a&gt; 和 &lt;a href=&quot;http://nshipster.com&quot;&gt;NSHipster&lt;/a&gt; 的 &lt;a href=&quot;https://twitter.com/mattt&quot;&gt;mattt&lt;/a&gt; 的关注和推广，获得了不少好评。那时候发现原来除了骗一波星星以外，我写的东西还是能帮助到其他人的。2014 年咬牙自掏机票门票参加了 WWDC，也在那里见到了很多不同地方的开发者。这个时代真的是一个神奇的时代，地球两端的人只要愿意，在 12 小时内就能互相见面。我们没有理由不拥抱这个世界，去和其他人交流，去一起探索。因为 Apple 的统一平台，开发者们有更多的机会认识彼此，这确实是一件幸事。&lt;/p&gt;
+
+&lt;p&gt;在今年，我和世界上其他 iOS 开发者的交流也在逐渐变多，这主要来源于向一些开源项目进行提交时候和这些项目开发者的交流。在这个过程中，我发现像是 &lt;a href=&quot;https://github.com/fastlane/fastlane&quot;&gt;fastlane&lt;/a&gt; 的 &lt;a href=&quot;https://github.com/KrauseFx&quot;&gt;Felix&lt;/a&gt;，或者是 &lt;a href=&quot;https://github.com/apple/swift-package-manager&quot;&gt;Swift Package Manager&lt;/a&gt; 的 &lt;a href=&quot;https://github.com/mxcl&quot;&gt;Max Howell&lt;/a&gt; 这些维护者们都十分谦虚，很有责任心，并愿意接纳讨论。前几天还和老婆调侃说起知不知道那个翻转二叉树被拒的悲剧，转眼过几天我们居然有机会一起写代码，在 Twitter 上互 fo 和聊天，这种感觉真的非常奇妙。&lt;/p&gt;
+
+&lt;p&gt;我们在工作中向开源社区索取了很多，有机会的话，感恩和回馈会是对开源社区最好的回报。以认真的态度多写一些有意义的代码，这不仅会是对个人的提升，同时也能促进社区的发展，于人于己都是一件好事。中国的开发者数目众多，中国在互联网和移动开发中得声音也越来越响亮，我们应该以怎样的姿态来面对这个越来越开放的世界。如何拥抱变化，敬畏世界，感恩开源，回馈社区，也许是新时代每个有志于软件开发的工程师所需要审视和考虑的问题。&lt;/p&gt;
+
+&lt;h2&gt;真 总结&lt;/h2&gt;
+
+&lt;p&gt;2015 年马上就要过去，要用一句话总结今年的话，那应该是“生活进入正轨，事业稳步发展”。一切都好，勿念。&lt;/p&gt;
+
+&lt;h3&gt;P.S.&lt;/h3&gt;
+
+&lt;p&gt;按照国际惯例，似乎应该写一份书单。但是因为好像今年读的技术书籍以外的书就只有一本反革命的日本右翼的书，所以还是不写为妙。取而代之，列一个最近已经买过和打算去买的比较有意思的东西的清单和一句话评语吧，主要目的是&lt;del&gt;帮大家长长草剁剁手&lt;/del&gt;为大家春节准备礼物提供参考..&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.apple.com/tv/&quot;&gt;第四代 Apple TV&lt;/a&gt; - 已成为饭后闲时在 YouTube 看反动新闻的主力工具&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.sphero.com/sphero-sprk&quot;&gt;Sphero SPRK 机器球&lt;/a&gt; - 用来逗满夏玩的球型机器人，已成为其最喜欢的食物之一&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.apple.com/cn/shop/product/MJ2R2/magic-trackpad-2&quot;&gt;Magic Trackpad 2&lt;/a&gt; - 工作用主力输入设备，作为触摸板死忠表示很满意&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.philips.com.cn/c-p/HX6712_04/sonicare-healthywhite-sonic-electric-toothbrush/overview&quot;&gt;飞利浦 HealtyWhite 电动牙刷&lt;/a&gt; - 每次用震得欲仙欲死，欲罢不能&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://shop.dyson.cn/vacuums/cordless-vacuums/v6-fluffy-209573-01&quot;&gt;Dyson V6 Fluffy 吸尘器&lt;/a&gt; - 吸得真心干净，而且超方便，指哪儿哪儿干净&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.philips.com.cn/c-p/S9111_12/shaver-series-9000-wet-and-dry-electric-shaver-with-smartclick-precision-trimmer-and-aquatec-wet-dry&quot;&gt;飞利浦 Shaver 9000 刮胡刀&lt;/a&gt; - 刮得还算干净，但是没有 Dyson 吸尘器吸得干净，不过清洗方便是大优点&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.wacom.com/en-us/products/pen-tablets/intuos-photo&quot;&gt;Wacom 影拓 Photo 绘图板&lt;/a&gt; - 第一块入门级的板子，用来 PS 照片挺好&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://cn.beatsbydre.com/%E6%8E%A2%E7%B4%A2/%E6%8C%89%E7%B1%BB%E5%88%AB%E6%B5%8F%E8%A7%88/rose-gold/MLLG2.html&quot;&gt;Beats Solo2 Wireless 高保真耳机&lt;/a&gt; - 美妙自由的音乐体验，专注工作值得拥有&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.smartisan.com/jianguo/#/overview&quot;&gt;坚果文青版 蘇芳&lt;/a&gt; - 完美的 Android 4 系测试机&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.apple.com/cn/&quot;&gt;iPhone 6s 粉色和 iPad mini 新款&lt;/a&gt; - 老婆大人的日常用机，我只有看的份&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Tue, 29 Dec 2015 00:03:40 +0800</pubDate>
+        <link>http://onevcat.com/2015/12/2015-final/</link>
+        <guid isPermaLink="true">http://onevcat.com/2015/12/2015-final/</guid>
+        
+        <category>胡言乱语集</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>当 App Store 遇上电视，开发者的第四代 Apple TV 开箱体验</title>
+        <description>&lt;h3&gt;引子&lt;/h3&gt;
+
+&lt;p&gt;2015 年 9 月，San Francisco。今年接近 100 华氏度的气温要比往年都更热，而 Apple 例行的秋季发布会也如期在这里举行。自从 iPhone 一战成名后，每年的 iPhone 旗舰机型都是移动通讯设备的业界标杆。而今年秋季发布会大家也自然地将重点放在了最新的 iPhone 6s 上。手机乏善可陈，除了硬件参数的一些常规升级外，我们并没有看到 iPhone 有多大进步。不过这也是大家预料之中，每隔两年一款的 s 系列定位就只是对之前版本的补充。另外，更大屏幕的 iPad Pro 也传闻已久。虽然 Apple 有意进军生产力市场，但是在平板电脑日渐衰颓的今天，一款并没有实质改变的设备是否能够力挽狂澜，还有待观察。&lt;/p&gt;
+
+&lt;p&gt;要说这场发布会上能配得上三藩 9 月气温的产品，可能就只剩新款 Apple TV 了。相比起它的前辈，新款的 Apple TV 拥有一颗 A8 处理器，运行了全新和独立的操作系统 tvOS，第三方开发者可以为 tvOS 开发独立运行的 app，并且它拥有一个全新的 TV App Store。在之前一两年时间里，Apple 开放了 iOS extension 和 Apple Watch app 的开发，以求完善平台用户体验。但是不论是通知中心还是手表 app，其实都是依附在已有的 iOS app 上的，仅仅是功能的补充。Apple TV 的 App Store 可以说是自 iOS 2 时代开放 App Store 以来 iOS 开发生态中最大的一次变革。开发者们现在有了全新的交互方式，全新的使用场景，可以再一次释放创造力。&lt;/p&gt;
+
+&lt;p&gt;这样的设备，作为一个 iOS 开发者，不论是利益所使还是兴趣所驱，结论自然都跑不离三个字，那就是“买买买”。&lt;/p&gt;
+
+&lt;h3&gt;开箱&lt;/h3&gt;
+
+&lt;p&gt;因为自己的开发者账号是中国区的，所以没法申请到之前的一美金的 Developer Kit，既然薅不到资本主义的羊毛，那就只能出血自己购入了。不过还好 150 美金的售价相比起其他 Apple 产品来说确实只是小菜一碟。于是顺利成章地大前天下了单，然后顺理成章地今天快递盒子就出现在了门口。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-1.jpg&quot; alt=&quot;apple-tv-1&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;包装的话和前几代产品差不错，颜色继承了一贯的黑乎乎，并没有像其他的 Apple 产品那样有别的颜色可以选择。不过考虑到电视机作为传统的黑色家电，也很少出现亮丽的色彩。也许想要等到白色或者金色的 Apple TV 的话，估计要看 Apple 自己动手做电视机了。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-2.jpg&quot; alt=&quot;apple-tv-2&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;打开包装盒以后的内容，电视盒子的主体部分和带触摸板和 Siri 的遥控器并排摆放。本体的尺寸在长宽上和前代保持一致，但是厚度增加了不少。这主要还是由于需要集成的东西变多了，毕竟本代 Apple TV 内含足够强劲的 A8 以及 2G 内存，另外，蓝牙 wifi 什么的自不用说，也是一应俱全。遥控器上半部分是玻璃的触控板，为系统的操作提供了全新的交互方式，我之后会再提及。上一张内含物全部排开的图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-3.jpg&quot; alt=&quot;apple-tv-3&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;左右两根线分别是电源线和一根普通的 USB-Lightning 的线缆，左下的说明书的话写有开始的欢迎语，以及一些关于本体接口和遥控器按键的简单说明。和 Apple 其他很多产品类似，这份说明书对于大部分人来说应该是不需要的。&lt;/p&gt;
+
+&lt;p&gt;值得一提的是，Apple 依然在看不到的地方做了不少功课。我们在放置 Apple TV 的时候，一般还是按照正常的方向放置的。在平时不可能看得到的底面上，Apple 也好不吝啬地做了大大的 logo。另外，设备整体摸上去触感也很不错。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-4.jpg&quot; alt=&quot;apple-tv-4&quot;&gt;&lt;/p&gt;
+
+&lt;h3&gt;安装&lt;/h3&gt;
+
+&lt;p&gt;其实算不上安装。现在的电子产品要是不能开箱后插上电源就能傻瓜使用的话，是会受不少诟病的。当然啦，Apple TV 这样的机顶盒产品的话除了电源线，还需要一根 HDMI 来和高清电视连接。需要注意的是，HDMI 线是不包含在 Apple TV 盒子里的，需要自行准备。虽然现在客厅娱乐化家里或多或少应该都能翻出一两根 HDMI 的线，但是也不排除正好没有。所以在购买的时候可以确定一下，没有的话直接在 Apple Store 里买一根也是不错的选择。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-5.jpg&quot; alt=&quot;apple-tv-5&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;本体背面除了电源线和 HDMI 接口外，还有两个插口，分别是以太网网线接口和一个 USB-C 接口。平时使用的话直接用内置的 wifi 就可以了，没有必要插网线。这个接口的目的应该是用来在 tvOS 出问题变砖的时候强制重装系统时使用的。当然，如果你选择不用无线网络的话，平时插根网线用应该也是可以的。另一个 USB-C 的接口是为开发者准备的，还是需要连线才能够将 Apple TV 与开发的 Mac 连接。另外，在从本地恢复 tvOS 系统的时候也需要 USB-C 的连接才能在 iTunes 中找到 Apple TV 设备。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-6.jpg&quot; alt=&quot;apple-tv-6&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;开机以后是很常规的欢迎和语言选择等等，操作的话就靠新的遥控器上半部分的触控板了。tvOS 使用焦点系统进行操控，同一时间屏幕上有且仅有一个焦点 UI 元素，用户通过在遥控器触摸板上的滑动来控制焦点移动，通过按压触摸板来确认。虽说是玻璃触摸板，但是从材质上来说遥控器的下半部分非触摸的区域却更接近于日常使用的手机屏幕，而上半部分的触摸板反而金属质感强烈。我一开始的时候有些不太习惯，拿反了好几次遥控器。不过在经过一段时间适应以后就不会弄错了。&lt;/p&gt;
+
+&lt;p&gt;初始设置的话十分方便，你可以用过使用 iOS 设备通过蓝牙来对新的 Apple TV 进行设定。这省去了输入网络密码，登陆 Apple ID 等等一系列复杂的输入过程。如果说在手机的小屏幕上进行键盘输入体验糟糕的话，在 Apple TV 上用遥控器进行输入简直就是灾难：键盘按键从 a 到 z 一字排开，你需要来回滚动焦点选择需要的字符。而且如果你像我一样在使用一些密码管理软件来管理密码，而非自己记忆的话，每次问你输入密码的时候估计都会有砸电视的冲动。还好，Apple 在第一次还是很人性化地帮我们省了这个步骤。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-7.jpg&quot; alt=&quot;apple-tv-7&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;成功登陆了自己的中国区的 Apple ID 以后，我们就进入到 tvOS 的主界面了，眼前情况只能用惨不忍睹来形容。只有照片，搜索，家庭共享和设置四个选项，和砖并没有太大区别..&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-8.jpg&quot; alt=&quot;apple-tv-8&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;赶快吓得祭出了自己日本区的账号，更换账号以后，终于看到 iTunes 和 App Store 等内容了。Apple TV 现在在大陆还没有上市和销售的消息，鉴于之前音乐电影图书的 iTunes Store 在中国正式上线，可能 Apple 也正在努力想让 Apple TV 能在国内开始销售。但是之前有广电总局机顶盒只能用国产 TVOS1.0 的禁令，所以最终 Apple TV 有没有可能在中国上市，还是一个未知数。&lt;/p&gt;
+
+&lt;p&gt;总之，你现在想要用 Apple TV 来做客厅娱乐的话，一个欧美或者日本区的 Apple ID 应该是必要的。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-9.jpg&quot; alt=&quot;apple-tv-9&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-10.jpg&quot; alt=&quot;apple-tv-10&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;作为开发者，最关心的自然是 App Store 了。可以看到虽然是第一天，但是商店中已经有不少 app 了，像是常看的视频 app 的 YouTube，vimeo，TED 等等一应俱全。Netflix 最近也登陆了日本，并且取得了很好的成绩，也出现在了日本区商店的推荐首页上。其他的像是 NHK，ESPN 等等频道也推出了自己的 app。&lt;/p&gt;
+
+&lt;h3&gt;使用&lt;/h3&gt;
+
+&lt;p&gt;使用上来说，交互设计十分简单清晰。焦点的内容会被稍微放大显示，点击触摸板选择，点击 Menu 按钮后退，这对一个普通的有其他电子产品使用经验的用户来说，几乎是没有学习成本的。观看电视节目的话要做的就是在主页面上滑动找到 app 并打开，然后选择想看的内容就可以了。&lt;/p&gt;
+
+&lt;p&gt;由于字符输入的困难，我选择了在设置中将购买 app 需要确认 Apple ID 关掉了。Apple TV 作为一款家庭设备的话其实如果家里有小朋友的话这还是挺危险的一件事情，但是相比起每次要打开手机显示密码再花三分钟划来划去输入密码的话，我还是选择前者..&lt;/p&gt;
+
+&lt;p&gt;在要求用户登录和输入上，值得一提的是 YouTube 的处理。YouTube 没有选择让用户直接在 Apple TV 上输入用户密码，而是采用了让用户使用其他设备进行登陆：访问特定网址进行正常登陆，然后输入特定的序列码来进行回调和授权。其实猜测这样做的很大原因是 YouTube 要求的是标准的 OAuth 2.0 登陆，需要访问 Google 账号，而在 tvOS 上是没有 WebView 支持的。也就是说，想要像在 iOS 或者 Android 上弹出 web view 的认证的话是不可能的了，除非用 TVML 专门为 Apple TV 写一套流程和界面。于此相比，现在几乎拥有 Apple TV 的用户都不太可能没有其他设备，使用更方便的设备进行登陆会是一个很不错的选择。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-11.jpg&quot; alt=&quot;apple-tv-11&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;除了电视节目，App Store 中现在另一个大类就是游戏了。在发布会上已经有开发商展示了一些游戏，比如 Crossy Road：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-12.jpg&quot; alt=&quot;apple-tv-12&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;这类游戏依然交互简单，相比起在手机上来说，你的操作不会影响到屏幕显示，你可以一直看到完整的屏幕 (而且这块屏幕比手机大得多的多得多..)，手持遥控器窝在沙发里懒洋洋地划来划去的感觉相比去抬着手拿设备来说也要舒适一些。&lt;/p&gt;
+
+&lt;p&gt;如果你认为 Apple TV 只能胜任这样的像素风小游戏的话你就错了。Gameloft 也在第一时间将《狂野飙车8》移植到了 Apple TV 上。因为 Apple TV 的 app 有 200 MB 的尺寸限制，所以对于这样的 3D 游戏，基本需要能够进行额外的资源加载。自己维护一套 asset 的规则或者使用 Apple 的 On-Demand Resources 都是可选项。Gameloft 也采用了额外的资源下载：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-13.jpg&quot; alt=&quot;apple-tv-13&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;得益于 A8 CPU 和 2GB 内存，游戏运行的帧率完全没有问题，游戏始终能跑在满帧。在操作时，游戏利用了遥控器中的重力感应和陀螺仪来识别遥控器方向，以此控制赛车。除了使用遥控器以外，游戏也支持 MFi 的各种第三方手柄或者方向盘，作为一款赛车类游戏来说，体验还是相当完整。当然，《狂野飙车8》还是属于移动端为主的视觉效果。光影和细节上相比主机游戏还是有不小差距，但是毕竟相比于 iPhone 或者 iPad，更大的屏幕意味着更接近于标准游戏主机的体验，玩起来还是挺过瘾的，可以说这次 Apple 在游戏方向上迈出了坚实的一步。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-14.jpg&quot; alt=&quot;apple-tv-14&quot;&gt;&lt;/p&gt;
+
+&lt;h3&gt;开发&lt;/h3&gt;
+
+&lt;p&gt;回到开发的正题上，Xcode 7.1 包含了 tvOS 的 SDK，相信有兴趣的同学已经把玩过 tvOS SDK 和模拟器了。想要把程序部署到实际设备上的话，我们需要一根 USB-C 到 USB-A 的线缆将 Apple TV 与 Mac 进行连接（如果你用的是 MacBook 的话那就是两头 USB-C），然后选择正确的 provisioning file 或者直接交给 Xcode fix 以后就可以直接部署了。所以作为开发者，在购买 Apple TV 作为开发设备的时候，千万不要忘了一并买一根转接线，否则你将无法将 TV 连接到你的开发设备上。&lt;/p&gt;
+
+&lt;p&gt;Apple TV 的 app 的话，基本来说有两种形式：一是基于网络的一套方案，使用 TVJS (一套为 Apple TV 设计的 Javascript 框架)，TVML (Apple TV 专用的类似 XML 的标记语言，用来构建界面) 和 TVMLKit (胶水代码) 来构建，Apple 把这类的 app 叫做 Client-server Apps。这类 app 的开发更偏向于类似前端和网站开发：你使用 Apple 提供的常用模板，然后从自己的服务器中获取内容后，将这些内容填写到模板中进行显示。使用这种开发方法的话，基本是在和 Javascript 和 XML 相关的内容打交道。如果你已经有现成的数据 (视频) 源，那么使用这种方法能让你直接将数据填到模板里，以此来迅速地构建出符合 Apple TV 标准交互的 app。&lt;/p&gt;
+
+&lt;p&gt;另一类 app 类似于传统 iOS app，使用一个 UIKit 的子集，一些 tvOS 的独特的特性以及 Auto layout 来进行 app 构建，Apple 将其称为 Custom Apps。如果你已经是一个 iOS 开发者的话，这种模式的 app 会让你感到如沐春风。基础控件，导航，网络等等，一切都是那么熟悉。不过相比起完整的 iOS，tvOS 有着完全不同的交互方式和体验，很多时候我们都需要注意不能将 iOS 开发中已有的经验简单粗暴地照搬。&lt;/p&gt;
+
+&lt;p&gt;对于开发者来说，直接获取利润的方式和普通的 iOS app 基本一致，也就是付费 app，内购以及广告。现在暂时在 tvOS 上还没有成熟的广告平台 (不知道 Admob 之类的平台商有没有在这方面有什么进展)，只能靠内容商自己想办法。因为是全新的平台，所以现在 App Store 上 app 数量还比较有限，可以说暂时还是一片蓝海。如果 Apple TV 能够获得成功进入大多数人的客厅的话，这绝对是一个极具潜力的消费市场。&lt;/p&gt;
+
+&lt;p&gt;但是不得不吐槽的是，现在 App Store 的应用发现还非常不足，只有推荐，已购买和搜索三个栏目。没有分类榜单，也没有方式能打开指向 App Store 的链接 (因为 Apple 铁了心不想把网页浏览加入到 tvOS 里)。也就是说，想要发现一个 app 现在只有两种方式：被 Apple 推荐出现在首页，或者是用户在搜索中输入你的 app 名字/关键字进行搜索。搜索的方法能为 app 带来的曝光度几乎为零，而且也没有办法使用链接进行推广。用户想要下载你的 app，不得不经过痛苦的搜索过程 (还记得我们说了好几次的 Apple TV 上输入不便的问题么)。所以对广大普通开发者来说，相比起开发中的技术问题，如何让自己开发的 app 让用户看到知道，会是更大的挑战。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/2015/apple-tv-15.jpg&quot; alt=&quot;apple-tv-15&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;不过输入和 App Store 的问题都不是无解。在平台化如此强大的今天，直接用 Siri 进行语音输入，使用 iCloud 密码或者 Touch ID，都是很好的输入解决方案。App Store 的话只要 Apple 愿意，添加一些分类榜单或者更完善的 app 发现机制也只是时间上的问题。对于像一个 tvOS 这样一个全新的系统和平台生态，我们还是不应该太过着急，多给它一些时间来调整。&lt;/p&gt;
+
+&lt;p&gt;我之后可能会看时间安排，有空的话会稍微再写一点 Apple TV 开发相关的内容 :)&lt;/p&gt;
+</description>
+        <pubDate>Sat, 31 Oct 2015 15:49:46 +0800</pubDate>
+        <link>http://onevcat.com/2015/10/apple-tv/</link>
+        <guid isPermaLink="true">http://onevcat.com/2015/10/apple-tv/</guid>
+        
+        <category>南箕北斗集</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>符合iOS系统兼容性需求的方法</title>
+  <meta name="description" content="">
+  <meta name="author" content="Wei Wang">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="符合iOS系统兼容性需求的方法">
+  <meta name="twitter:description" content="">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="符合iOS系统兼容性需求的方法">
+  <meta property="og:description" content="">
+  
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link href="/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="canonical" href="http://onevcat.com/2012/02/iosversion/">
+  <link rel="alternate" type="application/rss+xml" title="Asunquan" href="http://onevcat.com/feed.xml">
+  
+  <meta name="google-site-verification" content="1-1ZlHoRvM0T2FqPbW2S-qLgYXN6rsn52kErlMPd_gw" />
+  
+</head>
+
+
+  <body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="fa fa-list btn-mobile-menu__icon"></i>
+        <i class="fa fa-angle-up btn-mobile-close__icon hidden"></i>
+    </span>
+    
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url('/assets/images/background-cover.jpg')">
+  <div class="panel-main">
+
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        <a href="/#blog" title="前往 Asunquan 的主页" class="blog-button"><img src="/assets/images/avatar.jpg" width="80" alt="Asunquan logo" class="panel-cover__logo logo" /></a>
+        <h1 class="panel-cover__title panel-title"><a href="/#blog" title="link to homepage for Asunquan" class="blog-button">Asunquan</a></h1>
+
+        
+        <span class="panel-cover__subtitle panel-subtitle">不忘初心 不止于行</span>
+        
+        <hr class="panel-cover__divider" />
+        <p class="panel-cover__description">嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        
+        <p class="panel-cover__description"><a href="https://objccn.io/products/" target="_blank">ObjC 中国与 objc.io 合作最新作品《函数式 Swift》,《Core Data》及《Swift 进阶》已经发布</a>，<a href="https://boxueio.com">泊学网正在开展订阅赠书活动，也欢迎前往了解</a></p>
+        
+        
+        <div class="navigation-wrapper">
+          <div>
+            <nav class="cover-navigation cover-navigation--primary">
+              <ul class="navigation">
+                <li class="navigation__item"><a href="/#blog" title="访问博客" class="blog-button">博客</a></li>
+                
+                  <li class="navigation__item"><a href="http://project.onevcat.com" target="_blank" title="我的项目">项目</a></li>
+                
+                  <li class="navigation__item"><a href="http://about.onevcat.com/" target="_blank" title="了解更多关于我">关于</a></li>
+                
+                  <li class="navigation__item"><a href="//store.objccn.io/subscribe" target="_blank" title="邮件订阅本站">订阅</a></li>
+                
+              </ul>
+            </nav>
+          </div>
+          
+          <div><nav class="cover-navigation navigation--social">
+  <ul class="navigation">
+
+  
+  <!-- Weibo -->
+  <li class="navigation__item">
+    <a href="http://weibo.com/onevcat" title="@onevcat 的微博" target="_blank">
+      <i class='social fa fa-weibo'></i>
+      <span class="label">Weibo</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Github -->
+  <li class="navigation__item">
+    <a href="https://github.com/onevcat" title="@onevcat 的 Github" target="_blank">
+      <i class='social fa fa-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+  
+  
+  
+  <!-- Twitter -->
+  <li class="navigation__item">
+    <a href="http://twitter.com/onevcat" title="@onevcat" target="_blank">
+      <i class='social fa fa-twitter'></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+  
+
+  
+  <!-- Google Plus -->
+  <li class="navigation__item">
+    <a href="https://plus.google.com/107108267983477358170" rel="author" title="Google+" target="_blank">
+      <i class='social fa fa-google-plus-square'></i>
+      <span class="label">Google Plus</span>
+    </a>
+  </li>
+  
+
+  <!-- RSS -->
+  <li class="navigation__item">
+    <a href="/feed.xml" rel="author" title="RSS" target="_blank">
+      <i class='social fa fa-rss'></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  
+  <!-- Email -->
+  <li class="navigation__item">
+    <a href="mailto:onev@onevcat.com" title="Contact me">
+      <i class='social fa fa-envelope'></i>
+      <span class="label">Email</span>
+    </a>
+  </li>
+  
+
+  </ul>
+</nav>
+</div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="panel-cover--overlay cover-slate"></div>
+    
+  </div>
+</header>
+
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            <article class="post-container post-container--single" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="2012-02-25 21:54:42 +0800" itemprop="datePublished" class="post-meta__date date">2012-02-25</time> &#8226; <span class="post-meta__tags tags">能工巧匠集</span>
+    </div>
+    <h1 class="post-title">符合iOS系统兼容性需求的方法</h1>
+  </header>
+
+  <section class="post">
+    <p><a href="http://www.onevcat.com/wp-content/uploads/2012/02/ios.jpg"><img class="aligncenter size-full wp-image-673" title="ios" src="http://www.onevcat.com/wp-content/uploads/2012/02/ios.jpg" alt=""/></a></p>
+
+<p>转载本文请保留以下原作者信息:
+原作：OneV&#39;s Den
+<a href="http://www.onevcat.com/2012/02/iosversion/"><a href="http://www.onevcat.com/2012/02/iosversion/">http://www.onevcat.com/2012/02/iosversion/</a></a>
+<h2>兼容性，开发者之殇</h2>
+兼容性问题是全世界所有开发这面临的最头疼的问题之一，这句话不会有开发者会反驳。往昔的Windows Vista的升级死掉一批应用的惨状历历在目，而如今火热的移动互联网平台上类似的问题也层出不穷。Andriod的开源导致产商繁多，不同的设备不仅硬件配置有差异，系统有差异，就连屏幕比例也有差异。想要开发出一款真正全Android平台都完美运行的app简直是不可能的..
+iOS好很多，因为iPhone和iTouch的分辨率完全一致(就算retina也有Apple帮你打理好了)，因此需要关注的往往只有系统版本的差别。<strong>在使用到某些新系统才有的特性，或者被废弃的方法时，都需要对运行环境做出判定。</strong></p>
+
+<h2>何时需要照顾兼容性</h2>
+
+<p>没有人可以记住所有系统新加入的类或者属性方法，也没有人可以开发出一款能针对全系统的还amazing的应用。</p>
+
+<p><strong>在iOS的话，首先要做的就是为自己所开发的app选择合适的最低版本</strong>，在XCode中的对应app的target属性中，设置iOS Deployment Target属性，这对应着你的app将会运行在的最低的系统版本。如果你设成iOS 4.3的话，那你就不需要考虑代码对4.3之前的系统的兼容性了——因为低于iOS 4.3的设备是无法通过正规渠道安装你的应用的。</p>
+
+<p>&lt;!--:--&gt;&lt;!--more--&gt;&lt;!--:zh--&gt;
+但是你仍然要考虑在此之后的系统的兼容性。随着Apple不断升级系统，有些功能或者特性在新系统版本上会有很容易很高效的实现方法，有些旧的API被废弃或者删除。如果没有对这些可能存在的兼容性问题做出处理的话，小则程序效率低下，之后难以维护，大则直接crash。对于这些可能存在的问题，开发者一定要明确自己所调用的API是否存在于所用的框架中。某个类或者方法所支持的系统版本可以在官方文档中查到，所有的条目都会有类似这样的说明
+<pre>Availability Available in iOS 5.0 and later.</pre>
+或者
+<pre>Availability Available in iOS 2.1 and later. </pre></p>
+
+<p>Deprecated in iOS 5.0.
+从Availability即可得知版本兼容的信息。
+如果iOS Deployment Target要小于系统要求，则需要另写处理代码，否则所使用的特性在老版本的系统上将无法表现。</p>
+
+<p>另外，Apple也不过是一家公司，Apple的开发人员也不过是牛一点的程序员，iOS本身就有可能有某些bug，导致在某些版本上存在瑕疵。开发人员会很care，并尽快修正，但是很多时候用户并不care，或者由于种种原因一直不升级系统。这时候便需要检测系统，去避开这些bug，以增加用户体验了(比如3.0时的UITableView插入行时可能crash)。</p>
+
+<h2>符合兼容性需求的代码</h2>
+
+<h3>判定系统版本，按运行时的版本号运行代码</h3>
+
+<p>这不一定是最有效的方法，但这是最直接的方法。对系统版本的判定可以参考我的另一片文章:<a href="http://www.onevcat.com/2012/02/uiviewcontroller/">UIViewController的误用</a>。
+顺便在这边也把比较的方法贴出来：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">// System Versioning Preprocessor Macros
+
+#define SYSTEM_VERSION_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
+#define SYSTEM_VERSION_GREATER_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
+</code></pre></figure>
+<p>使用
+···
+if (SYSTEM_VERSION_LESS_THAN(@“5.0”))
+{
+    //系统版本不小于5.0...Do something
+}
+···</p>
+
+<p>需要注意的是，<code>[@“5.0” compare:@“5” options:NSNumericSearch]</code>这样的输入将会返回一个NSOrderedDescending，而不是期望中的NSOrderedSame，因此在输入的时候需要特别小心。另外这个方法的局限还在于对于4.1.3这样的系统版本号比较无力，想要使用的话也许需要自己进行转换(也许去掉第二个小数点再进行比较是个可行的方案)。</p>
+
+<h3>对于类，可以检测其是否存在</h3>
+
+<p>如果要使用的新特性是个类，而不是某个特定的方法的话，可以用NSClassFromString来将字符串转为类，如果runtime没有这个类的存在，该方法将返回nil。比如对于iOS 5，在位置解析方面，Apple使用了CoreLocation中的新类CLGeocoder来替代原来的MKReverseGeocoder，要判定使用哪个类，可以用下面的代码：</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">if(NSClassFromString(@&quot;CLGeocoder&quot;)) {
+    //CLGeocoder存在，可以使用
+}
+else{
+    //只能使用MKReverseGeocoder
+}
+</code></pre></figure>
+<p>这个方法应该是绝对靠谱的，但是只有类能够使用。而系统更新往往带来的不止类，也有很多新的方法和属性这样的东西，这个方式就无能为力了。</p>
+
+<h3>向特定的类或对象询问是否拥有某特性</h3>
+
+<p>对于某些类活期成员，他们本身有类似询问支不支持某种特性这样的方法，比如大家所熟知的UIImagePickerController里检测可用媒体类型的availableMediaTypesForSourceType:方法，以及CMMotionManager里检测三轴陀螺是否可用的方法gyroAvailable。但是有些类询问方法的类和成员所要使用的特性基本基本都是和设备硬件有关的。</p>
+
+<p>另外当然也可以用respondsToSelector:方法来检测是否对某个方法响应。但是<strong>这是非常危险的做法</strong>，我本人不推荐使用。因为iOS系统里存在很多私有API，而Apple的审查机制对于私有API调用的格杀勿论是业界公知的。而respondsToSelector:如果想要检测的方法在老版本的系统中是作为私有API形式存在的话，你将得到错误的结果，从而去执行私有API，那就完了。这种应用往往是被拒了都不知道自己在哪儿使用了私有API…</p>
+
+  </section>
+</article>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OneV's Den -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3324997515191619"
+     data-ad-slot="9170309685"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<section class="read-more">
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">最近的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/03/opencv-build-and-config/" title="link to OpenCV 在 iOS 开发环境下的编译和配置">OpenCV 在 iOS 开发环境下的编译和配置</a></h2>
+       <p class="excerpt">转载本文请保留以下原作者信息:原作：OneV&#39;s Den http://www.onevcat.com/2012/03/opencv-build-and-config/2014.5.3 更新现在一般都直接使用方便的 CocoaPods 来进行依赖管理了，特别是对于像 OpenCV 这样关系复杂的类库来说尤为如此。可以访问 CocoaPods 的页面并搜索 OpenCV 找到相关的 pod 信息就可以进行简单的导入了。如果您还不会或者没有开始使用 CocoaPods 的话，现在正是时...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-03-03 22:06:23 +0800" class="post-list__meta--date date">2012-03-03</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2012/03/opencv-build-and-config/>继续阅读</a></div>
+   </div>
+   
+   
+   
+   
+   <div class="read-more-item">
+       <span class="read-more-item-dim">更早的文章</span>
+       <h2 class="post-list__post-title post-title"><a href="/2012/02/uiviewcontroller/" title="link to UIViewController的误用">UIViewController的误用</a></h2>
+       <p class="excerpt">转载本文请保留以下原作者信息:原作：OneV http://www.onevcat.com/2012/02/uiviewcontroller/什么是UIViewController的误用UIViewController是iOS开发中最常见也最重要的部件之一，可以说绝大多数的app都用到了UIViewController来管理页面的view。它是MVC的核心结构和桥梁构成，可以说UIViewController是绝大多数开发者所花时间最多的部分了。但是正是这样一个重要的类却经常被误用，从而导...&hellip;</p>
+       <div class="post-list__meta"><time datetime="2012-02-02 21:50:53 +0800" class="post-list__meta--date date">2012-02-02</time> &#8226; <span class="post-list__meta--tags tags">能工巧匠集</span><a class="btn-border-small" href=/2012/02/uiviewcontroller/>继续阅读</a></div>
+   </div>
+   
+</section>
+
+<section class="post-comments">
+  
+    <div id="disqus_thread"></div>
+    <script>
+    
+    var disqus_config = function () {
+        this.page.url = "http://onevcat.com/2012/02/iosversion/";
+        this.page.identifier = "/2012/02/iosversion/";
+    };
+
+    var disqus_shortname = 'onevcat';
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>要查看<a href="http://disqus.com/?ref_noscript"> Disqus </a>评论，请启用 JavaScript</noscript>
+    
+  
+  
+  
+  
+</section>
+
+
+            <section class="footer">
+    <footer>
+    	<span class="footer__copyright">本站点采用<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a></span>
+        <span class="footer__copyright">由 <a href="https://jekyllrb.com">Jekyll</a> 于 2016-11-08 生成，感谢 <a href="https://www.digitalocean.com/?refcode=30ed2d146762">Digital Ocean</a> 为本站提供稳定的 VPS 服务</span>
+        <span class="footer__copyright">本站由 <a href="http://onev.cat">@onevcat</a> 创建，采用 <a href="https://github.com/onevcat/vno-jekyll">Vno - Jekyll</a> 作为主题，您可以在 GitHub 找到<a href="https://github.com/onevcat/OneV-s-Den">本站源码</a> - &copy; 2016</span>
+    </footer>
+</section>
+
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-25719337-1', 'onevcat.com');
+    ga('send', 'pageview');
+</script>
+
+
+    
+  </body>
+
+</html>
