@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Asunquan</title>
-    <description>嗨，我是王巍 (@onevcat)，一名来自中国的 iOS / Unity 开发者。现居日本，就职于 LINE。正在修行，探求创意之源。</description>
+    <title>asunquan.com</title>
+    <description>职场新人 iOS菜鸟 就职于搜狐畅游 从事iOS/tvOS的SDK开发 对于游戏市场有点点了解 平日和一只小Corgi同吃同睡</description>
     <link>http://onevcat.com/</link>
     <atom:link href="http://onevcat.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 08 Nov 2016 16:45:16 +0800</pubDate>
-    <lastBuildDate>Tue, 08 Nov 2016 16:45:16 +0800</lastBuildDate>
+    <pubDate>Tue, 08 Nov 2016 17:47:11 +0800</pubDate>
+    <lastBuildDate>Tue, 08 Nov 2016 17:47:11 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
     
       <item>
