@@ -5,8 +5,6 @@ welcome_message:
 description: 职场新人 iOS菜鸟 就职于搜狐畅游 从事iOS/tvOS的SDK开发 对于游戏市场有点点了解 平日和一只小Corgi同吃同睡 
 creator: <a href="https://github.com/asunquan”>@asunquan</a>
 
-url: "http://onevcat.com"
-
 permalink: /:year/:month/:title/
 
 # Format
@@ -31,7 +29,7 @@ paginate_path: "page/:num/"
 
 # Comment
 comment:
-    disqus: onevcat
+    disqus: asunquan
     # duoshuo:
 # Social
 social:
