@@ -5,9 +5,82 @@
     <description>职场新人 iOS菜鸟 就职于搜狐畅游 从事iOS/tvOS的SDK开发 对于游戏市场有点点了解 平日和一只小Corgi同吃同睡</description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 15 Nov 2016 14:57:35 +0800</pubDate>
-    <lastBuildDate>Tue, 15 Nov 2016 14:57:35 +0800</lastBuildDate>
+    <pubDate>Tue, 15 Nov 2016 17:00:45 +0800</pubDate>
+    <lastBuildDate>Tue, 15 Nov 2016 17:00:45 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
+    
+      <item>
+        <title>一些使用第三方SDK时可能遇到的问题和解决方法</title>
+        <description>&lt;h2&gt;前言&lt;/h2&gt;
+
+&lt;p&gt;在项目开发中, 产品经理都会提出各种不同的功能, 比如运营同事想看看应用内各项数据统计以便制定下一步运营计划, 这时项目中可能会使用友盟(阿里), TalkingData(腾讯), Google Analytics(Google)等, 又比如领导觉得需要加入一些社交功能来实现用户间交叉推广, 这时项目中可能就会使用到微信, 微博, QQ, Facebook, Twitter等社交平台推出的SDK. 这些供我们使用的东西可以统称为第三方SDK(因为不是我们自己的), 在iOS开发中的SDK形式上可能会出现.a文件和.framework文件两种, 不过原则上问题产生的原因都是一样的. &lt;/p&gt;
+
+&lt;p&gt;由于本人从事SDK开发工作, 经常会遇到开发者在使用时提出一些问题, 所以在此介绍一些常见问题的解决方法.&lt;/p&gt;
+
+&lt;h4&gt;ld:library not found -lXXXX 或 framework not found XXXX&lt;/h4&gt;
+
+&lt;p&gt;发生时间: 编译时报错&lt;/p&gt;
+
+&lt;p&gt;错误原因: 一般出现在导入第三方SDK时路径设置出错&lt;/p&gt;
+
+&lt;p&gt;解决方案: 在Target -&amp;gt; Build Settings -&amp;gt; Library Search Paths / Framework Search Paths 中查看报错SDK的路径是否设置正确.&lt;/p&gt;
+
+&lt;h4&gt;ld: &amp;#39;XXXX&amp;#39; does not contain bitcode&lt;/h4&gt;
+
+&lt;p&gt;发生时间: 编译时报错&lt;/p&gt;
+
+&lt;p&gt;错误原因: 一般出现在导入的第三方SDK不支持bitcode时&lt;/p&gt;
+
+&lt;p&gt;解决方案: 在Target -&amp;gt; Build Settings -&amp;gt; Enable Bitcode 设置为NO&lt;/p&gt;
+
+&lt;h4&gt;[XXXX xxxx] : unrecognized selector sent to instance&lt;/h4&gt;
+
+&lt;p&gt;发生时间: 运行时崩溃&lt;/p&gt;
+
+&lt;p&gt;错误原因: 一般出现在使用到导入的第三方SDK中的Category时&lt;/p&gt;
+
+&lt;p&gt;解决方案: 在Target -&amp;gt; Build Settings -&amp;gt; Other Linker Flags 设置 -ObjC .&lt;/p&gt;
+
+&lt;h4&gt;Undefined symbols for architecture xxx: &amp;quot;&lt;em&gt;OBJC_CLASS&lt;/em&gt;$_XXXX&amp;quot;, referenced from :&lt;/h4&gt;
+
+&lt;p&gt;发生时间: 编译时报错&lt;/p&gt;
+
+&lt;p&gt;错误原因: 一般出现在没有引入第三方SDK需要使用到的系统framework时&lt;/p&gt;
+
+&lt;p&gt;解决方案: 在Target -&amp;gt; Build Phases -&amp;gt; Link Binary With Libraries 添加缺少的系统framework.&lt;/p&gt;
+
+&lt;h4&gt;Undefined symbols for architecture xxx: &amp;quot;_xxxx&amp;quot;, referenced from :&lt;/h4&gt;
+
+&lt;p&gt;发生时间: 编译时报错&lt;/p&gt;
+
+&lt;p&gt;错误原因: 一般出现在没有引入第三方SDK需要使用到的tbd(dylib)文件时&lt;/p&gt;
+
+&lt;p&gt;解决方案: 在Target -&amp;gt; Build Phases -&amp;gt; Link Binary With Libraries 添加缺少的tbd(dylib)文件.&lt;/p&gt;
+
+&lt;h4&gt;duplicate symbol _XXXX in:&lt;/h4&gt;
+
+&lt;p&gt;发生时间: 编译时报错&lt;/p&gt;
+
+&lt;p&gt;错误原因: 一般出现在第三方SDK中使用了与项目中同名文件时&lt;/p&gt;
+
+&lt;p&gt;解决方案: 更改项目中文件的名称.&lt;/p&gt;
+
+&lt;p&gt;注: 这种文件冲突理论上在SDK开发中是不应该存在的, 这是SDK开发者很严重的问题, SDK中文件命名规则应该规避常用名, 通常会加上特殊前缀, 如畅游海外自发行SDK中自行维护了一个AFNetworking库, 为了规避开发者也是用到相同的库, 我们对AFNetworking的文件进行了命名上的修改, 由于修改了命名, 从github上进行替换难以操作, 所以我们对内容自行维护包括近期的适配IPv6网络等.&lt;/p&gt;
+
+&lt;h4&gt;问题未完, 遇到再续.....&lt;/h4&gt;
+
+&lt;h2&gt;写在最后的一些话&lt;/h2&gt;
+
+&lt;p&gt;以我个人经验, 上面的问题一般在SDK接入文档中都有说明需要配置, 一些开发者不是很重视接入文档, 甚至都不怎么看接入文档与类和方法无关的地方, 这样无形中为SDK开发人员加大了工作量. 也希望大家在以后的开发中能注重认真查看接入文档, 这样为双方都节省了时间, 何乐而不为呢?&lt;/p&gt;
+</description>
+        <pubDate>Tue, 15 Nov 2016 15:00:00 +0800</pubDate>
+        <link>/2016/11/SDK_ERROR/</link>
+        <guid isPermaLink="true">/2016/11/SDK_ERROR/</guid>
+        
+        <category>iOS开发</category>
+        
+        
+      </item>
     
   </channel>
 </rss>
