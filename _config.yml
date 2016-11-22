@@ -5,6 +5,10 @@ welcome_message:
 description: 职场新人 iOS菜鸟 就职于搜狐畅游 从事iOS/tvOS的SDK开发 对于游戏市场有点点了解 平日和一只小Corgi同吃同睡 
 creator: <a href="https://github.com/asunquan”>@asunquan</a>
 
+name: asunquan.com
+description: 职场新人 iOS菜鸟 就职于搜狐畅游 从事iOS/tvOS的SDK开发 对于游戏市场有点点了解 平日和一只小Corgi同吃同睡 
+url: “http://www.sunquan.club”
+
 permalink: /:year/:month/:title/
 
 # Format
@@ -34,8 +38,7 @@ comment:
 # Social
 social:
     weibo: asunquan
-    github: asunquan
-    facebook: 孙泉
+    github: asunquan    
     mail: asunquan@gmail.com
 
 # Google Analytics
