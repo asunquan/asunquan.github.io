@@ -28,4 +28,22 @@ tags: iOS开发
 * 请运营同学在2017年1月1日之后应用在确保所有请求修改为https后再提交审核
 * 浏览器类应用和音视频资源文件可仍然使用http链接访问
 
+注: 服务器需要支持perfect forward secrecy(PFS)否则在请求时会失败, 若无法支持需要在Info.plist中配置对应域名不进行forwardsecrecy验证, 这样也不会被苹果审核团队拒绝.
+
+```xml
+<key>NSAppTransportSecurity</key>
+     	<dict>
+     		<key>NSExceptionDomains</key>
+     		<dict>
+                 <key>"yourdomain"</key>
+                 <dict>
+                     <key>NSIncludesSubdomains</key>
+                     <true/>
+                     <key>NSExceptionRequiresForwardSecrecy</key>
+                     <false/>
+                 </dict>
+     		</dict>
+     	</dict>
+```
+
 ##### 注: 如果没有办法及时修改, 而又有上线需求, 那面也有一招, 在2017年到来之前提审并留出时间供苹果审核, 之后发布. 不过这个终究不是长远之计, 1月1日之后再提审必须做好充分的修改.
