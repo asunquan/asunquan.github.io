@@ -7,7 +7,7 @@ creator: <a href="https://github.com/asunquan”>@asunquan</a>
 
 name: asunquan.com
 description: 职场新人 iOS菜鸟 就职于搜狐畅游 从事iOS/tvOS的SDK开发 对于游戏市场有点点了解 平日和一只小Corgi同吃同睡 
-url: “http://www.sunquan.club”
+url: “http://www.asunquan.com”
 
 permalink: /:year/:month/:title/
 
@@ -44,4 +44,4 @@ social:
 # Google Analytics
 ga:
     id: UA-87028002-1
-    host: www.sunquan.club
+    host: www.asunquan.com
