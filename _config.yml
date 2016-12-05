@@ -25,7 +25,7 @@ blog_button:
     description: 访问博客
 
 nav:
-    - {title: 关于我, description: 我的简历, url: 'http://www.sunquan.club/2000/12/个人简历/'}
+    - {title: 关于我, description: 我的简历, url: 'http://www.asunquan.com/2000/12/个人简历/'}
 
 
 # Pagination
