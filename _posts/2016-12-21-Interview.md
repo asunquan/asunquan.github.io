@@ -91,6 +91,30 @@ readonly的属性只可以在该类内部中重写setter方法进行赋值, 如�
   [people setValue:@"Charles" forKey:NSStringFromSelector(@selector(name))];
   ```
 
+* 可以通过runtime的object_setIvar()方法进行赋值
+
+  ```objective-c
+  unsigned int count = 0;
+
+  // 获取类中的所有成员属性
+  Ivar *ivarList = class_copyIvarList(modelClass, &count);
+      
+  for (int i = 0; i < count; i++)
+  {
+    // 根据角标, 从数组取出对应的成员属性
+    Ivar ivar = ivarList[i];
+          
+    // 获取成员属性名
+    NSString *name = [NSString stringWithUTF8String:ivar_getName(ivar)];
+    
+    if ([name isEqualToString:@"_name"])
+    {
+      object_setIvar(people, ivar, @"Charles");
+      break;
+    }
+  }
+  ```
+
 #### weak, strong, copy, assign, retain
 
 weak: 表示的是一个弱引用, 这个引用不会增加对象的引用计数, 并且在所指向的对象被释放之后, weak指针会被自动置为nil, 使用weak关键字能有效的防止野指针的出现. 一般delegate属性会使用weak进行修饰.
@@ -152,6 +176,12 @@ extern只是用来获取全局变量的值, 不能用于定义变量. extern是�
 
 ## UI
 
+### UIView和CALayer之间的关系
+
+* UIView显示在屏幕上归功于CALayer, 通过调用drawRect方法来渲染自身的内容, 调节CALayer属性可以调整UIView的外观, UIView继承自UIResponder, CALayer不可以响应用户事件
+* UIView是iOS系统中界面元素的基础, 所有的界面元素都继承自它。它内部是由Core Animation来实现的，它真正的绘图部分，是由一个叫CALayer(Core Animation Layer)的类来管理。UIView本身，更像是一个CALayer的管理器，访问它的根绘图和坐标有关的属性，如frame，bounds等，实际上内部都是访问它所在CALayer的相关属性
+* UIView有个layer属性，可以返回它的主CALayer实例，UIView有一个layerClass方法，返回主layer所使用的类，UIView的子类，可以通过重载这个方法，来让UIView使用不同的CALayer来显示
+
 ## block
 
 ## 网络
@@ -159,6 +189,63 @@ extern只是用来获取全局变量的值, 不能用于定义变量. extern是�
 ## 多线程
 
 ## 运行时
+
+### 运行时方法
+
+#### 获取方法地址
+
+```objective-c
+// 获取description方法地址
+Method description = class_getClassMethod(self, @selector(description));
+```
+
+#### 交换方法
+
+交换方法实际上调用method_exchangeImplementations()方法, 交换两个方法的地址, 从而实现交换实现方法
+
+```objective-c
+// 获取description方法地址
+Method description = class_getClassMethod(self, @selector(description));
+
+// 获取csDescription方法地址
+Method csDescription = class_getClassMethod(self, @selector(csDescription));
+
+// 交换方法地址，相当于交换实现方式
+method_exchangeImplementations(description, csDescription);
+```
+
+### 通过运行时实现让category支持属性
+
+```objective-c
+@interface NSObject (test)
+
+@property (nonatomic, copy) NSString *name;
+
+@end
+
+
+@implementation NSObject (test)
+  
+// 定义关联的key
+static const char *key = "name";
+
+- (NSString *)name
+{
+    // 根据关联的key，获取关联的值。
+    return objc_getAssociatedObject(self, key);
+}
+
+- (void)setName:(NSString *)name
+{
+    // 第一个参数：给哪个对象添加关联
+    // 第二个参数：关联的key，通过这个key获取
+    // 第三个参数：关联的value
+    // 第四个参数:关联的策略
+    objc_setAssociatedObject(self, key, name, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+```
+
+
 
 ## 设计模式
 
