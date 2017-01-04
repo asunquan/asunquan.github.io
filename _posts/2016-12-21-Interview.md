@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "一些常见的面试题"
+title: "一些常见的面试题[持续更新]"
 date: 2016-12-21 10:00:00.000000000 +08:00
 tags: iOS开发面试题
 ---
@@ -156,7 +156,7 @@ nullable和nonnull是苹果在Xcode6.3中引入的新特性: nullability annotat
 #define NS_ASSUME_NONNULL_END   _Pragma("clang assume_nonnull end")
 ```
 
-### 几个别的关键字
+### 修饰变量常量的关键字
 
 #### const
 
@@ -174,6 +174,82 @@ static修饰局部变量时, 可以延长局部变量的生命周期, 直到程�
 
 extern只是用来获取全局变量的值, 不能用于定义变量. extern是先在当前文件查找有没有全局变量, 没有才会去其他文件查找.
 
+### 其他
+
+#### isa
+
+isa是一个Class类型的指针, 每个实例对象都有个isa指针指向对象的类, 而Class里也有个isa的指针, 指向metaClass(元类). 元类保存了类方法的列表. 当类方法被调用时, 先会从本身查找类方法的实现, 如果没有, 元类会向他父类查找该方法. 元类也是类, 也有isa指针, 最终指向的是一个rootmetaClass(根元类), 根元类的isa指针指向它本身, 这样形成了一个封闭的内循环.
+
+每一个对象本质上都是一个的实例, 其中类定义了成员变量和成员方法的列表, 对象通过对象的isa指针指向类.
+
+每一个类本质上都是一个对象, 类其实是元类(metaClass)的实例, 元类定义了类方法的列表, 类通过类的isa指针指向元类.
+
+所有的元类最终继承于一个根元类, 根元类isa指针指向本身, 行程一个封闭的内循环.
+
+#### Class
+
+Class是一个objc_class结构体类型的指针
+
+```objective-c
+struct objc_class {
+    Class isa  OBJC_ISA_AVAILABILITY;
+
+#if !__OBJC2__
+    // 父类, 如果该类已经是最顶层的根类, 那么它喂NULL 
+    Class super_class                                        OBJC2_UNAVAILABLE;
+    const char *name                                         OBJC2_UNAVAILABLE;
+    long version                                             OBJC2_UNAVAILABLE;
+    long info                                                OBJC2_UNAVAILABLE;
+    // 该类的实例变量大小
+    long instance_size                                       OBJC2_UNAVAILABLE;
+    // 成员变量数组 
+    struct objc_ivar_list *ivars                             OBJC2_UNAVAILABLE;
+    struct objc_method_list **methodLists                    OBJC2_UNAVAILABLE;
+    struct objc_cache *cache                                 OBJC2_UNAVAILABLE;
+    struct objc_protocol_list *protocols                     OBJC2_UNAVAILABLE;
+#endif
+
+} OBJC2_UNAVAILABLE;
+/* Use `Class` instead of `struct objc_class *` */
+```
+
+#### id
+
+id是一个objc_object结构体类型的指针
+
+#### SEL
+
+SEL是一个objc_selector结构体类型的指针, Objective-C在编译时会根据每个一个方法的名字, 参数序列生成一个唯一的整型标识, 这个标识就是SEL. 不同的类的实例对象执行相同的selector时, 会在各自的方法列表中去根据selector去寻找自己对应的IMP.
+
+#### IMP
+
+IMP实际上是一个函数指针, 指向方法实现的首地址. 
+
+```objective-c
+// 第一个参数是指向self的指针(如果是实例方法, 则是类实例的内存地址, 如果是类方法, 则是指向元类的指针)
+// 第二个参数是方法选择器(selector)
+// 接下来是方法的实际参数列表
+id (*IMP)(id, SEL, ...)
+```
+
+通过取得IMP, 可以跳过runtime的消息传递机制, 直接执行IMP指向的函数实现, 这样省去了runtime消息传递过程中所做的一系列查找操作, 会比直接向对象发送消息高效一些.
+
+#### Method
+
+Method是一个objc_method结构体类型的指针
+
+```objective-c
+struct objc_method {
+    // 方法名
+    SEL method_name                	    OBJC2_UNAVAILABLE;  
+    char *method_types                  OBJC2_UNAVAILABLE;
+    // 方法实现
+    IMP method_imp                      OBJC2_UNAVAILABLE;
+}
+```
+
+
+
 ## UI
 
 ### UIView和CALayer之间的关系
@@ -189,6 +265,228 @@ extern只是用来获取全局变量的值, 不能用于定义变量. extern是�
 ## 多线程
 
 ## 运行时
+
+### 运行时机制
+
+#### 运行时概述
+
+是一套比较底层的纯C语言API, 在我们平时编写的Objective-C代码中, 程序运行过程时, 其实都是转成了runtime的C语言代码.
+
+##### 方法的动态绑定
+
+在Objective-C中, 消息直到运行时才绑定到方法实现上, 编译器会将消息表达式[receiver message]转化为一个消息函数的调用, 这个函数将消息接收者和方法名作为其基础参数
+
+```objective-c
+objc_msgSend(receiver, selector, arg1, arg2, ....);
+```
+
+这个函数完成了动态绑定的所有事情:
+
+* 首先按照receiver的类型找到selector对应的实现方法
+* 调用方法的实现, 并将接收者对象及方法的所有参数传给它
+* 将方法实现返回的值作为它自己的返回值
+
+objc_msgSend通过对象的isa指针获取到类的objc_class结构体, 然后在方法分发表methodLists里查找selector, 如果没有则通过super_class找到其父类, 并在父类的方法分发表里面查找selector, 依次继续寻找, 一旦定位到selector, 函数就会获取到实现的入口, 并传入相应的参数来执行方法的具体实现. 如果最后没有定位到selector则会进行消息转发.
+
+##### 消息转发
+
+* 动态方法解析
+
+  对象在接收到未知的消息时, 首先会调用
+
+  ```objective-c
+  // 解决类方法
+  + (BOOL)resolveClassMethod:(SEL)sel OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+  // 解决实例方法
+  + (BOOL)resolveInstanceMethod:(SEL)sel OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+  ```
+
+  在这个方法中, 我们有机会为该未知消息新增一个已经实现了的处理方法
+
+
+* 备用接收者
+
+  如果在上一步无法处理消息, runtime会继续调用
+
+  ```objective-c
+  - (id)forwardingTargetForSelector:(SEL)aSelector OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+  ```
+
+  如果一个对象实现了这个方法, 并返回了一个非空的结果, 则这个对象会作为消息的新接收者, 消息会被分发到这个对象, 这个对象不能是self自身, 否则就出现无限循环. 如果没有指定相应的对象来处理aSelector, 则应该调用父类的实现来返回结果
+
+* 完整消息转发
+
+  如果在上一步还不能处理未知消息, 则唯一能做的就是启用完整的消息转发机制了. 此时会调用
+
+  ```objective-c
+  // 1.定位可以相应封装在anInvocation中的消息对象, 这个对象不需要能处理所有未知消息
+  // 2.使用anInvocation作为参数, 将消息发送到选中的对象. anInvocation将会保留调用结果, 运行时系统会提取这一结果并将其发送到消息的原始发送者
+  - (void)forwardInvocation:(NSInvocation *)anInvocation OBJC_SWIFT_UNAVAILABLE("");
+  ```
+
+  运行时系统会在这一步给消息接收者最后一次机会将消息转发给其他对象, 对象会创建一个表示消息的NSInvocation对象, 把与没有处理的消息有关的全部细节都封装在anInvocation中, 包括selector, target和arguments. 我们可以在forwardInvocation: 方法中选择将消息转发给其他对象.
+
+  必须重写为selector进行方法签名
+
+  ```objective-c
+  - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector OBJC_SWIFT_UNAVAILABLE("");
+  ```
+
+  消息转发机制使用从这个方法中获取的信息来创建NSInvocation对象, 因此必须重写这个方法, 为给定的selector提供一个合适的方法签名
+
+  ```objective-c
+  - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector 
+  {
+      NSMethodSignature *signature = [super methodSignatureForSelector:aSelector];
+   
+      if (!signature) 
+      {
+          if ([RuntimeHelper instancesRespondToSelector:aSelector]) 
+          {
+              signature = [RuntimeHelper instanceMethodSignatureForSelector:aSelector];
+          }
+      }
+   
+      return signature;
+  }
+   
+  - (void)forwardInvocation:(NSInvocation *)anInvocation 
+  {
+      if ([RuntimeHelper instancesRespondToSelector:anInvocation.selector]) 
+      {
+          [anInvocation invokeWithTarget:_helper];
+      }
+  }
+  ```
+
+  NSObject的forwardInvocation: 方法只是简单调用了
+
+  ```objective-c
+  - (void)doesNotRecognizeSelector:(SEL)aSelector;
+  ```
+
+  它不会转发任何消息, 如果不在上面三个步骤中处理未知消息, 则会引发一个异常.
+
+##### 消息转发与多重继承
+
+通过forwardingTargetForSelector: 和 forwardInvocation: 这两个方法我们可以允许一个对象与其他对象建立关系, 以处理某些未知消息, 而表面上仍是该对象在处理消息. 通过这种关系, 可以实现多重继承的某些特性, 让对象可以继承其他对象的特性来处理一些事情.
+
+不过, 这两者有一个重要的区别: 多重继承将不同的功能集成到一个对象中, 它会让对象变得过大, 而消息转发将功能分解到独立的小的对象中, 并通过某种方式将这些对象连接起来, 并做相应的消息转发
+
+#### 运行时的应用
+
+通过相关方法获取对象或者类的isa指针
+
+* 动态创建一个类(比如KVO的底层实现)
+* 动态为某个类添加属性/方法, 修改属性值/方法
+* 遍历一个类的所有属性/所有方法
+
+#### 相关方法
+
+* 添加
+
+  * 添加方法:
+
+    ```objective-c
+    OBJC_EXPORT BOOL class_addMethod(Class cls, SEL name, IMP imp, 
+                                     const char *types) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+    ```
+
+  * 添加实例变量:
+
+    ```objective-c
+    OBJC_EXPORT BOOL class_addIvar(Class cls, const char *name, size_t size, 
+                                   uint8_t alignment, const char *types) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+    ```
+
+  * 添加属性:
+
+    ```objective-c
+    OBJC_EXPORT BOOL class_addProperty(Class cls, const char *name, const objc_property_attribute_t *attributes, unsigned int attributeCount)
+        OBJC_AVAILABLE(10.7, 4.3, 9.0, 1.0);
+    ```
+
+  * 添加协议:
+
+    ```objective-c
+    OBJC_EXPORT BOOL class_addProtocol(Class cls, Protocol *protocol) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+    ```
+
+* 获取
+
+  * 获取方法:
+
+    ```objective-c
+    OBJC_EXPORT Method class_getClassMethod(Class cls, SEL name)
+        OBJC_AVAILABLE(10.0, 2.0, 9.0, 1.0);
+    ```
+
+  * 获取方法信息:
+
+    ```objective-c
+    // 获取方法名
+    OBJC_EXPORT SEL method_getName(Method m) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 通过引用返回方法的返回值类型字符串
+    OBJC_EXPORT void method_getReturnType(Method m, char *dst, size_t dst_len) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 通过引用返回方法指定位置参数的类型字符串
+    OBJC_EXPORT void method_getArgumentType(Method m, unsigned int index, 
+                                            char *dst, size_t dst_len) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 返回指定方法的方法描述结构体
+    OBJC_EXPORT struct objc_method_description *method_getDescription(Method m) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 获取描述方法参数和返回值类型的字符串
+    OBJC_EXPORT const char *method_getTypeEncoding(Method m) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 返回方法的实现
+    OBJC_EXPORT IMP method_getImplementation(Method m) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 返回方法的参数的个数
+    OBJC_EXPORT unsigned int method_getNumberOfArguments(Method m)
+        OBJC_AVAILABLE(10.0, 2.0, 9.0, 1.0);
+
+    OBJC_EXPORT unsigned method_getArgumentInfo(struct objc_method *m, int arg, const char **type, int *offset) OBJC2_UNAVAILABLE;
+
+    OBJC_EXPORT unsigned int method_getSizeOfArguments(Method m) OBJC2_UNAVAILABLE;
+    ```
+
+  * 获取属性列表:
+
+    ```objective-c
+
+    ```
+
+  * 获取属性信息:
+
+    ```objective-c
+
+    ```
+
+  * 获取类信息:
+
+    ````objective-c
+
+    ````
+
+  * 获取类属性列表:
+
+    ```objective-c
+
+    ```
+
+* ​
 
 ### 运行时方法
 
