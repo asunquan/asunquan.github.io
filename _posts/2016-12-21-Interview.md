@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "一些常见的面试题[持续更新]"
-date: 2016-12-21 10:00:00.000000000 +08:00
+date: 2017-01-06 10:00:00.000000000 +08:00
 tags: iOS开发面试题
 ---
 
@@ -13,7 +13,7 @@ tags: iOS开发面试题
 
 # 面试题
 
-## 基础
+## 基础关键字
 
 ### 属性的修饰关键字
 
@@ -174,7 +174,7 @@ static修饰局部变量时, 可以延长局部变量的生命周期, 直到程�
 
 extern只是用来获取全局变量的值, 不能用于定义变量. extern是先在当前文件查找有没有全局变量, 没有才会去其他文件查找.
 
-### 其他
+### 其他一些
 
 #### isa
 
@@ -185,6 +185,14 @@ isa是一个Class类型的指针, 每个实例对象都有个isa指针指向对�
 每一个类本质上都是一个对象, 类其实是元类(metaClass)的实例, 元类定义了类方法的列表, 类通过类的isa指针指向元类.
 
 所有的元类最终继承于一个根元类, 根元类isa指针指向本身, 行程一个封闭的内循环.
+
+* 每个实例对象的类都是类对象, 每个类对象的类都是元类对象, 每个元类对象的类都是根元类
+* 类对象的父类最终继承自根类对象NSObject, NSObject的父类为nil
+* 元类对象(包括根元类)的父类最终继承自根类对象NSObject
+
+
+* "+ " 类方法实际是在调用元类的对象方法, "-"对象方法是在调用类的对象方法
+* 由于每个类有且只有一个, 所以每个类对象都是其对应元类的单例
 
 #### Class
 
@@ -248,8 +256,6 @@ struct objc_method {
 }
 ```
 
-
-
 ## UI
 
 ### UIView和CALayer之间的关系
@@ -258,11 +264,25 @@ struct objc_method {
 * UIView是iOS系统中界面元素的基础, 所有的界面元素都继承自它。它内部是由Core Animation来实现的，它真正的绘图部分，是由一个叫CALayer(Core Animation Layer)的类来管理。UIView本身，更像是一个CALayer的管理器，访问它的根绘图和坐标有关的属性，如frame，bounds等，实际上内部都是访问它所在CALayer的相关属性
 * UIView有个layer属性，可以返回它的主CALayer实例，UIView有一个layerClass方法，返回主layer所使用的类，UIView的子类，可以通过重载这个方法，来让UIView使用不同的CALayer来显示
 
+### 为什么UIScrollView的滑动会导致NSTimer失效?
+
+```objective-c
+- (void)addTimer:(NSTimer *)timer forMode:(NSRunLoopMode)mode;
+```
+
+定时器里面有个NSRunLoopMode, 一般定时器是运行在defaultmode上但是如果滑动了这个页面, 主线程runloop会转到UITrackingRunLoopMode中, 这时候就不能胡处理定时器了, 造成定时器失效, 原因就是runLoopMode选错了, 一个是更改为NSRunLoopCommonModes(无论什么mode都能运行). 另一个是切换到主线程来更新UI界面的刷新.
+
 ## block
 
 ## 网络
 
 ## 多线程
+
+### runloop
+
+runloop是一个与线程相关的机制, 相当于一个循环, 在这个循环里面等待事件然后处理事件, 而这个循环是基于线程的, 在Cocoa中每个线程都有它的runloop, 通过这样的机制, 线程可以在没有事件要处理的时候休息, 有事件运行, 减轻cpu压力.
+
+
 
 ## 运行时
 
@@ -374,6 +394,50 @@ objc_msgSend通过对象的isa指针获取到类的objc_class结构体, 然后�
 
 不过, 这两者有一个重要的区别: 多重继承将不同的功能集成到一个对象中, 它会让对象变得过大, 而消息转发将功能分解到独立的小的对象中, 并通过某种方式将这些对象连接起来, 并做相应的消息转发
 
+##### self和super
+
+self调用方法时实际上是
+
+```objective-c
+OBJC_EXPORT void objc_msgSend(void /* id self, SEL op, ... */ )
+    OBJC_AVAILABLE(10.0, 2.0, 9.0, 1.0);
+```
+
+id的本质是objc_object结构体的指针
+
+```objective-c
+struct objc_object {
+    Class isa  OBJC_ISA_AVAILABILITY;
+};
+```
+
+其中有一个Class isa成员, 通过isa可以找到对象所属的类别.
+
+super调用方法时实际上是
+
+```objective-c
+OBJC_EXPORT void objc_msgSendSuper(void /* struct objc_super *super, SEL op, ... */ )
+    OBJC_AVAILABLE(10.0, 2.0, 9.0, 1.0);
+```
+
+objc_super结构体
+
+```objective-c
+struct objc_super {
+   // 指定一个类的实例
+    __unsafe_unretained id receiver;
+
+    // 指定特定父类实例的信息
+#if !defined(__cplusplus)  &&  !__OBJC2__
+    /* For compatibility with old objc-runtime.h header */
+    __unsafe_unretained Class class;
+#else
+    __unsafe_unretained Class super_class;
+#endif
+    /* super_class is the first class to search */
+};
+```
+
 #### 运行时的应用
 
 通过相关方法获取对象或者类的isa指针
@@ -449,7 +513,7 @@ objc_msgSend通过对象的isa指针获取到类的objc_class结构体, 然后�
     OBJC_EXPORT const char *method_getTypeEncoding(Method m) 
         OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
 
-    // 返回方法的实现
+    // 返回方法的实现IMP
     OBJC_EXPORT IMP method_getImplementation(Method m) 
         OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
 
@@ -462,31 +526,93 @@ objc_msgSend通过对象的isa指针获取到类的objc_class结构体, 然后�
     OBJC_EXPORT unsigned int method_getSizeOfArguments(Method m) OBJC2_UNAVAILABLE;
     ```
 
-  * 获取属性列表:
+  * 获取属性:
 
     ```objective-c
-
+    OBJC_EXPORT objc_property_t class_getProperty(Class cls, const char *name)
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
     ```
 
   * 获取属性信息:
 
     ```objective-c
+    // 获取属性名
+    OBJC_EXPORT const char *property_getName(objc_property_t property) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
 
+    // 获取属性字符串
+    OBJC_EXPORT const char *property_getAttributes(objc_property_t property) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
     ```
 
   * 获取类信息:
 
     ````objective-c
+    // 获取类名
+    OBJC_EXPORT const char *class_getName(Class cls) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
 
+    // 是否是元类
+    OBJC_EXPORT BOOL class_isMetaClass(Class cls) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 父类
+    OBJC_EXPORT Class class_getSuperclass(Class cls) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+    // 版本
+    OBJC_EXPORT int class_getVersion(Class cls)
+        OBJC_AVAILABLE(10.0, 2.0, 9.0, 1.0);
+
+    // 实例的大小
+    OBJC_EXPORT size_t class_getInstanceSize(Class cls) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
     ````
 
   * 获取类属性列表:
 
     ```objective-c
-
+    OBJC_EXPORT Ivar *class_copyIvarList(Class cls, unsigned int *outCount) 
+        OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
     ```
 
-* ​
+* 替换
+
+  ```objective-c
+  // 替换方法
+  OBJC_EXPORT IMP class_replaceMethod(Class cls, SEL name, IMP imp, 
+                                      const char *types) 
+      OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+  // 替换属性
+  OBJC_EXPORT void class_replaceProperty(Class cls, const char *name, const objc_property_attribute_t *attributes, unsigned int attributeCount)
+      OBJC_AVAILABLE(10.7, 4.3, 9.0, 1.0);
+  ```
+
+* 其他
+
+  ```objective-c
+  // 创建新的类
+  OBJC_EXPORT Class objc_allocateClassPair(Class superclass, const char *name, 
+                                           size_t extraBytes) 
+      OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+  // 注册一个类
+  OBJC_EXPORT void objc_registerClassPair(Class cls) 
+      OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+  // 干掉一个类
+  OBJC_EXPORT void objc_disposeClassPair(Class cls) 
+      OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+  // 交换两个方法的实现
+  OBJC_EXPORT void method_exchangeImplementations(Method m1, Method m2) 
+      OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+
+  // 设置方法的实现
+  OBJC_EXPORT IMP method_setImplementation(Method m, IMP imp) 
+      OBJC_AVAILABLE(10.5, 2.0, 9.0, 1.0);
+  ```
 
 ### 运行时方法
 
@@ -545,8 +671,29 @@ static const char *key = "name";
 
 
 
+## 其他 
+
+### 推送
+
+推送通知分为两种, 一种是本地推送, 一种是远程推送
+
+* 本地推送: 不需要联网也可以推送, 是开发人员在应用内设定特定的时间来提醒用户干什么的
+* 远程推送: 需要联网, 用户的设备会与APNs服务器形成一个长连接
+  * 请求用户推送权限
+  * 用户允许推送, 设备会将uuid和bundleID等信息发送给APNs
+  * APNs生成deviceToken并根据其返回给应用
+  * 应用将deviceToken发送给应用服务器
+  * 应用服务器将deviceToken和需要推送的信息发给APNs
+  * APNs根据deviceToken找到设备, 推送消息
+
 ## 设计模式
 
 ## 数据结构
 
 ## 算法
+
+### 哈希表查询元素的时间复杂度
+
+哈希表存储的是键值对, 其查找的时间复杂度与元素数量多少无关, 哈希表在查找元素时是通过计算哈希码值来定位元素的位置从而直接访问元素的, 因此, 哈希表查找的时间复杂度为O(1)
+
+
