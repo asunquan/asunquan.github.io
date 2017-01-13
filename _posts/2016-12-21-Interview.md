@@ -123,7 +123,7 @@ strong: 表示的是一个强引用, 对象的引用计数+1.
 
 copy: 赋值时将值拷贝到另一个内存空间, 引用计数为1, 不会影响原来内存空间的值, 适用于NSString, NSArray等不可变对象.
 
-assign: 默认修饰属性, setter方法直接赋值, 不进行任何retain操作, 不改变移用计数. 该方法只会针对CGFloat, NSInteger等或int, float, double, char等.
+assign: 默认修饰属性, setter方法直接赋值, 不进行任何retain操作, 不改变移用计数. 该方法只会针对纯量类型CGFloat, NSInteger等或int, float, double, char等.
 
 retain: MRC下独有, 适用于Objective-C对象的成员变量. 每次retain时, 移用计数+1.
 
@@ -142,6 +142,20 @@ retain: MRC下独有, 适用于Objective-C对象的成员变量. 每次retain时
 * copy和mutableCopy
 
   当对可变类型的对象进行操作时, 都为深拷贝, 即拷贝的是该对象内存空间中存储的内容. 当对不可变类型的对象进行操作时, 如果目标对象为可变对象时, 则为深拷贝, 如果目标对象为不可变对象时, 则为浅拷贝, 即拷贝的只是该对象的指针.
+
+* 如何让自定义的类使用copy修饰?
+
+  * 声明该类遵从NSCopying协议
+
+  * 实现NSCopying的协议方
+
+    ```objective-c
+    @protocol NSCopying
+
+    - (id)copyWithZone:(nullable NSZone *)zone;
+
+    @end
+    ```
 
 #### nullable和nonnull
 
@@ -690,7 +704,455 @@ static const char *key = "name";
 
 ## 数据结构
 
+#### 二叉树
+
+##### 什么是二叉树?
+
+二叉树是每个节点最多有两个子树的树结构. 通常子树被称作"左子树"和"右子树", 左子树和右子树同时也是二叉树. 二叉树的子树有左右之分, 并且次序不能任意颠倒. 二叉树是递归定义的, 所以一般二叉树的相关题目也都可以使用递归的思想来解决, 当然也有一些可以使用非递归的思想解决.
+
+##### 什么是二叉排序树?
+
+二叉排序树又叫二叉查找树或者二叉搜索树, 它首先是一个二叉树, 而且必须满足下面的条件:
+
+* 若左子树不空, 则左子树上所有节点的值均小于它的根节点的值
+* 若右子树不空, 则右子树上所有节点的值均大于它的根节点的值
+* 左右子树也分别为二叉排序树
+* 没有键值相等的节点
+
+##### 二叉树节点定义
+
+采用单链表的形式, 只从根节点指向子节点, 不保存父节点
+
+```objective-c
+@interface BinaryTreeNode : NSObject
+
+/**
+ 该节点的值
+ */
+@property (nonatomic, assign) NSInteger value;
+
+/**
+ 该节点的左节点
+ */
+@property (nonatomic, strong) BinaryTreeNode *leftNode;
+
+/**
+ 该节点的右节点
+ */
+@property (nonatomic, strong) BinaryTreeNode *rightNode;
+
+@end
+```
+
+##### 创建二叉排序树
+
+二叉树中左右节点值本身没有大小之分, 所以如果要创建二叉树, 就需要考虑如何处理某个节点是左节点还是右节点, 如何终止某个子树而切换到另一个子树. 二叉排序树种对于左右节点有明确的要求, 程序可以自动根据键值大小自动选择是左节点还是右节点.
+
+```objective-c
++ (BinaryTreeNode *)createTreeWithValues:(NSArray *)values
+{
+    // 创建一个根节点
+    BinaryTreeNode *rootNode = [[self alloc] init];
+    
+    // 添加所有值
+    for (int i = 0; i < values.count; i++)
+    {
+        NSInteger value = (NSInteger)values[i];
+        
+        rootNode = [self addNode:rootNode value:value];
+    }
+    
+    return rootNode;
+}
+
++ (BinaryTreeNode *)addNode:(BinaryTreeNode *)node value:(NSInteger)value
+{
+    // 根节点不存在则创建
+    if (!node)
+    {
+        node = [[BinaryTreeNode alloc] init];
+        node.value = value;
+    }
+    // 值不大于根节点则插入到左子树
+    else if (value <= node.value)
+    {
+        node.leftNode = [self addNode:node.leftNode value:value];
+    }
+    // 值大于根节点则插入到右子树
+    else
+    {
+        node.rightNode = [self addNode:node.rightNode value:value];
+    }
+    
+    return node;
+}
+```
+
+##### 二叉树中某个位置的节点
+
+类似索引操作, 按层次遍历, 位置从0开始算.
+
+```objective-c
+- (BinaryTreeNode *)nodeAtIndex:(NSInteger)index
+{
+    if (!self || index < 0)
+    {
+        return nil;
+    }
+    
+    NSMutableArray *queueArray = [NSMutableArray array];
+    
+    // 插入根节点
+    [queueArray addObject:self];
+    
+    while (queueArray.count)
+    {
+        BinaryTreeNode *node = queueArray.firstObject;
+        
+        if (index == 0)
+        {
+            return node;
+        }
+        
+        // 先进先出, 移除节点
+        [queueArray removeObjectAtIndex:0];
+        index--;
+        
+        // 插入左节点
+        if (node.leftNode)
+        {
+            [queueArray addObject:node.leftNode];
+        }
+        
+        // 插入右节点
+        if (node.rightNode)
+        {
+            [queueArray addObject:node.rightNode];
+        }
+    }
+    
+    // 遍历完若仍没有找到
+    return nil;
+}
+```
+
+##### 先序遍历
+
+先访问根, 在遍历左子树, 在遍历右子树.
+
+```objective-c
++ (NSArray *)preorderTraversalTree:(BinaryTreeNode *)rootNode
+{
+    NSMutableArray *result = [NSMutableArray array];
+    
+    [self preorderTraversalNode:rootNode into:result];
+    
+    return result;
+}
+
++ (void)preorderTraversalNode:(BinaryTreeNode *)node into:(NSMutableArray *)array
+{
+    [array addObject:[NSNumber numberWithInteger:node.value]];
+    
+    if (node.leftNode)
+    {
+        [self preorderTraversalNode:node.leftNode into:array];
+    }
+    else if (node.rightNode)
+    {
+        [self preorderTraversalNode:node.rightNode into:array];
+    }
+}
+```
+
+##### 中序遍历
+
+先遍历左子树, 再访问根, 再遍历右子树.
+
+对于二叉排序树来说, 中序遍历得到的序列是一个从小到大排序好的序列.
+
+```objective-c
++ (void)inorderTraversalNode:(BinaryTreeNode *)node into:(NSMutableArray *)array
+{
+    if (node.leftNode)
+    {
+        [self inorderTraversalNode:node.leftNode into:array];
+    }
+    else
+    {
+        [array addObject:[NSNumber numberWithInteger:node.value]];
+        
+        if (node.rightNode)
+        {
+            [self inorderTraversalNode:node.rightNode into:array];
+        }
+    }
+}
+```
+
+##### 后序遍历
+
+先遍历左子树, 再遍历右子树, 再访问根
+
+```objective-c
++ (NSArray *)postorderTraversalTree:(BinaryTreeNode *)rootNode
+{
+    NSMutableArray *result = [NSMutableArray array];
+    
+    [self postorderTraversalNode:rootNode into:result];
+    
+    return result;
+}
+
++ (void)postorderTraversalNode:(BinaryTreeNode *)node into:(NSMutableArray *)array
+{
+    if (node.leftNode)
+    {
+        [self postorderTraversalNode:node.leftNode into:array];
+    }
+    else if (node.rightNode)
+    {
+        [self postorderTraversalNode:node.rightNode into:array];
+    }
+    else
+    {
+        [array addObject:[NSNumber numberWithInteger:node.value]];
+    }
+}
+```
+
+##### 层次遍历
+
+按照从上到下, 从左到右的次序进行遍历, 先遍历完一层, 再遍历下一层, 因此又叫广度优先遍历, 需要用到队列, 在OC里可以用可变数组来实现.
+
+```objective-c
+
+```
+
 ## 算法
+
+### 排序算法
+
+#### 直接插入排序
+
+##### 基本思想
+
+讲一个记录插入到已排序好的有序表中, 从而得到一个新的记录数增一的有序表. 即: 先将序列的第一个记录看成是一个有序的子序列, 然后从第二个记录逐个进行插入, 直至整个序列有序为止.
+
+##### 要点
+
+设立哨兵, 作为临时存储和判断数组边界之用.
+
+如果碰见一个和插入元素相等的, 那么插入元素把想插入的元素放在相等元素的后面. 所以, 相等元素的前后顺序没有改变, 从原先无序序列出去的顺序就是排好后的顺序, 所以插入排序是稳定的.
+
+##### 算法实现
+
+```objective-c
+// 直接插入排序
+- (NSArray *)straightInsertionSort:(NSArray *)source
+{
+    if (source.count < 2)
+    {
+        return source;
+    }
+    
+    // 将数组的第一个值视为一个有序的子序列
+    NSMutableArray *result = [NSMutableArray arrayWithArray:source];
+    
+    // 从第二个值开始插入
+    for (int i = 1; i < result.count; i++)
+    {
+        // 判断要插入的值是否小于前一个插入的值
+        if (result[i] < result[i - 1])
+        {
+            // 设置哨兵(当前待插入值)
+            id tmp = result[i];
+            
+            int j;
+            
+            // 依次向前遍历之前排好的子序列直至当前值不大于哨兵
+            for (j = i - 1; j >= 0 && result[j] > tmp; j--)
+            {
+                result[j + 1] = result[j];
+            }
+            
+            result[j + 1] = tmp;
+        }
+    }
+    
+    return result;
+}
+```
+
+#### 希尔排序
+
+##### 基本思想
+
+先将整个待排序的记录序列分割成为若干个子序列分别进行直接插入排序, 待整个序列中的记录基本有序时, 在对全体记录进行一次直接插入排序
+
+##### 要点
+
+先将要排序的一组记录按某个增量d分成若干组子序列, 每组中记录的下标相差d. 对每组中全部元素进行直接插入排序, 然后再用一个较小的增量对它进行分组, 在每组中再进行直接插入排序. 继续不断缩小增量直至为1, 最后使用直接插入排序完成.
+
+##### 算法实现
+
+```objective-c
+// 希尔排序
+- (NSArray *)shellsSort:(NSArray *)source
+{
+    if (source.count < 2)
+    {
+        return source;
+    }
+    
+    NSMutableArray *result = [NSMutableArray arrayWithArray:source];
+    
+    // 比较的两个位置的差距
+    for (int gap = (int)(result.count / 2); gap > 0; gap /= 2)
+    {
+        // 从第gap个值开始插入
+        for (int i = gap; i < result.count; i++)
+        {
+            // 判断要插入的值是否小于前一个插入的值
+            if (result[i] < result[(i - gap)])
+            {
+                // 设置哨兵(当前待插入值)
+                id tmp = result[i];
+                
+                int j;
+                
+                // 依次向前遍历之前排好的子序列直至当前值不大于哨兵
+                for (j = i - gap; j >= 0 && result[j] > tmp; j-= gap)
+                {
+                    result[j + gap] = result[j];
+                }
+                
+                result[j + gap] = tmp;
+            }
+        }
+    }
+    
+    return result;
+}
+```
+
+#### 简单选择排序
+
+##### 基本思想
+
+在要排序的一组数中, 选出最小(或最大)的一个数与第一个位置的数交换, 然后在剩下的数当中再找最小(或者最大)的与第二个位置的数交换, 以此类推.
+
+##### 算法实现
+
+```objective-c
+// 简单选择排序
+- (NSArray *)simpleSelectionSort:(NSArray *)source
+{
+    if (source.count < 2)
+    {
+        return source;
+    }
+    
+    NSMutableArray *result = [NSMutableArray arrayWithArray:source];
+    
+    for (int i = 0; i < result.count; i++)
+    {
+        int minIndex = i;
+        
+        // 选出最小值
+        for (int j = i + 1; j < result.count; j++)
+        {
+            if (result[minIndex] > result[j])
+            {
+                minIndex = j;
+            }
+        }
+        // 最小值不是i则交换位置
+        if (result[minIndex] != result[i])
+        {
+            id tmp = result[i];
+            result[i] = result[minIndex];
+            result[minIndex] = tmp;
+        }
+    }
+    
+    return result;
+}
+```
+
+#### 堆排序
+
+##### 基本思想
+
+若以一维数组存储一个堆, 则堆对应一棵完全二叉树, 且所有非叶节点的值均不大于(或不小于)其子女的值, 根节点(堆顶元素)的值是最小(或最大)的.
+
+##### 要点
+
+##### 算法实现
+
+#### 冒泡排序
+
+##### 基本思想
+
+在要排序的一组数中, 对当前还未排好序的范围内的全部数, 自上而下对相邻的两个数依次进行比较和调整, 让较大的数往下沉, 较小的数往上冒.
+
+##### 要点
+
+每当两相邻的数比较后发现它们的排序与排序要求相反时, 交换它们
+
+##### 算法实现
+
+```objective-c
+// 冒泡排序
+- (NSArray *)bubbleSort:(NSArray *)source
+{
+    if (source.count < 2)
+    {
+        return source;
+    }
+    
+    NSMutableArray *result = [NSMutableArray arrayWithArray:source];
+    
+    for (int i = 0; i < result.count; i++)
+    {
+        for (int j = 0; j < result.count - i - 1; j++)
+        {
+            if (result[j] > result[j + 1])
+            {
+                id tmp = result[j + 1];
+                result[j + 1] = result[j];
+                result[j] = tmp;
+            }
+        }
+    }
+    
+    return result;
+}
+```
+
+#### 快速排序
+
+##### 基本思想
+
+##### 要点
+
+##### 算法实现
+
+#### 归并排序
+
+##### 基本思想
+
+##### 要点
+
+##### 算法实现
+
+#### 基数排序
+
+##### 基本思想
+
+##### 要点
+
+##### 算法实现
 
 ### 哈希表查询元素的时间复杂度
 
