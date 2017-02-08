@@ -926,7 +926,167 @@ static const char *key = "name";
 按照从上到下, 从左到右的次序进行遍历, 先遍历完一层, 再遍历下一层, 因此又叫广度优先遍历, 需要用到队列, 在OC里可以用可变数组来实现.
 
 ```objective-c
++ (NSArray *)levelorderTraversalTree:(BinaryTreeNode *)rootNode
+{
+    if (!rootNode)
+    {
+        return nil;
+    }
+    
+    NSMutableArray *result = [NSMutableArray array];
+    NSMutableArray *queueArray = [NSMutableArray array];
+    
+    // 插入根节点
+    [queueArray addObject:rootNode];
+    
+    while (queueArray.count)
+    {
+        BinaryTreeNode *node = queueArray.firstObject;
+        
+        // 先进先出, 移除节点
+        [queueArray removeObjectAtIndex:0];
+        
+        // 插入左节点
+        if (node.leftNode)
+        {
+            [queueArray addObject:node.leftNode];
+        }
+        
+        // 插入右节点
+        if (node.rightNode)
+        {
+            [queueArray addObject:node.rightNode];
+        }
+    }
+    
+    return result;
+}
+```
 
+##### 二叉树的深度
+
+二叉树的深度定义为: 从根节点到叶子节点依次经过的节点形成树的一条路径, 最长路径的长度为树的深度.
+
+* 如果根节点为空, 则深度为0;
+* 如果左右节点都是空, 则深度为1;
+* 递归思想: 二叉树的深度 = max( 左子树的深度, 右子树的深度) + 1
+
+```objective-c
++ (NSInteger)depthOfTree:(BinaryTreeNode *)rootNode
+{
+    if (!rootNode)
+    {
+        return 0;
+    }
+    
+    if (!rootNode.leftNode && !rootNode.rightNode)
+    {
+        return 1;
+    }
+    
+    NSInteger leftDepth = [self depthOfTree:rootNode.leftNode];
+    NSInteger rightDepth = [self depthOfTree:rootNode.rightNode];
+    
+    return MAX(leftDepth, rightDepth) + 1;
+}
+```
+
+##### 二叉树的宽度
+
+二叉树的宽度定义为各层节点数的最大值.
+
+```objective-c
++ (NSInteger)widthOfTree:(BinaryTreeNode *)rootNode
+{
+    if (!rootNode)
+    {
+        return 0;
+    }
+    
+    NSMutableArray *queueArray = [NSMutableArray array];
+    
+    // 插入根节点
+    [queueArray addObject:rootNode];
+    
+    NSInteger maxWidth = 1;
+    NSInteger curWidth = 0;
+    
+    while (queueArray.count)
+    {
+        curWidth = queueArray.count;
+        
+        for (int i = 0; i < curWidth; i++)
+        {
+            BinaryTreeNode *node = queueArray.firstObject;
+            
+            // 先进先出, 移除节点
+            [queueArray removeObjectAtIndex:0];
+            
+            // 插入左节点
+            if (node.leftNode)
+            {
+                [queueArray addObject:node.leftNode];
+            }
+            
+            // 插入右节点
+            if (node.rightNode)
+            {
+                [queueArray addObject:node.rightNode];
+            }
+        }
+        
+        // 宽度 = 当前层节点数
+        maxWidth = MAX(maxWidth, queueArray.count);
+    }
+    
+    return maxWidth;
+}
+```
+
+##### 二叉树的所有节点数
+
+递归思想: 二叉树的所有节点数 = 左子树节点数 + 右子树节点数 + 1
+
+```objective-c
++ (NSInteger)numberOfNodes:(BinaryTreeNode *)rootNode
+{
+    if (!rootNode)
+    {
+        return 0;
+    }
+    
+    NSInteger numberOfLeftNode = [self numberOfNodes:rootNode.leftNode];
+    NSInteger numberOfRightNode = [self numberOfNodes:rootNode.rightNode];
+    
+    return numberOfLeftNode + numberOfRightNode + 1;
+}
+```
+
+ 二叉树某层中的节点数
+
+* 根节点为空, 则节点数为0;
+* 层为1, 则节点数为1(即根节点);
+* 递归思想: 二叉树第k层节点数 = 左子树第(k - 1) 层节点数 + 右子树第(k - 1)层节点数
+
+```objective-c
++ (NSUInteger)numberOfNodes:(BinaryTreeNode *)rootNode onLevel:(NSUInteger)level
+{
+    if (!rootNode)
+    {
+        return 0;
+    }
+    
+    // 根节点
+    if (level == 1)
+    {
+        return 1;
+    }
+    
+    NSUInteger numberOfLeftNode = [self numberOfNodes:rootNode.leftNode onLevel:(level - 1)];
+    NSUInteger numberOfRightNode = [self numberOfNodes:rootNode.rightNode onLevel:(level - 1)];
+    
+    return numberOfLeftNode + numberOfRightNode;
+}
 ```
 
 ## 算法
